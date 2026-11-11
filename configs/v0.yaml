@@ -1,0 +1,15 @@
+# V0 — LLM sin RAG (cota inferior). Mismo prompt y esquema de salida que V1, sin contexto.
+version: v0
+descripcion: LLM sin recuperación; mide cuánto aporta el retrieval.
+kb_snapshot: null
+retrieval:
+  enabled: false
+generation:
+  reasoner: gpt-4.1-2025-04-14
+  temperature: 0
+  seed: 7
+  prompt: reasoner_v1
+  max_retries: 1
+postprocess:
+  verifier: false
+  rules: []

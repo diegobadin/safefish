@@ -1,0 +1,31 @@
+# V1 — Naive RAG (§2.2). Única variable respecto a V0: contexto recuperado.
+version: v1
+descripcion: Naive RAG; RecursiveCharacterTextSplitter 800/15%, 1 colección, denso top-6, query = texto crudo.
+kb_snapshot: kb-v1
+ingest:
+  sources: data/sources.yaml
+  languages: [es]
+  dedupe: {exact: true, near_threshold: 0.95, near_method: tfidf}
+chunking:
+  strategy: recursive
+  chunk_size: 800
+  chunk_overlap: 120
+  separators: ["\n\n", "\n", ".", " "]
+embeddings:
+  model: text-embedding-3-small
+retrieval:
+  enabled: true
+  query: {strategy: raw}
+  filter_canal: "off"
+  hybrid: {enabled: false}
+  rerank: {enabled: false}
+  top_k: 6
+generation:
+  reasoner: gpt-4.1-2025-04-14
+  temperature: 0
+  seed: 7
+  prompt: reasoner_v1
+  max_retries: 1
+postprocess:
+  verifier: false
+  rules: []

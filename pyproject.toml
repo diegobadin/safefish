@@ -1,0 +1,59 @@
+[project]
+name = "safefish"
+version = "0.1.0"
+description = "SafeFish: RAG clasificador-explicativo de mensajes sospechosos"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [{ name = "Diego Badin" }, { name = "Diego Rabinovich" }]
+# Versiones pinneadas para la orquestación y la vector DB (reproducibilidad, §4.2).
+# El resto queda fijado por el lockfile.
+dependencies = [
+    "langchain-core==1.8.0",
+    "langchain-openai==1.7.4",
+    "langchain-community==0.4.2",
+    "langchain-chroma==1.1.0",
+    "langchain-text-splitters==1.1.3",
+    "chromadb==1.5.9",
+    "pydantic==2.14.3",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+    "beautifulsoup4==4.15.0",
+    "pypdf==7.0.1",
+    "langdetect==1.0.9",
+    "numpy>=2.0",
+    "scikit-learn==1.9.1",
+    "scipy==1.18.1",
+    "tiktoken>=0.9",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.2.0",
+    "ruff==0.17.4",
+    "pre-commit==4.7.0",
+    "detect-secrets==1.5.0",
+]
+
+# Backend de Poetry: el proyecto se instala igual con `poetry install` (Poetry >= 2.2)
+# o con `uv sync`.
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+packages = [{ include = "safefish", from = "src" }]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+addopts = "-q"
+markers = ["api: requiere OPENAI_API_KEY y red (se saltean por defecto)"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+ignore = ["E501"]

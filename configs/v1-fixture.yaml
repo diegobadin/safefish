@@ -1,0 +1,27 @@
+# V1 sobre la mini-KB de fixtures (20 documentos sintéticos). Solo para desarrollo y smoke
+# tests mientras Track A arma las fuentes reales; NUNCA para reportar métricas.
+version: v1-fixture
+descripcion: Igual que v1 pero con tests/fixtures/mini_kb.
+kb_snapshot: kb-fixture
+ingest:
+  sources: tests/fixtures/mini_kb/sources.yaml
+  languages: [es]
+  dedupe: {exact: true, near_threshold: 0.95, near_method: tfidf}
+chunking:
+  strategy: recursive
+  chunk_size: 800
+  chunk_overlap: 120
+  separators: ["\n\n", "\n", ".", " "]
+embeddings:
+  model: text-embedding-3-small
+retrieval:
+  enabled: true
+  query: {strategy: raw}
+  filter_canal: "off"
+  top_k: 6
+generation:
+  reasoner: gpt-4.1-2025-04-14
+  temperature: 0
+  seed: 7
+  prompt: reasoner_v1
+  max_retries: 1

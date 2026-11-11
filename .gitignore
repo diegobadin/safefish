@@ -1,0 +1,38 @@
+# --- Secretos -----------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# --- Entorno ------------------------------------------------------------
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+dist/
+build/
+
+# --- Datos (ver §5.5 del plan: nada crudo ni con PII en git) --------------
+data/raw/*
+data/interim/*
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+# De cada snapshot de KB se versiona solo el manifest (hash + conteos).
+data/kb_snapshots/*/*
+!data/kb_snapshots/*/manifest.json
+
+# Capturas del golden: solo se versionan las redactadas (sufijo _red).
+golden/capturas/*
+!golden/capturas/.gitkeep
+!golden/capturas/*_red.*
+
+# Corridas de evaluación: las oficiales se agregan con `git add -f`.
+results/
+
+# Caché de LLM y embeddings (reproducibilidad local, ver §3.3).
+.cache/
+
+# --- Metadatos de Windows/WSL (Alternate Data Streams) -------------------
+*:Zone.Identifier
