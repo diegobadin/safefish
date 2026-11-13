@@ -1,0 +1,40 @@
+# Registro de fuentes de la KB real (Track A cura la KB; Track B cura el test: §3.1).
+# Cada documento hereda la metadata de su fuente; sumar `campaign_id` siempre que se pueda
+# (controla el leakage contra el golden, §4.5). Formato completo: src/safefish/ingest/loaders.py
+#
+# Los archivos van en data/raw/ (no se versiona). Las rutas son relativas a este YAML.
+# Ejemplos de cada loader (descomentar y completar):
+#
+#  - id: alertas-oficiales            # una página por alerta; metadata en común
+#    tipo: caso
+#    loader: web
+#    urls: ["https://<organismo>/alerta-1", "https://<organismo>/alerta-2"]
+#    fuente_tipo: alerta_oficial
+#    metadata: {modalidad: phishing_bancario, canal: [sms, email], entidad_suplantada: banco}
+#
+#  - id: casos-curados                # un .md por caso con front matter (id, modalidad, canal,
+#    tipo: caso                       # entidad_suplantada, campaign_id, fuente_url)
+#    loader: text
+#    path: raw/casos/*.md
+#    fuente_tipo: alerta_oficial
+#
+#  - id: guias-pdf
+#    tipo: guia
+#    loader: pdf
+#    path: raw/guias/*.pdf
+#    fuente_tipo: organismo
+#    metadata: {situacion: no_respondio}
+#
+#  - id: mensajes-recolectados        # PII se redacta por defecto en mensajes y casos
+#    tipo: mensaje
+#    loader: csv
+#    path: raw/mensajes.csv
+#    fuente_tipo: recolectado
+#    csv: {content_column: texto, id_column: id,
+#          metadata_columns: [label, modalidad, canal, entidad, campaign_id]}
+
+sources:
+  - id: senales-taxonomia             # definiciones de señales desde taxonomias.yaml
+    tipo: senal
+    loader: taxonomia
+    fuente_tipo: taxonomia

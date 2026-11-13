@@ -1,0 +1,186 @@
+{
+  "mensaje": {
+    "texto": "Invertí con nosotros y ganá 25% mensual garantizado, cupos limitados solo por hoy",
+    "canal": "whatsapp",
+    "segmentos": [
+      {
+        "emisor": "remitente",
+        "texto": "Invertí con nosotros y ganá 25% mensual garantizado, cupos limitados solo por hoy"
+      }
+    ],
+    "entidades": {
+      "links": [],
+      "telefonos": [],
+      "montos": [],
+      "cbu_alias": [],
+      "emails": []
+    },
+    "ocr_words": null,
+    "origen": "texto"
+  },
+  "bundle": {
+    "queries": [
+      "Invertí con nosotros y ganá 25% mensual garantizado, cupos limitados solo por hoy"
+    ],
+    "casos": [
+      {
+        "id": "FX-C07#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Inversión falsa con rendimientos garantizados.\n\nDescripción: se ofrece invertir en cripto o en un \"plazo fijo especial\" con ganancias garantizadas del 20 o 30 % mensual. Se agrega a la persona a un grupo con testimonios de supuestos inversores y se muestran capturas de ganancias.\n\nFrases típicas: \"rendimiento garantizado del 30% mensual\"; \"cupos limitados, solo por hoy\"; \"empezá con $ 50.000 y retirá cuando quieras\".\n\nMecanismo: las primeras ganancias se muestran en un panel falso; cuando la víctima quiere retirar, se le pide pagar comisiones o impuestos y el dinero nunca se recupera.",
+        "metadata": {
+          "canal_email": true,
+          "fuente_tipo": "sintetico",
+          "archivo": "c07_inversion.md",
+          "chunk_id": "FX-C07#c00",
+          "fuente_url": "https://example.org/fixtures/inversion-falsa",
+          "n_chunks": 1,
+          "entidad_suplantada": "plataforma_inversion",
+          "source_id": "fx-casos",
+          "campaign_id": "fx-kb-inversion",
+          "chunk_index": 0,
+          "modalidad": "inversion_falsa",
+          "doc_id": "FX-C07",
+          "doc_tipo": "caso",
+          "canal_whatsapp": true,
+          "canal": "whatsapp,email",
+          "idioma": "es",
+          "canal_sms": false
+        },
+        "score_dense": 0.575736,
+        "score_bm25": null,
+        "score_rerank": null
+      },
+      {
+        "id": "FX-C08#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Falso empleo de tareas pagas.\n\nDescripción: una \"reclutadora\" ofrece trabajo desde casa dando me gusta a videos o calificando hoteles, con pagos diarios. Al principio paga montos chicos para generar confianza.\n\nFrases típicas: \"ganá entre $ 20.000 y $ 50.000 por día desde tu celular\"; \"solo tenés que dar like a estos videos\"; \"para desbloquear la tarea premium tenés que depositar $ 30.000\".\n\nMecanismo: tras los primeros pagos se pide depositar dinero para \"desbloquear\" tareas mejor pagas; los depósitos nunca se devuelven.",
+        "metadata": {
+          "archivo": "c08_empleo.md",
+          "canal_sms": false,
+          "source_id": "fx-casos",
+          "campaign_id": "fx-kb-empleo",
+          "canal": "whatsapp",
+          "canal_email": false,
+          "chunk_id": "FX-C08#c00",
+          "doc_tipo": "caso",
+          "n_chunks": 1,
+          "idioma": "es",
+          "chunk_index": 0,
+          "entidad_suplantada": "empresa_comercial",
+          "doc_id": "FX-C08",
+          "modalidad": "falso_empleo_tareas",
+          "canal_whatsapp": true,
+          "fuente_tipo": "sintetico",
+          "fuente_url": "https://example.org/fixtures/falso-empleo"
+        },
+        "score_dense": 0.393273,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "mensajes": [
+      {
+        "id": "FX-M02#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Hola ma, este es mi número nuevo agendalo. Necesito que me transfieras hoy 85.000 al alias de un amigo, mañana te devuelvo. No le digas a papá",
+        "metadata": {
+          "canal_whatsapp": true,
+          "label": "estafa",
+          "entidad": "familiar",
+          "canal_email": false,
+          "doc_id": "FX-M02",
+          "idioma": "es",
+          "fila": 1,
+          "modalidad": "falso_familiar_cambio_numero",
+          "doc_tipo": "mensaje",
+          "canal_sms": false,
+          "canal": "whatsapp",
+          "source_id": "fx-mensajes",
+          "chunk_index": 0,
+          "archivo": "mensajes.csv",
+          "n_chunks": 1,
+          "fuente_tipo": "sintetico",
+          "chunk_id": "FX-M02#c00",
+          "campaign_id": "fx-kb-m-familiar"
+        },
+        "score_dense": 0.425842,
+        "score_bm25": null,
+        "score_rerank": null
+      },
+      {
+        "id": "FX-M05#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Felicitaciones! Ganaste un celular en el sorteo aniversario. Para recibirlo transferi el costo de envio de $3.500",
+        "metadata": {
+          "modalidad": "premio_sorteo_falso",
+          "canal_sms": false,
+          "archivo": "mensajes.csv",
+          "doc_id": "FX-M05",
+          "canal_email": false,
+          "chunk_id": "FX-M05#c00",
+          "entidad": "empresa_comercial",
+          "idioma": "es",
+          "fuente_tipo": "sintetico",
+          "n_chunks": 1,
+          "doc_tipo": "mensaje",
+          "source_id": "fx-mensajes",
+          "label": "estafa",
+          "fila": 4,
+          "campaign_id": "fx-kb-m-premio",
+          "canal": "whatsapp",
+          "canal_whatsapp": true,
+          "chunk_index": 0
+        },
+        "score_dense": 0.419337,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "senales": [
+      {
+        "id": "S-oferta_desproporcionada#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Señal: oferta desproporcionada\nDefinición: Promete ganancias, sueldos o descuentos fuera de lo razonable o garantizados.\nEjemplos: ganá $50.000 por día desde tu casa | rendimiento garantizado del 30% mensual",
+        "metadata": {
+          "signal_id": "oferta_desproporcionada",
+          "source_id": "fx-senales",
+          "chunk_index": 0,
+          "tipo_senal": "riesgo",
+          "idioma": "es",
+          "fuente_tipo": "taxonomia",
+          "doc_id": "S-oferta_desproporcionada",
+          "chunk_id": "S-oferta_desproporcionada#c00",
+          "n_chunks": 1,
+          "severidad": "media",
+          "doc_tipo": "senal"
+        },
+        "score_dense": 0.533464,
+        "score_bm25": null,
+        "score_rerank": null
+      },
+      {
+        "id": "S-premio_inesperado#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Señal: premio inesperado\nDefinición: Anuncia un premio, beneficio o reintegro que la persona no esperaba ni solicitó.\nEjemplos: ¡ganaste un celular en nuestro sorteo aniversario!",
+        "metadata": {
+          "source_id": "fx-senales",
+          "idioma": "es",
+          "signal_id": "premio_inesperado",
+          "severidad": "media",
+          "doc_tipo": "senal",
+          "doc_id": "S-premio_inesperado",
+          "chunk_id": "S-premio_inesperado#c00",
+          "n_chunks": 1,
+          "fuente_tipo": "taxonomia",
+          "chunk_index": 0,
+          "tipo_senal": "riesgo"
+        },
+        "score_dense": 0.387495,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "guias": [],
+    "timings_ms": {}
+  }
+}

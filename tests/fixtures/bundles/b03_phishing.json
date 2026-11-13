@@ -1,0 +1,189 @@
+{
+  "mensaje": {
+    "texto": "Banco Ejemplo: su cuenta será bloqueada. Valide sus datos en bancoejemplo-clientes.com",
+    "canal": "sms",
+    "segmentos": [
+      {
+        "emisor": "remitente",
+        "texto": "Banco Ejemplo: su cuenta será bloqueada. Valide sus datos en bancoejemplo-clientes.com"
+      }
+    ],
+    "entidades": {
+      "links": [
+        "bancoejemplo-clientes.com"
+      ],
+      "telefonos": [],
+      "montos": [],
+      "cbu_alias": [],
+      "emails": []
+    },
+    "ocr_words": null,
+    "origen": "texto"
+  },
+  "bundle": {
+    "queries": [
+      "Banco Ejemplo: su cuenta será bloqueada. Valide sus datos en bancoejemplo-clientes.com"
+    ],
+    "casos": [
+      {
+        "id": "FX-C03#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Phishing bancario por SMS o mail que suplanta al Banco Ejemplo.\n\nDescripción: un SMS o correo avisa que la cuenta fue bloqueada, que hay un consumo no reconocido o que hay que \"validar los datos\" para evitar la suspensión. Incluye un link acortado o un dominio parecido al oficial (por ejemplo, bancoejemplo-seguridad.com) que lleva a un formulario idéntico al home banking.\n\nFrases típicas: \"su cuenta será suspendida en 24 hs\"; \"ingrese al siguiente enlace para validar su identidad\"; \"detectamos un movimiento inusual, confirme sus datos\".\n\nMecanismo: en el sitio falso se piden usuario, clave, datos de la tarjeta y a veces el token o código que llega por SMS. Con eso el atacante opera la cuenta o da de alta transferencias.",
+        "metadata": {
+          "canal_sms": true,
+          "entidad_suplantada": "banco",
+          "canal_email": true,
+          "archivo": "c03_phishing_banco.md",
+          "fuente_url": "https://example.org/fixtures/phishing-banco-ejemplo",
+          "chunk_index": 0,
+          "modalidad": "phishing_bancario",
+          "doc_id": "FX-C03",
+          "source_id": "fx-casos",
+          "idioma": "es",
+          "fuente_tipo": "sintetico",
+          "doc_tipo": "caso",
+          "chunk_id": "FX-C03#c00",
+          "campaign_id": "fx-kb-phishing-banco",
+          "n_chunks": 1,
+          "canal": "sms,email",
+          "canal_whatsapp": false
+        },
+        "score_dense": 0.625717,
+        "score_bm25": null,
+        "score_rerank": null
+      },
+      {
+        "id": "FX-C01#c01",
+        "coleccion": "kb_fixture",
+        "texto": "Mecanismo: con el código, el atacante toma la cuenta, la víctima pierde el acceso y desde su perfil se piden transferencias a sus contactos. Si además no tenía activada la verificación en dos pasos, el atacante puede activarla y dificultar la recuperación.",
+        "metadata": {
+          "doc_id": "FX-C01",
+          "campaign_id": "fx-kb-robo-wa",
+          "canal_whatsapp": true,
+          "chunk_id": "FX-C01#c01",
+          "doc_tipo": "caso",
+          "n_chunks": 2,
+          "fuente_url": "https://example.org/fixtures/robo-cuenta-whatsapp",
+          "source_id": "fx-casos",
+          "entidad_suplantada": "contacto_conocido",
+          "chunk_index": 1,
+          "modalidad": "robo_cuenta_whatsapp",
+          "canal_sms": true,
+          "archivo": "c01_robo_wa.md",
+          "canal": "whatsapp,sms",
+          "idioma": "es",
+          "fuente_tipo": "sintetico",
+          "canal_email": false
+        },
+        "score_dense": 0.52798,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "mensajes": [
+      {
+        "id": "FX-M03#c00",
+        "coleccion": "kb_fixture",
+        "texto": "BANCO EJEMPLO: Su cuenta sera suspendida. Valide sus datos en bancoejemplo-validacion.com antes de 24hs",
+        "metadata": {
+          "doc_id": "FX-M03",
+          "source_id": "fx-mensajes",
+          "doc_tipo": "mensaje",
+          "modalidad": "phishing_bancario",
+          "canal": "sms",
+          "canal_whatsapp": false,
+          "canal_email": false,
+          "archivo": "mensajes.csv",
+          "canal_sms": true,
+          "fuente_tipo": "sintetico",
+          "chunk_id": "FX-M03#c00",
+          "chunk_index": 0,
+          "campaign_id": "fx-kb-m-phishing",
+          "idioma": "es",
+          "fila": 2,
+          "n_chunks": 1,
+          "label": "estafa",
+          "entidad": "banco"
+        },
+        "score_dense": 0.834247,
+        "score_bm25": null,
+        "score_rerank": null
+      },
+      {
+        "id": "FX-M06#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Banco Ejemplo: tu código de verificación es <CODIGO>. No lo compartas con nadie, ni siquiera con empleados del banco.",
+        "metadata": {
+          "fuente_tipo": "sintetico",
+          "label": "legitimo",
+          "canal_email": false,
+          "doc_id": "FX-M06",
+          "archivo": "mensajes.csv",
+          "source_id": "fx-mensajes",
+          "fila": 5,
+          "idioma": "es",
+          "canal_whatsapp": false,
+          "chunk_id": "FX-M06#c00",
+          "doc_tipo": "mensaje",
+          "n_chunks": 1,
+          "canal": "sms",
+          "canal_sms": true,
+          "chunk_index": 0,
+          "campaign_id": "fx-kb-m-legit-codigo",
+          "entidad": "banco"
+        },
+        "score_dense": 0.59013,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "senales": [
+      {
+        "id": "S-amenaza_bloqueo#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Señal: amenaza bloqueo\nDefinición: Amenaza con bloquear, suspender, embargar o dar de baja algo si no se actúa.\nEjemplos: tu cuenta será bloqueada en 24 hs | evitá el embargo pagando hoy",
+        "metadata": {
+          "chunk_index": 0,
+          "chunk_id": "S-amenaza_bloqueo#c00",
+          "n_chunks": 1,
+          "idioma": "es",
+          "source_id": "fx-senales",
+          "doc_tipo": "senal",
+          "fuente_tipo": "taxonomia",
+          "tipo_senal": "riesgo",
+          "doc_id": "S-amenaza_bloqueo",
+          "signal_id": "amenaza_bloqueo",
+          "severidad": "alta"
+        },
+        "score_dense": 0.522951,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "guias": [
+      {
+        "id": "FX-G02#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Si ingresaste tu clave o los datos de tu tarjeta en un link sospechoso:\n1. Comunicate con tu banco usando el teléfono que figura al dorso de tu tarjeta o en la app oficial, nunca el que aparece en el mensaje.\n2. Pedí el bloqueo de la tarjeta y cambiá la clave del home banking desde la app oficial.\n3. Revisá los movimientos recientes y desconocé los que no hiciste.\n4. Hacé la denuncia y guardá capturas del mensaje y del sitio.",
+        "metadata": {
+          "fuente_url": "https://example.org/fixtures/guia-phishing",
+          "modalidad": "phishing_bancario",
+          "situacion": "compartio_clave_o_tarjeta",
+          "doc_id": "FX-G02",
+          "fuente_tipo": "sintetico",
+          "chunk_index": 0,
+          "idioma": "es",
+          "source_id": "fx-guias",
+          "doc_tipo": "guia",
+          "chunk_id": "FX-G02#c00",
+          "n_chunks": 1,
+          "archivo": "g02_phishing.md"
+        },
+        "score_dense": 0.599727,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "timings_ms": {}
+  }
+}

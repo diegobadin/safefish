@@ -254,6 +254,7 @@ class GoldenCase(_Strict):
     label: Label
     veredicto_esperado: list[Veredicto] = Field(min_length=1)  # el primero es el canónico
     modalidad: Modalidad | None = None
+    entidad: str | None = None  # entidad suplantada (relevancia graduada de retrieval, §4.3)
     senales_esperadas: list[SignalId] = Field(default_factory=list)
     pasos_clave_esperados: list[str] = Field(default_factory=list)
     referencia: str = ""

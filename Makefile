@@ -47,6 +47,6 @@ golden-check:
 	$(RUN) python -m eval.golden --golden-dir $(GOLDEN) --kb-config $(CONFIG)
 
 demo-fixture:
-	$(RUN) python -m safefish.ingest.build_kb --config configs/v1-fixture.yaml
+	$(RUN) python -m safefish.ingest.build_kb --config configs/v1-fixture.yaml --force
 	$(RUN) python -m eval.run --config configs/v0.yaml --split dev --golden-dir tests/fixtures/golden
 	$(RUN) python -m eval.run --config configs/v1-fixture.yaml --split dev --golden-dir tests/fixtures/golden
