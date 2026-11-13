@@ -1,0 +1,186 @@
+{
+  "mensaje": {
+    "texto": "Hola, te llegó un código por SMS? me lo pasás que es para un sorteo",
+    "canal": "whatsapp",
+    "segmentos": [
+      {
+        "emisor": "remitente",
+        "texto": "Hola, te llegó un código por SMS? me lo pasás que es para un sorteo"
+      }
+    ],
+    "entidades": {
+      "links": [],
+      "telefonos": [],
+      "montos": [],
+      "cbu_alias": [],
+      "emails": []
+    },
+    "ocr_words": null,
+    "origen": "texto"
+  },
+  "bundle": {
+    "queries": [
+      "Hola, te llegó un código por SMS? me lo pasás que es para un sorteo"
+    ],
+    "casos": [
+      {
+        "id": "FX-C05#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Premio o sorteo falso.\n\nDescripción: se avisa que la persona ganó un celular, un viaje o una orden de compra en un sorteo por aniversario de una marca. Para cobrarlo hay que pagar un \"cargo de envío\" o \"impuesto\" por transferencia, o completar datos en un link.\n\nFrases típicas: \"¡felicitaciones! fuiste seleccionado en nuestro sorteo aniversario\"; \"para recibir tu premio abona el costo de envío de $ 3.500 al siguiente CBU\"; \"tenés 2 horas para reclamarlo\".",
+        "metadata": {
+          "fuente_url": "https://example.org/fixtures/premio-falso",
+          "chunk_index": 0,
+          "fuente_tipo": "sintetico",
+          "canal": "whatsapp,sms",
+          "archivo": "c05_premio.md",
+          "n_chunks": 1,
+          "doc_id": "FX-C05",
+          "idioma": "es",
+          "chunk_id": "FX-C05#c00",
+          "doc_tipo": "caso",
+          "source_id": "fx-casos",
+          "campaign_id": "fx-kb-premio",
+          "canal_email": false,
+          "entidad_suplantada": "empresa_comercial",
+          "modalidad": "premio_sorteo_falso",
+          "canal_whatsapp": true,
+          "canal_sms": true
+        },
+        "score_dense": 0.570852,
+        "score_bm25": null,
+        "score_rerank": null
+      },
+      {
+        "id": "FX-C01#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Robo de cuenta de WhatsApp mediante el código de verificación.\n\nDescripción: el estafador intenta registrar la cuenta de WhatsApp de la víctima en otro teléfono. Para eso necesita el código de 6 dígitos que WhatsApp envía por SMS al número de la víctima. Escribe desde un número desconocido o desde la cuenta ya robada de un conocido y pide que le reenvíen \"un código que te llegó por error\".\n\nFrases típicas: \"te mandé un código de 6 dígitos por error, ¿me lo pasás?\"; \"es para votar en un concurso, pasame el código que te llegó\"; \"soy del equipo de soporte, necesitamos el código para verificar tu cuenta\".",
+        "metadata": {
+          "fuente_tipo": "sintetico",
+          "doc_tipo": "caso",
+          "canal_sms": true,
+          "doc_id": "FX-C01",
+          "campaign_id": "fx-kb-robo-wa",
+          "fuente_url": "https://example.org/fixtures/robo-cuenta-whatsapp",
+          "source_id": "fx-casos",
+          "entidad_suplantada": "contacto_conocido",
+          "chunk_id": "FX-C01#c00",
+          "idioma": "es",
+          "n_chunks": 2,
+          "canal_email": false,
+          "canal": "whatsapp,sms",
+          "chunk_index": 0,
+          "canal_whatsapp": true,
+          "modalidad": "robo_cuenta_whatsapp",
+          "archivo": "c01_robo_wa.md"
+        },
+        "score_dense": 0.536517,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "mensajes": [
+      {
+        "id": "FX-M01#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Hola! Te mandé un código de 6 dígitos por error a tu número, me lo podés pasar porfa? Es urgente",
+        "metadata": {
+          "archivo": "mensajes.csv",
+          "fila": 0,
+          "canal": "whatsapp",
+          "canal_email": false,
+          "campaign_id": "fx-kb-m-robo-wa",
+          "label": "estafa",
+          "canal_whatsapp": true,
+          "n_chunks": 1,
+          "canal_sms": false,
+          "doc_id": "FX-M01",
+          "entidad": "contacto_conocido",
+          "source_id": "fx-mensajes",
+          "chunk_id": "FX-M01#c00",
+          "fuente_tipo": "sintetico",
+          "idioma": "es",
+          "chunk_index": 0,
+          "modalidad": "robo_cuenta_whatsapp",
+          "doc_tipo": "mensaje"
+        },
+        "score_dense": 0.695956,
+        "score_bm25": null,
+        "score_rerank": null
+      },
+      {
+        "id": "FX-M05#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Felicitaciones! Ganaste un celular en el sorteo aniversario. Para recibirlo transferi el costo de envio de $3.500",
+        "metadata": {
+          "campaign_id": "fx-kb-m-premio",
+          "doc_id": "FX-M05",
+          "doc_tipo": "mensaje",
+          "modalidad": "premio_sorteo_falso",
+          "chunk_index": 0,
+          "canal_email": false,
+          "fila": 4,
+          "canal_whatsapp": true,
+          "fuente_tipo": "sintetico",
+          "chunk_id": "FX-M05#c00",
+          "archivo": "mensajes.csv",
+          "label": "estafa",
+          "canal": "whatsapp",
+          "source_id": "fx-mensajes",
+          "canal_sms": false,
+          "idioma": "es",
+          "entidad": "empresa_comercial",
+          "n_chunks": 1
+        },
+        "score_dense": 0.612126,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "senales": [
+      {
+        "id": "S-pedido_codigo_verificacion#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Señal: pedido codigo verificacion\nDefinición: Pide reenviar o dictar un código de verificación, token o clave de un solo uso.\nEjemplos: pasame el código de 6 dígitos que te llegó | decime el token que te mandamos por SMS\nContraejemplos (no es la señal): nunca compartas tu código con nadie",
+        "metadata": {
+          "doc_id": "S-pedido_codigo_verificacion",
+          "source_id": "fx-senales",
+          "severidad": "critica",
+          "n_chunks": 1,
+          "signal_id": "pedido_codigo_verificacion",
+          "tipo_senal": "riesgo",
+          "chunk_id": "S-pedido_codigo_verificacion#c00",
+          "chunk_index": 0,
+          "doc_tipo": "senal",
+          "fuente_tipo": "taxonomia",
+          "idioma": "es"
+        },
+        "score_dense": 0.586991,
+        "score_bm25": null,
+        "score_rerank": null
+      },
+      {
+        "id": "S-premio_inesperado#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Señal: premio inesperado\nDefinición: Anuncia un premio, beneficio o reintegro que la persona no esperaba ni solicitó.\nEjemplos: ¡ganaste un celular en nuestro sorteo aniversario!",
+        "metadata": {
+          "chunk_index": 0,
+          "chunk_id": "S-premio_inesperado#c00",
+          "doc_id": "S-premio_inesperado",
+          "doc_tipo": "senal",
+          "fuente_tipo": "taxonomia",
+          "source_id": "fx-senales",
+          "idioma": "es",
+          "n_chunks": 1,
+          "severidad": "media",
+          "signal_id": "premio_inesperado",
+          "tipo_senal": "riesgo"
+        },
+        "score_dense": 0.478234,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "guias": [],
+    "timings_ms": {}
+  }
+}

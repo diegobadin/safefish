@@ -1,0 +1,27 @@
+# Mini-KB de fixtures (F0): documentos SINTÉTICOS con entidades ficticias (Banco Ejemplo,
+# BilleteraYa, CorreoExpress). Sirve para desarrollar y testear sin la KB real.
+# Nunca se usa para reportar métricas.
+sources:
+  - id: fx-casos
+    tipo: caso
+    loader: text
+    path: casos/*.md
+    fuente_tipo: sintetico
+  - id: fx-mensajes
+    tipo: mensaje
+    loader: csv
+    path: mensajes.csv
+    fuente_tipo: sintetico
+    csv:
+      content_column: texto
+      id_column: id
+      metadata_columns: [label, modalidad, canal, entidad, campaign_id]
+  - id: fx-guias
+    tipo: guia
+    loader: text
+    path: guias/*.md
+    fuente_tipo: sintetico
+  - id: fx-senales
+    tipo: senal
+    loader: taxonomia
+    fuente_tipo: taxonomia

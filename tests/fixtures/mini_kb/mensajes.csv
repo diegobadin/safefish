@@ -1,0 +1,9 @@
+id,texto,label,modalidad,canal,entidad,campaign_id
+FX-M01,"Hola! Te mandé un código de 6 dígitos por error a tu número, me lo podés pasar porfa? Es urgente",estafa,robo_cuenta_whatsapp,whatsapp,contacto_conocido,fx-kb-m-robo-wa
+FX-M02,"Hola ma, este es mi número nuevo agendalo. Necesito que me transfieras hoy 85.000 al alias de un amigo, mañana te devuelvo. No le digas a papá",estafa,falso_familiar_cambio_numero,whatsapp,familiar,fx-kb-m-familiar
+FX-M03,"BANCO EJEMPLO: Su cuenta sera suspendida. Valide sus datos en bancoejemplo-validacion.com antes de 24hs",estafa,phishing_bancario,sms,banco,fx-kb-m-phishing
+FX-M04,"CorreoExpress: su envio esta retenido por falta de pago de tasa ($1.200). Abone en correoexpress-pagos.net",estafa,encomienda_retenida,sms,correo,fx-kb-m-encomienda
+FX-M05,"Felicitaciones! Ganaste un celular en el sorteo aniversario. Para recibirlo transferi el costo de envio de $3.500",estafa,premio_sorteo_falso,whatsapp,empresa_comercial,fx-kb-m-premio
+FX-M06,"Banco Ejemplo: tu código de verificación es <CODIGO>. No lo compartas con nadie, ni siquiera con empleados del banco.",legitimo,,sms,banco,fx-kb-m-legit-codigo
+FX-M07,"BilleteraYa: registramos un ingreso a tu cuenta desde un nuevo dispositivo. Si no fuiste vos, revisá la seguridad desde la app. Nunca te vamos a pedir tu clave.",legitimo,,email,billetera,fx-kb-m-legit-alerta
+FX-M08,"Tu pedido de CorreoExpress está en camino. Seguilo desde la app oficial con tu número de envío.",legitimo,,sms,correo,fx-kb-m-legit-envio

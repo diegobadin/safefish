@@ -1,0 +1,187 @@
+{
+  "mensaje": {
+    "texto": "Hola ma, cambié de número. Me transferís 60.000 a este alias? te devuelvo mañana",
+    "canal": "whatsapp",
+    "segmentos": [
+      {
+        "emisor": "remitente",
+        "texto": "Hola ma, cambié de número. Me transferís 60.000 a este alias? te devuelvo mañana"
+      }
+    ],
+    "entidades": {
+      "links": [],
+      "telefonos": [],
+      "montos": [],
+      "cbu_alias": [],
+      "emails": []
+    },
+    "ocr_words": null,
+    "origen": "texto"
+  },
+  "bundle": {
+    "queries": [
+      "Hola ma, cambié de número. Me transferís 60.000 a este alias? te devuelvo mañana"
+    ],
+    "casos": [
+      {
+        "id": "FX-C02#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Falso familiar que cambió de número.\n\nDescripción: llega un mensaje de un número desconocido que dice ser un hijo, sobrino o nieto que \"cambió de número\" y pide que lo agenden. Después de una conversación breve aparece un problema urgente: una deuda, un pago que no puede hacer desde la app o un trámite que vence hoy.\n\nFrases típicas: \"hola ma, este es mi número nuevo, agendalo\"; \"se me rompió el celu y no puedo entrar al banco\"; \"¿me podés transferir hoy a este alias que es de un amigo? mañana te lo devuelvo\"; \"no le digas nada a papá\".\n\nMecanismo: la urgencia y el pedido de secreto buscan que la víctima no verifique llamando al número anterior. El dinero se transfiere a una cuenta de un tercero (cuenta mula).",
+        "metadata": {
+          "canal_email": false,
+          "doc_tipo": "caso",
+          "campaign_id": "fx-kb-falso-familiar",
+          "canal": "whatsapp",
+          "archivo": "c02_falso_familiar.md",
+          "canal_sms": false,
+          "source_id": "fx-casos",
+          "modalidad": "falso_familiar_cambio_numero",
+          "chunk_id": "FX-C02#c00",
+          "fuente_tipo": "sintetico",
+          "n_chunks": 1,
+          "canal_whatsapp": true,
+          "doc_id": "FX-C02",
+          "entidad_suplantada": "familiar",
+          "idioma": "es",
+          "chunk_index": 0,
+          "fuente_url": "https://example.org/fixtures/falso-familiar"
+        },
+        "score_dense": 0.552846,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "mensajes": [
+      {
+        "id": "FX-M02#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Hola ma, este es mi número nuevo agendalo. Necesito que me transfieras hoy 85.000 al alias de un amigo, mañana te devuelvo. No le digas a papá",
+        "metadata": {
+          "canal_sms": false,
+          "fuente_tipo": "sintetico",
+          "canal_whatsapp": true,
+          "n_chunks": 1,
+          "doc_id": "FX-M02",
+          "modalidad": "falso_familiar_cambio_numero",
+          "canal": "whatsapp",
+          "canal_email": false,
+          "chunk_index": 0,
+          "campaign_id": "fx-kb-m-familiar",
+          "source_id": "fx-mensajes",
+          "entidad": "familiar",
+          "label": "estafa",
+          "archivo": "mensajes.csv",
+          "idioma": "es",
+          "fila": 1,
+          "doc_tipo": "mensaje",
+          "chunk_id": "FX-M02#c00"
+        },
+        "score_dense": 0.760159,
+        "score_bm25": null,
+        "score_rerank": null
+      },
+      {
+        "id": "FX-M01#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Hola! Te mandé un código de 6 dígitos por error a tu número, me lo podés pasar porfa? Es urgente",
+        "metadata": {
+          "canal_whatsapp": true,
+          "doc_tipo": "mensaje",
+          "canal_email": false,
+          "archivo": "mensajes.csv",
+          "campaign_id": "fx-kb-m-robo-wa",
+          "fuente_tipo": "sintetico",
+          "entidad": "contacto_conocido",
+          "chunk_index": 0,
+          "label": "estafa",
+          "fila": 0,
+          "idioma": "es",
+          "canal_sms": false,
+          "doc_id": "FX-M01",
+          "source_id": "fx-mensajes",
+          "modalidad": "robo_cuenta_whatsapp",
+          "canal": "whatsapp",
+          "n_chunks": 1,
+          "chunk_id": "FX-M01#c00"
+        },
+        "score_dense": 0.526495,
+        "score_bm25": null,
+        "score_rerank": null
+      },
+      {
+        "id": "FX-M05#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Felicitaciones! Ganaste un celular en el sorteo aniversario. Para recibirlo transferi el costo de envio de $3.500",
+        "metadata": {
+          "modalidad": "premio_sorteo_falso",
+          "n_chunks": 1,
+          "entidad": "empresa_comercial",
+          "archivo": "mensajes.csv",
+          "label": "estafa",
+          "canal": "whatsapp",
+          "doc_id": "FX-M05",
+          "canal_email": false,
+          "fuente_tipo": "sintetico",
+          "campaign_id": "fx-kb-m-premio",
+          "chunk_index": 0,
+          "source_id": "fx-mensajes",
+          "canal_whatsapp": true,
+          "chunk_id": "FX-M05#c00",
+          "canal_sms": false,
+          "idioma": "es",
+          "doc_tipo": "mensaje",
+          "fila": 4
+        },
+        "score_dense": 0.505651,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "senales": [
+      {
+        "id": "S-cambio_de_numero#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Señal: cambio de numero\nDefinición: Dice ser un conocido que cambió de número, sin forma de verificarlo.\nEjemplos: hola ma, este es mi número nuevo, agendalo",
+        "metadata": {
+          "doc_tipo": "senal",
+          "n_chunks": 1,
+          "source_id": "fx-senales",
+          "chunk_id": "S-cambio_de_numero#c00",
+          "tipo_senal": "riesgo",
+          "chunk_index": 0,
+          "idioma": "es",
+          "signal_id": "cambio_de_numero",
+          "severidad": "alta",
+          "doc_id": "S-cambio_de_numero",
+          "fuente_tipo": "taxonomia"
+        },
+        "score_dense": 0.565085,
+        "score_bm25": null,
+        "score_rerank": null
+      },
+      {
+        "id": "S-transferencia_a_tercero#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Señal: transferencia a tercero\nDefinición: Pide transferir o depositar dinero a una cuenta, CBU, CVU o alias de un tercero.\nEjemplos: transferime a este alias que es de un amigo | depositá el cargo de envío a este CBU\nContraejemplos (no es la señal): pagá tu factura desde la app oficial con el código de pago",
+        "metadata": {
+          "doc_id": "S-transferencia_a_tercero",
+          "idioma": "es",
+          "n_chunks": 1,
+          "signal_id": "transferencia_a_tercero",
+          "severidad": "critica",
+          "chunk_id": "S-transferencia_a_tercero#c00",
+          "fuente_tipo": "taxonomia",
+          "tipo_senal": "riesgo",
+          "source_id": "fx-senales",
+          "doc_tipo": "senal",
+          "chunk_index": 0
+        },
+        "score_dense": 0.479616,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "guias": [],
+    "timings_ms": {}
+  }
+}

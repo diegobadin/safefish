@@ -1,0 +1,175 @@
+{
+  "mensaje": {
+    "texto": "Tu código de verificación es <CODIGO>. No lo compartas con nadie.",
+    "canal": "sms",
+    "segmentos": [
+      {
+        "emisor": "remitente",
+        "texto": "Tu código de verificación es <CODIGO>. No lo compartas con nadie."
+      }
+    ],
+    "entidades": {
+      "links": [],
+      "telefonos": [],
+      "montos": [],
+      "cbu_alias": [],
+      "emails": []
+    },
+    "ocr_words": null,
+    "origen": "texto"
+  },
+  "bundle": {
+    "queries": [
+      "Tu código de verificación es <CODIGO>. No lo compartas con nadie."
+    ],
+    "casos": [],
+    "mensajes": [
+      {
+        "id": "FX-M06#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Banco Ejemplo: tu código de verificación es <CODIGO>. No lo compartas con nadie, ni siquiera con empleados del banco.",
+        "metadata": {
+          "idioma": "es",
+          "doc_id": "FX-M06",
+          "canal_sms": true,
+          "fuente_tipo": "sintetico",
+          "label": "legitimo",
+          "fila": 5,
+          "chunk_index": 0,
+          "archivo": "mensajes.csv",
+          "n_chunks": 1,
+          "canal": "sms",
+          "canal_email": false,
+          "source_id": "fx-mensajes",
+          "doc_tipo": "mensaje",
+          "campaign_id": "fx-kb-m-legit-codigo",
+          "entidad": "banco",
+          "chunk_id": "FX-M06#c00",
+          "canal_whatsapp": false
+        },
+        "score_dense": 0.805226,
+        "score_bm25": null,
+        "score_rerank": null
+      },
+      {
+        "id": "FX-M01#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Hola! Te mandé un código de 6 dígitos por error a tu número, me lo podés pasar porfa? Es urgente",
+        "metadata": {
+          "label": "estafa",
+          "idioma": "es",
+          "canal": "whatsapp",
+          "canal_email": false,
+          "chunk_id": "FX-M01#c00",
+          "entidad": "contacto_conocido",
+          "source_id": "fx-mensajes",
+          "doc_tipo": "mensaje",
+          "doc_id": "FX-M01",
+          "chunk_index": 0,
+          "canal_whatsapp": true,
+          "campaign_id": "fx-kb-m-robo-wa",
+          "modalidad": "robo_cuenta_whatsapp",
+          "n_chunks": 1,
+          "fila": 0,
+          "fuente_tipo": "sintetico",
+          "archivo": "mensajes.csv",
+          "canal_sms": false
+        },
+        "score_dense": 0.534542,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "senales": [
+      {
+        "id": "S-pedido_codigo_verificacion#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Señal: pedido codigo verificacion\nDefinición: Pide reenviar o dictar un código de verificación, token o clave de un solo uso.\nEjemplos: pasame el código de 6 dígitos que te llegó | decime el token que te mandamos por SMS\nContraejemplos (no es la señal): nunca compartas tu código con nadie",
+        "metadata": {
+          "source_id": "fx-senales",
+          "n_chunks": 1,
+          "doc_tipo": "senal",
+          "chunk_id": "S-pedido_codigo_verificacion#c00",
+          "signal_id": "pedido_codigo_verificacion",
+          "tipo_senal": "riesgo",
+          "fuente_tipo": "taxonomia",
+          "severidad": "critica",
+          "idioma": "es",
+          "doc_id": "S-pedido_codigo_verificacion",
+          "chunk_index": 0
+        },
+        "score_dense": 0.609065,
+        "score_bm25": null,
+        "score_rerank": null
+      },
+      {
+        "id": "S-pedido_secreto#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Señal: pedido secreto\nDefinición: Pide no contarle a nadie, no llamar o no verificar por otra vía.\nEjemplos: no le digas nada a papá | no llames al banco que se cancela la operación",
+        "metadata": {
+          "source_id": "fx-senales",
+          "chunk_id": "S-pedido_secreto#c00",
+          "doc_tipo": "senal",
+          "idioma": "es",
+          "doc_id": "S-pedido_secreto",
+          "chunk_index": 0,
+          "signal_id": "pedido_secreto",
+          "severidad": "media",
+          "fuente_tipo": "taxonomia",
+          "n_chunks": 1,
+          "tipo_senal": "riesgo"
+        },
+        "score_dense": 0.484735,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "guias": [
+      {
+        "id": "FX-G01#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Si compartiste el código de verificación de WhatsApp:\n1. Volvé a registrar WhatsApp en tu teléfono con tu número: eso desconecta al otro dispositivo.\n2. Activá la verificación en dos pasos desde Ajustes > Cuenta.\n3. Avisá a tus contactos por otra vía que no respondan pedidos de dinero hechos desde tu cuenta.\n4. Si te piden plata en tu nombre, hacé la denuncia ante la policía o la fiscalía de tu jurisdicción.",
+        "metadata": {
+          "doc_tipo": "guia",
+          "situacion": "compartio_codigo",
+          "source_id": "fx-guias",
+          "fuente_url": "https://example.org/fixtures/guia-robo-wa",
+          "n_chunks": 1,
+          "chunk_index": 0,
+          "chunk_id": "FX-G01#c00",
+          "doc_id": "FX-G01",
+          "archivo": "g01_robo_wa.md",
+          "modalidad": "robo_cuenta_whatsapp",
+          "idioma": "es",
+          "fuente_tipo": "sintetico"
+        },
+        "score_dense": 0.532788,
+        "score_bm25": null,
+        "score_rerank": null
+      },
+      {
+        "id": "FX-G03#c00",
+        "coleccion": "kb_fixture",
+        "texto": "Si recibiste un mensaje sospechoso y todavía no respondiste:\n1. No respondas, no abras links ni descargues archivos.\n2. Verificá por un canal oficial que ya conozcas: la app de la entidad o un contacto que tengas agendado de antes.\n3. Nunca compartas códigos de verificación, claves ni datos de tarjeta.\n4. Bloqueá y reportá el número o la dirección como spam.",
+        "metadata": {
+          "n_chunks": 1,
+          "archivo": "g03_general.md",
+          "modalidad": "no_determinada",
+          "chunk_index": 0,
+          "fuente_tipo": "sintetico",
+          "doc_id": "FX-G03",
+          "source_id": "fx-guias",
+          "situacion": "no_respondio",
+          "doc_tipo": "guia",
+          "fuente_url": "https://example.org/fixtures/guia-general",
+          "idioma": "es",
+          "chunk_id": "FX-G03#c00"
+        },
+        "score_dense": 0.492497,
+        "score_bm25": null,
+        "score_rerank": null
+      }
+    ],
+    "timings_ms": {}
+  }
+}
