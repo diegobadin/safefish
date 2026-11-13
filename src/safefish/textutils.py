@@ -247,11 +247,29 @@ def _url_parts(u: str) -> tuple[str, str]:
     return host.lower(), path
 
 
+def canonical_phone(text: str) -> str:
+    """Dígitos de un teléfono argentino sin los prefijos que no cambian el destino:
+    internacional (`00`), país (`54`), el `9` de celular tras el `54` y el `0` troncal.
+    La característica de área se conserva: `351 4348-3500` y `4348-3500` son números
+    distintos."""
+    d = re.sub(r"\D", "", text)
+    if d.startswith("00"):
+        d = d[2:]
+    if d.startswith("54") and len(d) >= 12:
+        d = d[2:]
+        if d.startswith("9") and len(d) == 11:
+            d = d[1:]
+    if d.startswith("0"):
+        d = d[1:]
+    return d
+
+
 def contacto_respaldado(c: str, fuente: str) -> bool:
     """`c` (teléfono, mail o URL) figura en `fuente`:
 
     - mail: igualdad exacta (sin distinguir mayúsculas);
-    - teléfono: mismos dígitos, o uno es sufijo del otro con ≥ 8 dígitos (prefijos +54 / 11);
+    - teléfono: igualdad exacta de `canonical_phone` (solo se ignoran prefijos de país y
+      troncales, nunca una característica de área agregada u omitida);
     - URL: mismo host y la ruta de `c` es prefijo de la de la fuente (acortar está bien,
       agregar una ruta no).
     """
@@ -259,14 +277,8 @@ def contacto_respaldado(c: str, fuente: str) -> bool:
     if "@" in c:
         return c.lower() in {x.lower() for x in contactos if "@" in x}
     if _PHONE_ONLY.fullmatch(c):
-        d = re.sub(r"\D", "", c)
-        for x in contactos:
-            if not _PHONE_ONLY.fullmatch(x):
-                continue
-            g = re.sub(r"\D", "", x)
-            if d == g or (min(len(d), len(g)) >= 8 and (g.endswith(d) or d.endswith(g))):
-                return True
-        return False
+        d = canonical_phone(c)
+        return any(canonical_phone(x) == d for x in contactos if _PHONE_ONLY.fullmatch(x))
     host, path = _url_parts(c)
     for x in contactos:
         if "@" in x or _PHONE_ONLY.fullmatch(x):
