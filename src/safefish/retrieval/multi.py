@@ -12,6 +12,7 @@ import time
 from langchain_chroma import Chroma
 from langchain_core.embeddings import Embeddings
 
+from safefish.concurrency import CHROMA_LOCK
 from safefish.schemas import EvidenceItem, ExtractedMessage, RetrievalBundle
 
 CAMPOS = ("casos", "mensajes", "senales", "guias")
@@ -52,7 +53,8 @@ class MultiCollectionRetriever:
             if n <= 0 or store is None:
                 continue
             t0 = time.perf_counter()
-            hits = store.similarity_search_by_vector_with_relevance_scores(vec, k=n)
+            with CHROMA_LOCK:
+                hits = store.similarity_search_by_vector_with_relevance_scores(vec, k=n)
             timings[f"dense_{campo}"] = round((time.perf_counter() - t0) * 1000, 1)
             getattr(bundle, campo).extend(to_item(d, dist, self.names[campo]) for d, dist in hits)
         bundle.timings_ms = timings

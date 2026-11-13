@@ -93,9 +93,12 @@ def test_arnes_v3(kb_v2, tmp_path, fake_llm):
     pipe = SafeFishPipeline.from_config(cfg, llm=fake_llm, embeddings=emb)
     out_dir, metrics = run_eval(cfg, cases, pipe, tmp_path / "results", split="dev", golden_file=golden, workers=2)  # fmt: skip
     t = metrics["task"]
-    assert t["n_errores"] == 0
+    rows = [json.loads(x) for x in (out_dir / "predictions.jsonl").read_text(encoding="utf-8").splitlines()]  # fmt: skip
+    assert t["n_errores"] == 0, [r["error"] for r in rows if r["error"]]
     assert t["grounding_citas"] == 1.0  # invariante post-R1 (gate G2)
-    assert t["contactos_no_respaldados"] == 0
+    rows = [json.loads(x) for x in (out_dir / "predictions.jsonl").read_text(encoding="utf-8").splitlines()]  # fmt: skip
+    planes = {r["id"]: (r["pred"]["plan"], sorted(r["contexto_guias_por_id"])) for r in rows}
+    assert t["contactos_no_respaldados"] == 0, planes
     assert "grounding_citas_pre_r1" in t and "eventos_verificador" in t
     assert t["pasos_con_guide_id"] == 1.0
     assert metrics["retrieval"]["k"] == 4

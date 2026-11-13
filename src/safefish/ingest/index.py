@@ -88,11 +88,26 @@ def build_indexes(
     return names
 
 
-def open_collection(snapshot_dir: Path, embeddings: Embeddings, name: str) -> Chroma | None:
-    """Abre una colección existente del snapshot, o None si no se creó (tipo sin documentos)."""
+def open_collections(snapshot_dir: Path, embeddings: Embeddings, names: dict[str, str]) -> dict[str, Chroma | None]:  # fmt: skip
+    """Abre las colecciones del snapshot con **un** cliente compartido; None si una colección
+    no se creó (tipo sin documentos)."""
     import chromadb
 
     client = chromadb.PersistentClient(path=str(snapshot_dir / "chroma"))
+    existentes = {c.name for c in client.list_collections()}
+    return {
+        campo: open_collection(snapshot_dir, embeddings, name, client)
+        if name in existentes
+        else None
+        for campo, name in names.items()
+    }
+
+
+def open_collection(snapshot_dir: Path, embeddings: Embeddings, name: str, client=None) -> Chroma | None:  # fmt: skip
+    """Abre una colección existente del snapshot, o None si no se creó (tipo sin documentos)."""
+    import chromadb
+
+    client = client or chromadb.PersistentClient(path=str(snapshot_dir / "chroma"))
     if name not in {c.name for c in client.list_collections()}:
         return None
     return Chroma(

@@ -88,8 +88,11 @@ deja abiertas o que ajustan el esqueleto de contratos del §1.5.
 
 ### Ajustes tras la revisión de código y de seguridad
 
-- **Contactos:** `find_contacts` es un detector *amplio* (cualquier TLD, teléfonos con
-  puntos, números cortos como `134` o `*611`): un falso positivo solo redacta de más. La
+- **Contactos:** `find_contacts` es un detector *amplio* (cualquier TLD y dominios IDN, URLs
+  con esquema de cualquier forma, IPs, teléfonos con puntos, números cortos como `134` o
+  `*611`; un contacto contenido en otro no se cuenta dos veces): un falso positivo solo
+  redacta de más. El `organismo` de la metadata de una guía cuenta para R5 solo como nombre de
+  organismo, nunca para respaldar un contacto. La
   comparación (`contacto_respaldado`) es estructurada: mails exactos, URLs por host + prefijo
   de ruta, teléfonos por igualdad tras quitar solo prefijos de país/troncales (la
   característica de área cuenta). R5 también limpia contactos de `explicacion` y `por_que` que
@@ -111,6 +114,10 @@ deja abiertas o que ajustan el esqueleto de contratos del §1.5.
   aunque cambie el layout, y `make eval … RETRIEVAL_ONLY=1` (sin generación: solo embeddings).
 - **Métricas:** `GoldenCase.citas_bbox` y `localizacion_iou50` (§4.3); el juez del plan
   registra tokens, costo y fallidos en `metrics.json → juez_plan`.
+- **Concurrencia con Chroma:** la primera consulta a una colección carga el índice HNSW de
+  forma perezosa y no es segura entre hilos (el arnés con `workers > 1` fallaba de forma
+  intermitente con "Nothing found on disk"). Las colecciones de un snapshot se abren con un
+  único cliente y toda consulta pasa por `concurrency.CHROMA_LOCK` (milisegundos).
 
 ## Consecuencias
 

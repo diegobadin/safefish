@@ -11,6 +11,7 @@ import time
 
 from langchain_chroma import Chroma
 
+from safefish.concurrency import CHROMA_LOCK
 from safefish.schemas import DocTipo, EvidenceItem, ExtractedMessage, RetrievalBundle
 
 _FIELD = {DocTipo.CASO: "casos", DocTipo.MENSAJE: "mensajes", DocTipo.SENAL: "senales", DocTipo.GUIA: "guias"}  # fmt: skip
@@ -23,7 +24,8 @@ class DenseRetriever:
     def retrieve(self, m: ExtractedMessage) -> RetrievalBundle:
         query = m.texto
         t0 = time.perf_counter()
-        hits = self.store.similarity_search_with_score(query, k=self.top_k)
+        with CHROMA_LOCK:
+            hits = self.store.similarity_search_with_score(query, k=self.top_k)
         ms = (time.perf_counter() - t0) * 1000
         bundle = RetrievalBundle(queries=[query], timings_ms={"dense": round(ms, 1)})
         for doc, distance in hits:  # distancia coseno → similitud

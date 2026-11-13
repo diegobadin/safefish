@@ -220,11 +220,13 @@ RE_URL_LAX = re.compile(
     r"""(?ix)
     (?<![@\w.-])
     (?:https?://)?(?:www\.)?
-    (?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}
+    (?:[^\W_](?:[\w-]{0,61}[^\W_])?\.)+[^\W\d_]{2,24}   # etiquetas y TLD Unicode (IDN)
     (?![\w-])
     (?:/[^\s<>"'()]*)?
     """
 )
+RE_URL_SCHEME = re.compile(r"(?i)\b(?:https?|hxxps?)://[^\s<>\"'()]+")  # cualquier cosa con esquema
+RE_IPV4 = re.compile(r"(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?::\d{1,5})?(?:/[^\s<>\"'()]*)?(?![\d.])")
 RE_PHONE_DOTS = re.compile(
     r"(?<![\d.])(?:\+?54[ .]?(?:9[ .]?)?)?(?:\(?0?\d{2,4}\)?[ .])?\d{2,4}\.\d{3,4}\.\d{4}(?![\d.])"
 )  # el último grupo de 4 dígitos excluye montos (grupos de 3)
@@ -237,11 +239,19 @@ def find_contacts(text: str) -> list[str]:
     """Teléfonos, mails y links del texto (detector amplio), sin contar dos veces el dominio
     de un mail."""
     emails = RE_EMAIL.findall(text)
-    links = [m.group(0).rstrip(".,;:!?") for m in RE_URL_LAX.finditer(text)]
-    links = [u for u in links if not any(u in e for e in emails)]
+    links = [
+        m.group(0).rstrip(".,;:!?")
+        for rx in (RE_URL_SCHEME, RE_URL_LAX, RE_IPV4)
+        for m in rx.finditer(text)
+    ] + find_links(text)
+    links = [u for u in links if u and not any(u in e for e in emails)]
     phones = find_phones(text) + [m.group(0) for m in RE_PHONE_DOTS.finditer(text)]
+    phones = [p for p in phones if not any(p in u for u in links)]  # dígitos de una IP/URL
     shorts = [m.group(1) or m.group(0) for m in RE_SHORT_CODE.finditer(text)]
-    return list(dict.fromkeys([*phones, *shorts, *emails, *links]))
+    found = list(dict.fromkeys([*phones, *shorts, *emails, *links]))
+    # Un contacto contenido en otro más largo (bit.ly/x dentro de https://bit.ly/x) no se
+    # cuenta aparte: R5 lo reemplaza junto con el largo y la métrica no lo duplica.
+    return [c for c in found if not any(c != o and c in o for o in found)]
 
 
 # ---------------------------------------------------------------------------

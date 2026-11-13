@@ -165,10 +165,13 @@ class RuleVerifier:
         out = self._r5_texto_libre(b, out, m, ev)
         if not out.plan:
             return out, ev
-        # La fuente de un paso es su guía: texto (contexto + pasos) y el organismo de la
-        # metadata, que el planner ve como atributo de la guía.
-        guias = {_doc_id(g): f"{g.texto}\n{g.metadata.get('organismo') or ''}" for g in b.guias}
+        # La fuente de un paso es su guía (contexto + pasos). El `organismo` de la metadata
+        # (que el planner ve como atributo) solo cuenta para matchear organismos: nunca
+        # respalda un contacto, porque no es texto de la guía.
+        guias = {_doc_id(g): g.texto for g in b.guias}
+        orgs = {_doc_id(g): find_organismos(str(g.metadata.get("organismo") or "")) for g in b.guias}  # fmt: skip
         todas = "\n".join(guias.values())
+        todos_orgs = set().union(*orgs.values()) if orgs else set()
         plan: list[PasoPlan] = []
         for i, p in enumerate(out.plan):
             guide_id = p.guide_id
@@ -177,7 +180,8 @@ class RuleVerifier:
                 guide_id = None
             fuente = guias[guide_id] if guide_id else todas
 
-            inventados = find_organismos(p.paso) - find_organismos(fuente)
+            orgs_fuente = find_organismos(fuente) | (orgs[guide_id] if guide_id else todos_orgs)
+            inventados = find_organismos(p.paso) - orgs_fuente
             if inventados:
                 ev.append(Evento("R5", "paso_con_organismo_inventado", {"paso": i, "organismos": sorted(inventados), "texto": p.paso[:200]}))  # fmt: skip
                 continue

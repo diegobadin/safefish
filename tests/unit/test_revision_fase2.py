@@ -247,3 +247,30 @@ def test_juez_reporta_fallos_y_uso():
     assert res["n_fallidos"] == 1 and res["n_juzgados"] == 1
     assert res["tokens"]["in"] > 0
     assert [r["cobertura_plan"] for r in rows] == [None, 1.0]
+
+
+def test_r5_organismo_de_metadata_no_respalda_contactos():
+    b = RetrievalBundle(
+        guias=[
+            EvidenceItem(
+                id="G-1",
+                coleccion="guias",
+                texto="Pasos:\n1. Reclamá ante el organismo.",
+                metadata={
+                    "doc_id": "G-1",
+                    "organismo": "BCRA 0800-999-1111 www.bcra-reclamos.help",
+                },  # fmt: skip
+            )
+        ]
+    )
+    plan = [PasoPlan(paso="Reclamá ante el BCRA al 0800-999-1111 o en www.bcra-reclamos.help", guide_id="G-1")]  # fmt: skip
+    res, ev = RuleVerifier(["R5"]).check_plan(b, _out(plan=plan))
+    assert "BCRA" in res.plan[0].paso  # el nombre del organismo sí se acepta
+    assert "0800-999-1111" not in res.plan[0].paso and "bcra-reclamos" not in res.plan[0].paso
+    assert [e.accion for e in ev] == ["contacto_inventado", "contacto_inventado"]
+
+
+def test_contactos_con_esquema_ip_e_idn():
+    assert find_contacts("Entrá a http://190.12.4.5:8080/login ya") == ["http://190.12.4.5:8080/login"]  # fmt: skip
+    assert find_contacts("Entrá a bancó-seguro.ar") == ["bancó-seguro.ar"]
+    assert find_contacts("Entrá a https://bit.ly/abc") == ["https://bit.ly/abc"]  # sin duplicar

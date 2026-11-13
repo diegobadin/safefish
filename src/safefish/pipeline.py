@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 
 from langchain_core.embeddings import Embeddings
 
+from safefish.concurrency import CHROMA_LOCK
 from safefish.config import PipelineConfig
 from safefish.extract.capture import MultimodalExtractor
 from safefish.generation.planner import GuidePlanner, GuideStore
@@ -82,7 +83,7 @@ class SafeFishPipeline:
         from safefish.extract.vision import VisionTranscriber
         from safefish.ingest.index import (
             check_embeddings_model,
-            open_collection,
+            open_collections,
             open_index,
             read_manifest,
         )
@@ -116,16 +117,19 @@ class SafeFishPipeline:
                 retriever = DenseRetriever(store, r.top_k, manifest["collection"])
 
                 def guias_dense(q: str, k: int) -> list[str]:
-                    hits = store.similarity_search(q, k=k, filter={"doc_tipo": "guia"})
+                    with CHROMA_LOCK:
+                        hits = store.similarity_search(q, k=k, filter={"doc_tipo": "guia"})
                     return [str(d.metadata.get("doc_id")) for d in hits]
             else:
                 names = manifest["collections"]
-                stores = {campo: open_collection(snap, emb, n) for campo, n in names.items()}
+                stores = open_collections(snap, emb, names)
                 retriever = MultiCollectionRetriever(stores, r.top_n, emb, names)
                 if (gstore := stores.get("guias")) is not None:
 
                     def guias_dense(q: str, k: int) -> list[str]:
-                        return [str(d.metadata.get("doc_id")) for d in gstore.similarity_search(q, k=k)]  # fmt: skip
+                        with CHROMA_LOCK:
+                            hits = gstore.similarity_search(q, k=k)
+                        return [str(d.metadata.get("doc_id")) for d in hits]
 
         planner = None
         if g.planner:
