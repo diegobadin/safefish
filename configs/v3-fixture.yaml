@@ -1,0 +1,44 @@
+# v3 sobre la mini-KB de fixtures (sintética). Solo desarrollo y smoke tests; NUNCA para reportar métricas.
+version: v3-fixture
+descripcion: V2 + verificador determinístico (citas literales, soporte de modalidad, reglas R1–R5).
+kb_snapshot: kb-fixture-v2
+ingest:
+  sources: tests/fixtures/mini_kb/sources.yaml
+  languages: [es]
+  dedupe: {exact: true, near_threshold: 0.95, near_method: tfidf}
+  normalize: {mode: auto, model: gpt-4.1-mini-2025-04-14, prompt: normalizer_v1, review_fraction: 0.1}
+  min_casos_por_modalidad: 5
+chunking:
+  strategy: per_case
+index:
+  layout: per_tipo
+embeddings:
+  model: text-embedding-3-small
+retrieval:
+  enabled: true
+  query: {strategy: raw}
+  filter_canal: "off"
+  k_eval: 4  # mismo k para comparar casos entre V1, V2a y V2 (§2.0)
+  top_n: {casos: 4, mensajes: 6, senales: 6, guias: 0}
+generation:
+  reasoner: gpt-4.1-2025-04-14
+  temperature: 0
+  seed: 7
+  prompt: reasoner_v1
+  max_retries: 1
+  planner: true
+  planner_mode: llm
+  planner_model: gpt-4.1-mini-2025-04-14
+  planner_prompt: planner_v1
+  planner_top_guias: 2
+  planner_max_pasos: 5
+postprocess:
+  verifier: true
+  rules: [R1, R2, R3, R4, R5]
+  cita_threshold: 0.9
+  bbox_threshold: 0.8
+extraction:
+  vision_model: gpt-4.1-2025-04-14
+  vision_prompt: vision_v1
+  ocr: tesseract
+  ocr_lang: spa

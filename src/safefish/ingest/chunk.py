@@ -3,6 +3,9 @@
 V1: `RecursiveCharacterTextSplitter` (≈800 caracteres, overlap 15 %). Se espera que parta
 casos (descripción en un chunk y frases típicas en otro): es la hipótesis que V2 resuelve con
 *1 caso = 1 chunk*.
+
+V2 (`per_case`): los documentos ya vienen normalizados (`ingest/normalize.py`) y renderizados
+con la plantilla fija de su colección; cada documento es exactamente un chunk.
 """
 
 from __future__ import annotations
@@ -28,7 +31,14 @@ def make_splitter(cfg: ChunkingCfg) -> RecursiveCharacterTextSplitter:
 
 def chunk_documents(docs: Sequence[Document], cfg: ChunkingCfg) -> list[Document]:
     if cfg.strategy == "per_case":
-        raise NotImplementedError("per_case llega en V2 junto con el normalizador LLM (Track A)")
+        return [
+            Document(
+                id=d.metadata["doc_id"],
+                page_content=d.page_content,
+                metadata={**d.metadata, "chunk_id": d.metadata["doc_id"], "chunk_index": 0, "n_chunks": 1},
+            )
+            for d in docs
+        ]  # fmt: skip
     splitter = make_splitter(cfg)
     chunks: list[Document] = []
     for doc in docs:

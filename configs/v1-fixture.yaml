@@ -18,6 +18,7 @@ retrieval:
   enabled: true
   query: {strategy: raw}
   filter_canal: "off"
+  k_eval: 4  # mismo k para comparar casos entre V1, V2a y V2 (§2.0)
   top_k: 6
 generation:
   reasoner: gpt-4.1-2025-04-14

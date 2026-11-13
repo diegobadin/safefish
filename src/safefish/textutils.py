@@ -52,7 +52,8 @@ def cita_score(cita: str, texto: str) -> float:
     c, t = normalize_for_match(cita), normalize_for_match(texto)
     if not c:
         return 0.0
-    if c in t:
+    # Subcadena exacta, pero respetando límites de palabra: "cambio" no está en "intercambio".
+    if re.search(rf"(?<!\w){re.escape(c)}(?!\w)", t):
         return 1.0
     cw, tw = c.split(), t.split()
     n = len(cw)
@@ -171,3 +172,200 @@ def find_cbu_alias(text: str) -> list[str]:
     return [m.group(0) for m in RE_CBU.finditer(text)] + [
         m.group(2) for m in RE_ALIAS.finditer(text)
     ]
+
+
+# ---------------------------------------------------------------------------
+# Organismos (regla R5): un nombre de organismo en el plan tiene que estar en la guía fuente.
+# Cada entrada agrupa alias equivalentes; matchea sobre la forma normalizada (sin tildes).
+# ---------------------------------------------------------------------------
+
+ORGANISMOS: dict[str, tuple[str, ...]] = {
+    "bcra": ("bcra", "banco central"),
+    "anses": ("anses",),
+    "afip": ("afip",),
+    "arca": ("arca", "agencia de recaudacion y control aduanero"),
+    "enacom": ("enacom",),
+    "cnv": ("cnv", "comision nacional de valores"),
+    "ufeci": ("ufeci", "unidad fiscal especializada en ciberdelincuencia"),
+    "mpf": ("ministerio publico fiscal", "mpf"),
+    "pfa": ("policia federal", "pfa"),
+    "policia_ciudad": ("policia de la ciudad",),
+    "defensa_consumidor": ("defensa del consumidor", "defensa de las y los consumidores"),
+    "cert": ("cert.ar", "certar", "icic", "direccion nacional de ciberseguridad"),
+    "aaip": (
+        "aaip",
+        "agencia de acceso a la informacion publica",
+        "proteccion de datos personales",
+    ),
+    "red_link": ("red link",),
+    "banelco": ("banelco",),
+}
+
+
+def find_organismos(text: str) -> set[str]:
+    """Claves de `ORGANISMOS` mencionadas en el texto (por cualquiera de sus alias)."""
+    t = re.sub(r"[.:,;/-]+(?=\s|$)", "", f" {normalize_for_match(text)} ") + " "
+    return {
+        key
+        for key, aliases in ORGANISMOS.items()
+        if any(f" {normalize_for_match(a)} " in t for a in aliases)
+    }
+
+
+# Detector **amplio** para los controles de contactos (R5, normalizador, métrica): cualquier
+# TLD, teléfonos con puntos y números cortos de servicio. Es más agresivo que `find_links` /
+# `find_phones` (que usan la PII y las entidades) a propósito: un falso positivo acá solo
+# hace que se redacte de más; un falso negativo deja pasar un contacto inventado.
+RE_URL_LAX = re.compile(
+    r"""(?ix)
+    (?<![@\w.-])
+    (?:https?://)?(?:www\.)?
+    (?:[^\W_](?:[\w-]{0,61}[^\W_])?\.)+[^\W\d_]{2,24}   # etiquetas y TLD Unicode (IDN)
+    (?![\w-])
+    (?:/[^\s<>"'()]*)?
+    """
+)
+RE_URL_SCHEME = re.compile(r"(?i)\b(?:https?|hxxps?)://[^\s<>\"'()]+")  # cualquier cosa con esquema
+RE_IPV4 = re.compile(r"(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?::\d{1,5})?(?:/[^\s<>\"'()]*)?(?![\d.])")
+RE_PHONE_DOTS = re.compile(
+    r"(?<![\d.])(?:\+?54[ .]?(?:9[ .]?)?)?(?:\(?0?\d{2,4}\)?[ .])?\d{2,4}\.\d{3,4}\.\d{4}(?![\d.])"
+)  # el último grupo de 4 dígitos excluye montos (grupos de 3)
+RE_SHORT_CODE = re.compile(
+    r"(?i)(?<![\w*])\*\d{2,5}(?!\d)|(?<!\w)(?:al|l[ií]nea|n[uú]mero|marc[aá]\w*)\s+(\d{3,4})(?![.,\s-]?\d)"
+)
+
+
+Span = tuple[int, int]
+
+
+def find_contact_spans(text: str) -> list[Span]:
+    """Posiciones `(inicio, fin)` de teléfonos, mails y links (detector amplio).
+
+    Un match se descarta solo si su **posición** está dentro de la de otro match más largo
+    (el dominio de un mail, `bit.ly/x` dentro de `https://bit.ly/x`, los dígitos de una IP).
+    Nunca por substring del texto: un teléfono suelto que además aparece dentro de una URL
+    sigue siendo un contacto propio y se controla aparte."""
+    spans: set[Span] = set()
+
+    def add(start: int, end: int) -> None:
+        frag = text[start:end]
+        trimmed = frag.rstrip(".,;:!?")
+        lead = len(frag) - len(frag.lstrip())
+        end = start + len(trimmed)
+        start += lead
+        if end > start:
+            spans.add((start, end))
+
+    for rx in (RE_EMAIL, RE_URL_SCHEME, RE_URL_LAX, RE_IPV4, RE_0800, RE_PHONE_DOTS):
+        for m in rx.finditer(text):
+            add(*m.span())
+    for m in RE_URL.finditer(text):
+        if "@" not in m.group(0):
+            add(*m.span())
+    for m in RE_PHONE.finditer(text):
+        if 8 <= len(re.sub(r"\D", "", m.group(0))) <= 13:
+            add(*m.span())
+    for m in RE_SHORT_CODE.finditer(text):
+        add(*(m.span(1) if m.group(1) else m.span()))
+
+    def contenido(a: Span, b: Span) -> bool:
+        return a != b and b[0] <= a[0] and a[1] <= b[1]
+
+    return sorted(s for s in spans if not any(contenido(s, o) for o in spans))
+
+
+def find_contacts(text: str) -> list[str]:
+    """Teléfonos, mails y links del texto (detector amplio), uno por posición."""
+    return list(dict.fromkeys(text[a:b] for a, b in find_contact_spans(text)))
+
+
+def redact_contacts(text: str, respaldado, reemplazo: str) -> tuple[str, list[str]]:
+    """Reemplaza **por posición** (de derecha a izquierda) cada contacto para el que
+    `respaldado(contacto)` es falso. Devuelve (texto, contactos eliminados en orden)."""
+    eliminados: list[str] = []
+    spans = find_contact_spans(text)
+    # Spans solapados que no se contienen: se redacta la unión para no dejar restos.
+    merged: list[list[int]] = []
+    for a, b in spans:
+        c = text[a:b]
+        if respaldado(c):
+            continue
+        eliminados.append(c)
+        if merged and a < merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], b)
+        else:
+            merged.append([a, b])
+    for a, b in reversed(merged):
+        text = text[:a] + reemplazo + text[b:]
+    return text, eliminados
+
+
+# ---------------------------------------------------------------------------
+# Delimitadores de prompt: el texto no confiable (mensaje, fuentes, KB) nunca debe poder
+# abrir o cerrar un tag del prompt. Se reemplazan los ángulos (no se borran: borrar en una
+# pasada permite reconstruir un tag anidado) y las comillas de los atributos.
+# ---------------------------------------------------------------------------
+
+
+def escape_tags(text: str) -> str:
+    return str(text).replace("<", "‹").replace(">", "›")
+
+
+def escape_attr(value: object) -> str:
+    return escape_tags(str(value)).replace('"', "'").replace("\n", " ")
+
+
+# ---------------------------------------------------------------------------
+# Contactos respaldados (R5, normalizador, métrica de contactos alucinados): comparación
+# estructurada contra los contactos extraídos de la fuente, no por substring de la prosa.
+# ---------------------------------------------------------------------------
+
+_PHONE_ONLY = re.compile(r"[\d\s()+.*#-]+")
+
+
+def _url_parts(u: str) -> tuple[str, str]:
+    u = re.sub(r"(?i)^(?:https?://)?(?:www\.)?", "", u.strip()).rstrip("/.,;:")
+    host, _, path = u.partition("/")
+    return host.lower(), path
+
+
+def canonical_phone(text: str) -> str:
+    """Dígitos de un teléfono argentino sin los prefijos que no cambian el destino:
+    internacional (`00`), país (`54`), el `9` de celular tras el `54` y el `0` troncal.
+    La característica de área se conserva: `351 4348-3500` y `4348-3500` son números
+    distintos."""
+    d = re.sub(r"\D", "", text)
+    if d.startswith("00"):
+        d = d[2:]
+    if d.startswith("54") and len(d) >= 12:
+        d = d[2:]
+        if d.startswith("9") and len(d) == 11:
+            d = d[1:]
+    if d.startswith("0"):
+        d = d[1:]
+    return d
+
+
+def contacto_respaldado(c: str, fuente: str) -> bool:
+    """`c` (teléfono, mail o URL) figura en `fuente`:
+
+    - mail: igualdad exacta (sin distinguir mayúsculas);
+    - teléfono: igualdad exacta de `canonical_phone` (solo se ignoran prefijos de país y
+      troncales, nunca una característica de área agregada u omitida);
+    - URL: mismo host y la ruta de `c` es prefijo de la de la fuente (acortar está bien,
+      agregar una ruta no).
+    """
+    contactos = find_contacts(fuente)
+    if "@" in c:
+        return c.lower() in {x.lower() for x in contactos if "@" in x}
+    if _PHONE_ONLY.fullmatch(c):
+        d = canonical_phone(c)
+        return any(canonical_phone(x) == d for x in contactos if _PHONE_ONLY.fullmatch(x))
+    host, path = _url_parts(c)
+    for x in contactos:
+        if "@" in x or _PHONE_ONLY.fullmatch(x):
+            continue
+        h, p = _url_parts(x)
+        if h == host and (not path or p == path or p.startswith(path.rstrip("/") + "/")):
+            return True
+    return False

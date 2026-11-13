@@ -1,4 +1,9 @@
-"""Indexado en Chroma (M-ING.5) y apertura de snapshots para retrieval."""
+"""Indexado en Chroma (M-ING.5) y apertura de snapshots para retrieval.
+
+Layout `single` (V1, V2a): una colección con los cuatro tipos. Layout `per_tipo` (V2+): una
+colección por tipo de documento (`<snapshot>_casos`, `_mensajes`, `_senales`, `_guias`); el
+manifest las lista en `collections`.
+"""
 
 from __future__ import annotations
 
@@ -9,6 +14,8 @@ from pathlib import Path
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
+
+from safefish.schemas import DocTipo
 
 COSINE = {"hnsw": {"space": "cosine"}}
 
@@ -55,3 +62,66 @@ def open_index(snapshot_dir: Path, embeddings: Embeddings, embeddings_model: str
         persist_directory=str(snapshot_dir / "chroma"),
         create_collection_if_not_exists=False,
     )
+
+
+COLECCION_POR_TIPO = {DocTipo.CASO: "casos", DocTipo.MENSAJE: "mensajes", DocTipo.SENAL: "senales", DocTipo.GUIA: "guias"}  # fmt: skip
+
+
+def collection_names(base: str, layout: str) -> dict[str, str]:
+    """`{campo del bundle: colección de Chroma}`. En `single` todas apuntan a la misma."""
+    if layout == "single":
+        return {campo: base for campo in COLECCION_POR_TIPO.values()}
+    return {campo: f"{base}_{campo}" for campo in COLECCION_POR_TIPO.values()}
+
+
+def build_indexes(
+    chunks: Sequence[Document], embeddings: Embeddings, persist_dir: Path, base: str, layout: str
+) -> dict[str, str]:
+    names = collection_names(base, layout)
+    if layout == "single":
+        build_index(chunks, embeddings, persist_dir, base)
+        return names
+    for tipo, campo in COLECCION_POR_TIPO.items():
+        subset = [c for c in chunks if c.metadata["doc_tipo"] == tipo.value]
+        if subset:
+            build_index(subset, embeddings, persist_dir, names[campo])
+    return names
+
+
+def open_collections(snapshot_dir: Path, embeddings: Embeddings, names: dict[str, str]) -> dict[str, Chroma | None]:  # fmt: skip
+    """Abre las colecciones del snapshot con **un** cliente compartido; None si una colección
+    no se creó (tipo sin documentos)."""
+    import chromadb
+
+    client = chromadb.PersistentClient(path=str(snapshot_dir / "chroma"))
+    existentes = {c.name for c in client.list_collections()}
+    return {
+        campo: open_collection(snapshot_dir, embeddings, name, client)
+        if name in existentes
+        else None
+        for campo, name in names.items()
+    }
+
+
+def open_collection(snapshot_dir: Path, embeddings: Embeddings, name: str, client=None) -> Chroma | None:  # fmt: skip
+    """Abre una colección existente del snapshot, o None si no se creó (tipo sin documentos)."""
+    import chromadb
+
+    client = client or chromadb.PersistentClient(path=str(snapshot_dir / "chroma"))
+    if name not in {c.name for c in client.list_collections()}:
+        return None
+    return Chroma(
+        client=client,
+        collection_name=name,
+        embedding_function=embeddings,
+        create_collection_if_not_exists=False,
+    )
+
+
+def check_embeddings_model(manifest: dict, embeddings_model: str, snapshot: str) -> None:
+    built_with = manifest["embeddings"]["model"]
+    if built_with != embeddings_model:
+        raise ValueError(
+            f"El snapshot {snapshot} se construyó con {built_with} y el config pide "
+            f"{embeddings_model}: reconstruí la KB o cambiá el config"
+        )

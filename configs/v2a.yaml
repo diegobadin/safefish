@@ -1,0 +1,32 @@
+# V2a — Barrido de solo retrieval (§2.0): chunk por caso en UNA colección.
+# Aísla el efecto de "1 caso = 1 chunk" del de "4 colecciones" (V2). Mismo top-6 global que V1.
+# Se evalúa con métricas de retrieval (Hit/MRR/nDCG de casos); no es un escalón de la escalera.
+version: v2a
+descripcion: Normalización + 1 caso = 1 chunk, 1 colección, denso top-6, query = texto crudo.
+kb_snapshot: kb-v2a
+ingest:
+  sources: data/sources.yaml
+  languages: [es]
+  dedupe: {exact: true, near_threshold: 0.95, near_method: tfidf}
+  normalize: {mode: auto, model: gpt-4.1-mini-2025-04-14, prompt: normalizer_v1, review_fraction: 0.1}
+chunking:
+  strategy: per_case
+index:
+  layout: single
+embeddings:
+  model: text-embedding-3-small
+retrieval:
+  enabled: true
+  query: {strategy: raw}
+  filter_canal: "off"
+  k_eval: 4  # mismo k para comparar casos entre V1, V2a y V2 (§2.0)
+  top_k: 6
+generation:
+  reasoner: gpt-4.1-2025-04-14
+  temperature: 0
+  seed: 7
+  prompt: reasoner_v1
+  max_retries: 1
+postprocess:
+  verifier: false
+  rules: []

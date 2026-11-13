@@ -7,9 +7,7 @@ V2 lo arma el planner a partir de las Guías.
 
 from __future__ import annotations
 
-import hashlib
 import re
-from functools import cache
 from pathlib import Path
 from typing import Protocol
 
@@ -18,6 +16,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, ConfigDict, Field
 
 from safefish.llm import LLMResult
+from safefish.prompting import load_prompt_file
 from safefish.schemas import (
     CasoRef,
     ExtractedMessage,
@@ -32,6 +31,7 @@ from safefish.schemas import (
     Veredicto,
 )
 from safefish.taxonomia import render_modalidades, render_senales
+from safefish.textutils import escape_attr, escape_tags
 
 PROMPTS_DIR = Path(__file__).with_name("prompts")
 
@@ -80,21 +80,13 @@ class LLMClient(Protocol):
 # ---------------------------------------------------------------------------
 
 
-@cache
 def load_prompt(name: str) -> tuple[ChatPromptTemplate, str]:
     """Devuelve (template, hash corto del archivo)."""
-    raw = (PROMPTS_DIR / f"{name}.md").read_text(encoding="utf-8")
-    body = "\n".join(ln for ln in raw.splitlines() if not ln.startswith("# "))
-    parts = re.split(r"^## (system|human)\s*$", body, flags=re.M)
-    sections = {parts[i]: parts[i + 1].strip() for i in range(1, len(parts) - 1, 2)}
-    template = ChatPromptTemplate.from_messages(
-        [("system", sections["system"]), ("human", sections["human"])]
-    )
-    return template, hashlib.sha256(raw.encode()).hexdigest()[:12]
+    return load_prompt_file(PROMPTS_DIR / f"{name}.md")
 
 
 def _attr(v) -> str:
-    return str(v).replace('"', "'")
+    return escape_attr(v)
 
 
 def render_evidencia(b: RetrievalBundle) -> str:
@@ -105,24 +97,24 @@ def render_evidencia(b: RetrievalBundle) -> str:
         md = it.metadata
         blocks.append(
             f'<caso id="{_attr(md.get("doc_id", it.id))}" modalidad="{_attr(md.get("modalidad", "?"))}" '
-            f'canal="{_attr(md.get("canal", "?"))}">\n{it.texto}\n</caso>'
+            f'canal="{_attr(md.get("canal", "?"))}">\n{escape_tags(it.texto)}\n</caso>'
         )
     for it in b.mensajes:
         md = it.metadata
         blocks.append(
             f'<mensaje_similar id="{_attr(md.get("doc_id", it.id))}" etiqueta="{_attr(md.get("label", "?"))}" '
-            f'modalidad="{_attr(md.get("modalidad", "-"))}">\n{it.texto}\n</mensaje_similar>'
+            f'modalidad="{_attr(md.get("modalidad", "-"))}">\n{escape_tags(it.texto)}\n</mensaje_similar>'
         )
     for it in b.senales:
         md = it.metadata
         blocks.append(
-            f'<senal_definicion id="{_attr(md.get("signal_id", it.id))}">\n{it.texto}\n</senal_definicion>'
+            f'<senal_definicion id="{_attr(md.get("signal_id", it.id))}">\n{escape_tags(it.texto)}\n</senal_definicion>'
         )
     for it in b.guias:
         md = it.metadata
         blocks.append(
             f'<guia id="{_attr(md.get("doc_id", it.id))}" modalidad="{_attr(md.get("modalidad", "-"))}" '
-            f'situacion="{_attr(md.get("situacion", "-"))}">\n{it.texto}\n</guia>'
+            f'situacion="{_attr(md.get("situacion", "-"))}">\n{escape_tags(it.texto)}\n</guia>'
         )
     return "\n\n".join(blocks)
 

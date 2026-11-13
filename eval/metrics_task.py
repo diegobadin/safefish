@@ -16,7 +16,7 @@ import numpy as np
 from sklearn.metrics import cohen_kappa_score, f1_score
 
 from safefish.schemas import VEREDICTO_ORDEN, VEREDICTOS_POSITIVOS, Veredicto
-from safefish.textutils import cita_en_texto, find_links, find_phones, normalize_for_match
+from safefish.textutils import cita_en_texto, contacto_respaldado, find_contacts
 
 
 def _pred(row: dict) -> dict | None:
@@ -142,19 +142,71 @@ def soporte_modalidad(rows: list[dict]) -> float | None:
     return round(float(np.mean(ok)), 4)
 
 
-def contactos_no_respaldados(rows: list[dict]) -> int:
-    """Teléfonos y URLs del plan que no aparecen en las guías del contexto ni en el mensaje
-    (insumo de la regla R5; objetivo = 0)."""
+def _contactos_inventados(pred: dict | None, row: dict) -> int:
+    if not pred:
+        return 0
+    por_id = row.get("contexto_guias_por_id") or {}
+    todas = " ".join(por_id.values()) or " ".join(row.get("contexto_guias") or [])
     total = 0
-    for r in rows:
-        p = _pred(r)
-        if not p:
-            continue
-        fuentes = normalize_for_match(" ".join([r["texto"], *(r.get("contexto_guias") or [])]))
-        for paso in p["plan"]:
-            for c in find_phones(paso["paso"]) + find_links(paso["paso"]):
-                total += normalize_for_match(c) not in fuentes
+    for paso in pred["plan"]:
+        fuente = por_id.get(paso.get("guide_id") or "", todas)
+        for c in find_contacts(paso["paso"]):
+            total += not contacto_respaldado(c, fuente)
     return total
+
+
+def contactos_no_respaldados(rows: list[dict]) -> int:
+    """**Contactos alucinados** (§4.3): teléfonos, URLs y mails del plan ausentes de la guía
+    fuente del paso (o de todas las guías del contexto si el paso no cita una). Debe ser 0.
+    Un contacto copiado del propio mensaje también cuenta: el plan nunca debe derivar a él."""
+    return sum(_contactos_inventados(_pred(r), r) for r in rows)
+
+
+def generacion_metrics(rows: list[dict]) -> dict:
+    """V3+: efecto del verificador (antes vs. después de las reglas) y calidad del plan."""
+    out: dict = {}
+    pre = [r for r in rows if r.get("pred_pre_verify")]
+    if pre:
+        n_citas = n_ok = 0
+        for r in pre:
+            for s in r["pred_pre_verify"]["senales"]:
+                n_citas += 1
+                n_ok += cita_en_texto(s["cita"], r["texto"])
+        out["grounding_citas_pre_r1"] = round(n_ok / n_citas, 4) if n_citas else None
+        out["contactos_no_respaldados_pre_r5"] = sum(
+            _contactos_inventados(r["pred_pre_verify"], r) for r in pre
+        )
+        eventos = _count(f"{e['regla']}:{e['accion']}" for r in rows for e in r.get("verificacion") or [])  # fmt: skip
+        out["eventos_verificador"] = dict(sorted(eventos.items()))
+        out["casos_con_intervencion"] = round(
+            float(np.mean([bool(r.get("verificacion")) for r in pre])), 4
+        )
+        cambio = [
+            r for r in pre
+            if _pred(r) and r["pred_pre_verify"]["veredicto"] != r["pred"]["veredicto"]
+        ]  # fmt: skip
+        out["veredictos_modificados"] = len(cambio)
+    con_plan = [r for r in rows if _pred(r)]
+    if con_plan:
+        pasos = [p for r in con_plan for p in r["pred"]["plan"]]
+        out["pasos_plan_promedio"] = round(len(pasos) / len(con_plan), 2)
+        out["pasos_con_guide_id"] = (
+            round(sum(1 for p in pasos if p.get("guide_id")) / len(pasos), 4) if pasos else None
+        )
+    infos = [r["plan_info"] for r in rows if r.get("plan_info")]
+    if infos:
+        out["planner_fallback_extractivo"] = round(
+            float(np.mean([bool(i.get("fallback_extractivo")) for i in infos])), 4
+        )
+        out["planner_sin_guias"] = sum(1 for i in infos if not i.get("guias"))
+        out["planner_via_guias"] = dict(
+            sorted(_count(g["via"] for i in infos for g in i.get("guias", [])).items())
+        )
+    cov = [r["cobertura_plan"] for r in rows if r.get("cobertura_plan") is not None]
+    if cov:
+        out["cobertura_plan"] = round(float(np.mean(cov)), 4)
+        out["n_cobertura_plan"] = len(cov)
+    return out
 
 
 def robustez_metrics(rows: list[dict]) -> dict:
@@ -218,6 +270,7 @@ def compute_task_metrics(rows: list[dict]) -> dict:
         "soporte_modalidad": soporte_modalidad(rows),
         "contactos_no_respaldados": contactos_no_respaldados(rows),
         **robustez_metrics(rows),
+        **generacion_metrics(rows),
         "n_errores": errors,
         "json_valido_sin_reintento": round(
             sum(1 for r in rows if _pred(r) and not r.get("reintentos")) / n, 4
