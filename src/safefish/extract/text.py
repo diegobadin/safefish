@@ -1,4 +1,4 @@
-"""Extractor de texto (M-EXT, entrada `texto`). La captura llega en Fase 2 (visión + OCR)."""
+"""Extractor de texto (M-EXT, entrada `texto`). Las capturas: `extract/capture.py`."""
 
 from __future__ import annotations
 
@@ -28,7 +28,9 @@ class TextExtractor:
 
     def extract(self, raw: RawInput) -> ExtractedMessage:
         if not raw.texto:
-            raise NotImplementedError("Entrada por captura: Fase 2 (M-EXT visión + OCR, Track A)")
+            raise ValueError(
+                "TextExtractor solo procesa texto: las capturas van por MultimodalExtractor"
+            )
         texto = normalize_unicode(raw.texto)
         return ExtractedMessage(
             texto=texto,

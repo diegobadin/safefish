@@ -5,7 +5,7 @@ SPLIT ?= dev
 LIMIT ?=
 GOLDEN ?= golden
 
-.PHONY: help install test lint format kb eval compare golden-check demo-fixture hooks
+.PHONY: help install test lint format kb coverage eval compare golden-check demo-fixture demo-fixture-v3 hooks
 
 help:
 	@echo "make install                         Instala dependencias (uv sync)"
@@ -16,6 +16,9 @@ help:
 	@echo "make compare A=results/<run> B=results/<run>   Deltas, IC bootstrap y McNemar"
 	@echo "make golden-check                    Valida el golden (esquema, duplicados, leakage)"
 	@echo "make demo-fixture                    KB + eval de punta a punta sobre fixtures (usa la API)"
+	@echo "make demo-fixture-v3                 Igual, para V2 y V3 (4 colecciones, planner, verificador)"
+	@echo "make coverage CONFIG=configs/v2.yaml Panel de cobertura: casos por modalidad × canal (§2.3)"
+	@echo "make eval ... JUDGE=1                Suma la cobertura del plan con juez LLM (V2+)"
 
 install:
 	uv sync
@@ -38,7 +41,10 @@ kb:
 	$(RUN) python -m safefish.ingest.build_kb --config $(CONFIG)
 
 eval:
-	$(RUN) python -m eval.run --config $(CONFIG) --split $(SPLIT) --golden-dir $(GOLDEN) $(if $(LIMIT),--limit $(LIMIT),)
+	$(RUN) python -m eval.run --config $(CONFIG) --split $(SPLIT) --golden-dir $(GOLDEN) $(if $(LIMIT),--limit $(LIMIT),) $(if $(JUDGE),--judge-plan,)
+
+coverage:
+	$(RUN) python -m safefish.ingest.coverage --config $(CONFIG)
 
 compare:
 	$(RUN) python -m eval.compare --a $(A) --b $(B)
@@ -50,3 +56,8 @@ demo-fixture:
 	$(RUN) python -m safefish.ingest.build_kb --config configs/v1-fixture.yaml --force
 	$(RUN) python -m eval.run --config configs/v0.yaml --split dev --golden-dir tests/fixtures/golden
 	$(RUN) python -m eval.run --config configs/v1-fixture.yaml --split dev --golden-dir tests/fixtures/golden
+
+demo-fixture-v3:
+	$(RUN) python -m safefish.ingest.build_kb --config configs/v2-fixture.yaml --force
+	$(RUN) python -m eval.run --config configs/v2-fixture.yaml --split dev --golden-dir tests/fixtures/golden
+	$(RUN) python -m eval.run --config configs/v3-fixture.yaml --split dev --golden-dir tests/fixtures/golden

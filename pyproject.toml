@@ -24,6 +24,8 @@ dependencies = [
     "scikit-learn==1.9.1",
     "scipy==1.18.1",
     "tiktoken>=0.9",
+    "pillow>=11",
+    "pytesseract>=0.3.13",
 ]
 
 [dependency-groups]

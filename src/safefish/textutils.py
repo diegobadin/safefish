@@ -171,3 +171,48 @@ def find_cbu_alias(text: str) -> list[str]:
     return [m.group(0) for m in RE_CBU.finditer(text)] + [
         m.group(2) for m in RE_ALIAS.finditer(text)
     ]
+
+
+# ---------------------------------------------------------------------------
+# Organismos (regla R5): un nombre de organismo en el plan tiene que estar en la guía fuente.
+# Cada entrada agrupa alias equivalentes; matchea sobre la forma normalizada (sin tildes).
+# ---------------------------------------------------------------------------
+
+ORGANISMOS: dict[str, tuple[str, ...]] = {
+    "bcra": ("bcra", "banco central"),
+    "anses": ("anses",),
+    "afip": ("afip",),
+    "arca": ("arca", "agencia de recaudacion y control aduanero"),
+    "enacom": ("enacom",),
+    "cnv": ("cnv", "comision nacional de valores"),
+    "ufeci": ("ufeci", "unidad fiscal especializada en ciberdelincuencia"),
+    "mpf": ("ministerio publico fiscal", "mpf"),
+    "pfa": ("policia federal", "pfa"),
+    "policia_ciudad": ("policia de la ciudad",),
+    "defensa_consumidor": ("defensa del consumidor", "defensa de las y los consumidores"),
+    "cert": ("cert.ar", "certar", "icic", "direccion nacional de ciberseguridad"),
+    "aaip": (
+        "aaip",
+        "agencia de acceso a la informacion publica",
+        "proteccion de datos personales",
+    ),
+    "red_link": ("red link",),
+    "banelco": ("banelco",),
+}
+
+
+def find_organismos(text: str) -> set[str]:
+    """Claves de `ORGANISMOS` mencionadas en el texto (por cualquiera de sus alias)."""
+    t = re.sub(r"[.:,;/-]+(?=\s|$)", "", f" {normalize_for_match(text)} ") + " "
+    return {
+        key
+        for key, aliases in ORGANISMOS.items()
+        if any(f" {normalize_for_match(a)} " in t for a in aliases)
+    }
+
+
+def find_contacts(text: str) -> list[str]:
+    """Teléfonos, mails y links del texto, sin contar dos veces el dominio de un mail."""
+    emails = RE_EMAIL.findall(text)
+    links = [u for u in find_links(text) if not any(u in e for e in emails)]
+    return list(dict.fromkeys([*find_phones(text), *emails, *links]))

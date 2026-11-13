@@ -8,12 +8,21 @@
 | Snapshot | kb_hash | Docs | Chunks | Por tipo | Fuentes |
 |---|---|---|---|---|---|
 | kb-v1 | — | — | — | — | — |
+| kb-v2 | — | — | — | — | — |
+| kb-v2a | — | — | — | — | — |
 
 - **Fuentes y licencias:** <por fuente: URL, organismo, licencia o términos de uso, fecha de captura>
 - **Filtros aplicados:** idioma (es), deduplicación exacta y cercana (coseno TF-IDF ≥ 0.95), boilerplate.
 - **PII:** redacción con placeholders tipados (`<TEL>`, `<CBU>`, `<ALIAS>`, `<EMAIL>`, `<DNI>`,
   `<TARJETA>`, `<CODIGO>`, `<NOMBRE>`, `<LINK_ACORTADO>`, rutas de URL → `<RUTA>`). La detección de
   nombres es heurística (disparadores + mayúscula): limitación conocida.
+- **Normalización (V2+):** `normalizer_version` del manifest; documentos por método (plantilla /
+  LLM / crudo), descartados, frases típicas descartadas y contactos redactados
+  (`manifest.normalizacion`). Revisión manual de la muestra del 10 %: <n revisados, n ok, errores
+  típicos>.
+- **Cobertura:** casos por modalidad × canal (`make coverage`); modalidades bajo el umbral de 5:
+  <lista>.
+- **Auditoría de inyección:** chunks marcados (`manifest.auditoria_inyeccion`) y decisión tomada.
 - **Sintéticos / traducidos:** <cantidad; solo en la KB, nunca en test>.
 
 ## Golden

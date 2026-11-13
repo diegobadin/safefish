@@ -24,6 +24,7 @@ data/kb_snapshots/*/*
 !data/kb_snapshots/*/manifest.json
 # El snapshot de fixtures se regenera en cada demo: no se versiona.
 data/kb_snapshots/kb-fixture/
+data/kb_snapshots/kb-fixture-v2/
 
 # Capturas del golden: solo se versionan las redactadas (sufijo _red).
 golden/capturas/*

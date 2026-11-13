@@ -31,6 +31,23 @@ class DedupeCfg(_Cfg):
     near_method: Literal["tfidf", "embeddings"] = "tfidf"
 
 
+class NormalizeCfg(_Cfg):
+    """V2+: normalización de cada fuente a `CaseDoc | MessageDoc | SignalDoc | GuideDoc`.
+
+    - `auto`: usa el parser de plantilla si el documento ya viene estructurado (secciones
+      `Descripción:/Frases típicas:/Mecanismo:` o pasos numerados) y el LLM si no.
+    - `llm`: siempre el LLM. `template`: nunca el LLM (lo que no parsea queda como texto crudo).
+    """
+
+    mode: Literal["auto", "llm", "template"] = "auto"
+    model: str = "gpt-4.1-mini-2025-04-14"
+    prompt: str = "normalizer_v1"
+    min_frase_score: float = 0.85  # frases típicas del LLM que no están en la fuente se descartan
+    review_fraction: float = 0.10  # muestra para revisión manual (§2.3)
+    review_seed: int = 7
+    timeout_s: float = 90.0
+
+
 class IngestCfg(_Cfg):
     sources: str = "data/sources.yaml"
     languages: list[str] = Field(default_factory=lambda: ["es"])
@@ -45,6 +62,8 @@ class IngestCfg(_Cfg):
             DocTipo.GUIA: False,
         }
     )
+    normalize: NormalizeCfg = Field(default_factory=NormalizeCfg)
+    min_casos_por_modalidad: int = 5  # umbral del panel de cobertura (§2.3)
 
 
 class ChunkingCfg(_Cfg):
@@ -52,6 +71,13 @@ class ChunkingCfg(_Cfg):
     chunk_size: int = 800
     chunk_overlap: int = 120  # 15 % de 800
     separators: list[str] = Field(default_factory=lambda: ["\n\n", "\n", ".", " "])
+
+
+class IndexCfg(_Cfg):
+    """`single`: una colección con los cuatro tipos (V1, V2a). `per_tipo`: una colección por
+    tipo de documento (V2+), con `top_n` por colección."""
+
+    layout: Literal["single", "per_tipo"] = "single"
 
 
 class EmbeddingsCfg(_Cfg):
@@ -80,8 +106,12 @@ class RetrievalCfg(_Cfg):
     filter_canal: Literal["off", "hard", "soft"] = "off"
     hybrid: HybridCfg = Field(default_factory=HybridCfg)
     rerank: RerankCfg = Field(default_factory=RerankCfg)
-    top_k: int = 6  # V1: una colección, top-k total
-    top_n: dict[str, int] = Field(default_factory=dict)  # V2+: por colección
+    top_k: int = 6  # layout single: top-k total
+    top_n: dict[str, int] = Field(default_factory=dict)  # layout per_tipo: por colección
+
+    def k_casos(self) -> int:
+        """k con el que se miden las métricas de retrieval de casos."""
+        return self.top_n.get("casos", self.top_k) if self.top_n else self.top_k
 
     @field_validator("filter_canal", mode="before")
     @classmethod
@@ -95,13 +125,32 @@ class GenerationCfg(_Cfg):
     seed: int | None = 7
     prompt: str = "reasoner_v1"
     max_retries: int = 1  # reintentos ante JSON inválido (§2.2)
-    planner: bool = False  # V2+: plan desde Guías
+    planner: bool = False  # V2+: plan desde Guías (M-GEN.2)
+    planner_mode: Literal["llm", "extractivo"] = "llm"  # extractivo = pasos literales, sin LLM
+    planner_model: str = "gpt-4.1-mini-2025-04-14"
+    planner_prompt: str = "planner_v1"
+    planner_top_guias: int = 2
+    planner_max_pasos: int = 5
     timeout_s: float = 60.0
 
 
 class PostprocessCfg(_Cfg):
     verifier: bool = False
-    rules: list[str] = Field(default_factory=list)
+    rules: list[Literal["R1", "R2", "R3", "R4", "R5"]] = Field(default_factory=list)
+    cita_threshold: float = 0.9  # R1: tolerancia fuzzy de la cita literal
+    bbox_threshold: float = 0.8  # alineación cita → palabras OCR (captura)
+
+
+class ExtractionCfg(_Cfg):
+    """M-EXT para capturas: LLM con visión (transcripción estructurada) + OCR con cajas."""
+
+    vision_model: str = "gpt-4.1-2025-04-14"
+    vision_prompt: str = "vision_v1"
+    ocr: Literal["tesseract", "none"] = "tesseract"
+    ocr_lang: str = "spa"
+    ocr_min_conf: float = 30.0
+    preprocess: bool = True  # resize + binarización (Clase 10)
+    timeout_s: float = 90.0
 
 
 class PipelineConfig(_Cfg):
@@ -110,10 +159,12 @@ class PipelineConfig(_Cfg):
     kb_snapshot: str | None = None
     ingest: IngestCfg = Field(default_factory=IngestCfg)
     chunking: ChunkingCfg = Field(default_factory=ChunkingCfg)
+    index: IndexCfg = Field(default_factory=IndexCfg)
     embeddings: EmbeddingsCfg = Field(default_factory=EmbeddingsCfg)
     retrieval: RetrievalCfg = Field(default_factory=RetrievalCfg)
     generation: GenerationCfg = Field(default_factory=GenerationCfg)
     postprocess: PostprocessCfg = Field(default_factory=PostprocessCfg)
+    extraction: ExtractionCfg = Field(default_factory=ExtractionCfg)
 
     def config_hash(self) -> str:
         """Hash estable de la configuración efectiva (sin la descripción)."""

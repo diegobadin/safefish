@@ -236,6 +236,62 @@ class SafeFishOutput(_Strict):
 
 
 # ---------------------------------------------------------------------------
+# Documentos normalizados de la KB (M-ING.3, V2+, §1.4). Uno por chunk (1 caso = 1 chunk).
+# La metadata que se indexa sale de estos modelos: es el contrato entre ingesta y retrieval.
+# ---------------------------------------------------------------------------
+
+
+class _KBDoc(_Strict):
+    doc_id: str
+    fuente_url: str | None = None
+    fuente_tipo: str = "desconocido"
+    source_id: str = ""
+    fecha: str | None = None
+    campaign_id: str | None = None
+    normalizer_version: str = "template"  # "template" o "<modelo>:<hash del prompt>"
+
+
+class CaseDoc(_KBDoc):
+    modalidad: Modalidad
+    canales: list[Canal] = Field(default_factory=list)  # vacío = multicanal
+    entidad_suplantada: str | None = None
+    descripcion: str
+    frases_tipicas: list[str] = Field(default_factory=list)
+    mecanismo: str = ""
+    signal_ids: list[SignalId] = Field(default_factory=list)
+
+
+class MessageDoc(_KBDoc):
+    texto: str
+    label: Label
+    modalidad: Modalidad | None = None
+    canal: Canal | None = None
+    entidad: str | None = None
+
+
+class SignalDoc(_KBDoc):
+    signal_id: SignalId
+    severidad: Severidad
+    tipo_senal: str = "riesgo"
+    definicion: str
+    ejemplos: list[str] = Field(default_factory=list)
+    contraejemplos: list[str] = Field(default_factory=list)
+
+
+class GuideDoc(_KBDoc):
+    """Un procedimiento por (modalidad, situación). Listas vacías = aplica a todas."""
+
+    modalidades: list[Modalidad] = Field(default_factory=list)
+    situaciones: list[Situacion] = Field(default_factory=list)
+    organismo: str | None = None
+    contexto: str = ""
+    pasos: list[str] = Field(min_length=1)
+
+
+KBDoc = CaseDoc | MessageDoc | SignalDoc | GuideDoc
+
+
+# ---------------------------------------------------------------------------
 # Golden dataset (M-EVAL, §4.5)
 # ---------------------------------------------------------------------------
 

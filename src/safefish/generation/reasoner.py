@@ -7,9 +7,7 @@ V2 lo arma el planner a partir de las Guías.
 
 from __future__ import annotations
 
-import hashlib
 import re
-from functools import cache
 from pathlib import Path
 from typing import Protocol
 
@@ -18,6 +16,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, ConfigDict, Field
 
 from safefish.llm import LLMResult
+from safefish.prompting import load_prompt_file
 from safefish.schemas import (
     CasoRef,
     ExtractedMessage,
@@ -80,17 +79,9 @@ class LLMClient(Protocol):
 # ---------------------------------------------------------------------------
 
 
-@cache
 def load_prompt(name: str) -> tuple[ChatPromptTemplate, str]:
     """Devuelve (template, hash corto del archivo)."""
-    raw = (PROMPTS_DIR / f"{name}.md").read_text(encoding="utf-8")
-    body = "\n".join(ln for ln in raw.splitlines() if not ln.startswith("# "))
-    parts = re.split(r"^## (system|human)\s*$", body, flags=re.M)
-    sections = {parts[i]: parts[i + 1].strip() for i in range(1, len(parts) - 1, 2)}
-    template = ChatPromptTemplate.from_messages(
-        [("system", sections["system"]), ("human", sections["human"])]
-    )
-    return template, hashlib.sha256(raw.encode()).hexdigest()[:12]
+    return load_prompt_file(PROMPTS_DIR / f"{name}.md")
 
 
 def _attr(v) -> str:

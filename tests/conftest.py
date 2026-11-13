@@ -32,8 +32,22 @@ def _cita(texto: str, kw: str) -> str:
     return texto[start : end if end != -1 else len(texto)]
 
 
+_GUIA = re.compile(r'<guia id="([^"]+)"[^>]*>\n1\. ([^\n]+)')
+
+
+def planner_responder(messages, schema):
+    """Planner falso: el primer paso de cada guía, redactado igual, con su guide_id."""
+    from safefish.generation.planner import PasoPlanLLM, PlanLLMOutput
+
+    human = messages[-1].content
+    return PlanLLMOutput(pasos=[PasoPlanLLM(paso=p, guide_id=g) for g, p in _GUIA.findall(human)])
+
+
 def heuristic_responder(messages, schema):
-    """Clasificador por palabras clave con citas literales: estable y sin red."""
+    """Clasificador por palabras clave con citas literales: estable y sin red. Despacha por
+    esquema para que un único LLM falso sirva al razonador y al planner."""
+    if schema.__name__ == "PlanLLMOutput":
+        return planner_responder(messages, schema)
     human = messages[-1].content if len(messages) == 2 else messages[1].content
     texto = _MSG.search(human).group(1)
     low = texto.lower()

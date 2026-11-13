@@ -3,11 +3,15 @@
     python -m safefish.ingest.build_kb --config configs/v1.yaml [--force] [--fake-embeddings]
 
 fuentes → loaders → normalización Unicode → boilerplate → idioma → PII → dedupe exacto y
-cercano → chunking → embeddings + Chroma → `data/kb_snapshots/<kb>/`:
+cercano → [V2+: normalización a CaseDoc/MessageDoc/SignalDoc/GuideDoc] → chunking →
+embeddings + Chroma → `data/kb_snapshots/<kb>/`:
 
-- `chroma/`        índice persistente (no se versiona)
-- `chunks.jsonl`   chunks con metadata (insumo de BM25 en V5 y de auditorías; no se versiona)
-- `manifest.json`  hash, conteos, filtros aplicados y fuentes (sí se versiona)
+- `chroma/`                      índice persistente: 1 colección (single) o 4 (per_tipo)
+- `chunks.jsonl`                 chunks con metadata (planner, BM25 en V5, auditorías)
+- `normalizacion_revision.jsonl` V2+: muestra del 10 % para revisión manual (§2.3)
+- `manifest.json`                hash, conteos, cobertura, filtros y fuentes (se versiona)
+
+Ninguno de los archivos salvo `manifest.json` se versiona.
 """
 
 from __future__ import annotations
@@ -15,6 +19,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import random
 import shutil
 import subprocess
 import sys
@@ -35,11 +40,19 @@ from safefish.ingest.clean import (
     filter_language,
     strip_boilerplate,
 )
-from safefish.ingest.index import build_index
+from safefish.ingest.coverage import audit_injection, coverage
+from safefish.ingest.index import build_indexes
 from safefish.ingest.loaders import load_source, load_sources_file
+from safefish.ingest.normalize import (
+    LLMNormalizer,
+    NormalizeReport,
+    StructuredClient,
+    kbdoc_to_document,
+    normalize_documents,
+)
 from safefish.ingest.pii import redact_pii
 from safefish.observability import UsageTracker, reset_tracker, set_tracker
-from safefish.schemas import DocTipo
+from safefish.schemas import DocTipo, KBDoc
 from safefish.textutils import normalize_unicode
 
 
@@ -154,8 +167,60 @@ def _counts(docs: list[Document], chunks: list[Document]) -> dict:
     }  # fmt: skip
 
 
+def normalize_stage(
+    cfg: PipelineConfig, docs: list[Document], llm: StructuredClient | None = None
+) -> tuple[list[KBDoc], NormalizeReport, str | None]:
+    """V2+: documentos limpios → documentos estructurados. El LLM se crea solo si hace falta
+    (con `mode: auto` y fuentes ya estructuradas no se llama nunca)."""
+    ncfg = cfg.ingest.normalize
+    normalizer = None
+    if ncfg.mode != "template":
+        if llm is None:
+            from safefish.llm import StructuredLLM
+
+            llm = StructuredLLM.from_cfg(ncfg.model, 0.0, 7, ncfg.timeout_s)
+        normalizer = LLMNormalizer(llm, ncfg)
+    kbdocs, report = normalize_documents(docs, ncfg, normalizer)
+    versions = sorted({d.normalizer_version for d in kbdocs})
+    return kbdocs, report, ",".join(versions) or None
+
+
+def review_sample(
+    kbdocs: list[KBDoc], report: NormalizeReport, raw: dict[str, str], frac: float, seed: int
+) -> list[dict]:
+    """Muestra para revisión manual (§2.3). Prioriza lo normalizado por LLM: lo determinístico
+    (plantillas, taxonomía, CSV etiquetado) no necesita revisión de contenido."""
+    llm_ids = set(report.llm_doc_ids)
+    pool = [d for d in kbdocs if d.doc_id in llm_ids] or [
+        d for d in kbdocs if d.normalizer_version != "template"
+    ]
+    if not pool:
+        return []
+    n = min(len(pool), max(1, round(frac * len(pool))))
+    sample = random.Random(seed).sample(sorted(pool, key=lambda d: d.doc_id), n)
+
+    def fuente(doc_id: str) -> str:  # los casos múltiples de una fuente llevan sufijo -N
+        return raw.get(doc_id) or raw.get(doc_id.rsplit("-", 1)[0], "")
+
+    return [
+        {
+            "doc_id": d.doc_id,
+            "tipo": type(d).__name__,
+            "normalizer_version": d.normalizer_version,
+            "fuente_extracto": fuente(d.doc_id)[:1500],
+            "normalizado": d.model_dump(mode="json"),
+            "revision": {"ok": None, "revisor": None, "notas": ""},
+        }
+        for d in sorted(sample, key=lambda d: d.doc_id)
+    ]
+
+
 def build_snapshot(
-    cfg: PipelineConfig, *, embeddings: Embeddings | None = None, force: bool = False
+    cfg: PipelineConfig,
+    *,
+    embeddings: Embeddings | None = None,
+    force: bool = False,
+    normalizer_llm: StructuredClient | None = None,
 ) -> dict:
     if not cfg.kb_snapshot:
         raise ValueError(f"El config {cfg.version} no define kb_snapshot (¿es V0?)")
@@ -171,18 +236,32 @@ def build_snapshot(
     emb = embeddings or make_embeddings(cfg.embeddings)
     tracker = UsageTracker()
     token = set_tracker(tracker)
+    norm_report: NormalizeReport | None = None
+    normalizer_version = None
+    revision: list[dict] = []
     try:
         docs, report = prepare_documents(cfg)
         if not any(d.metadata["doc_tipo"] == DocTipo.CASO for d in docs):
             raise ValueError(
                 f"La KB no tiene documentos tipo `caso`: completá {cfg.ingest.sources} (Track A)"
             )
+        if cfg.chunking.strategy == "per_case":
+            raw = {d.metadata["doc_id"]: d.page_content for d in docs}
+            with tracker.stage("normalize"):
+                kbdocs, norm_report, normalizer_version = normalize_stage(cfg, docs, normalizer_llm)
+            docs = [kbdoc_to_document(d) for d in kbdocs]
+            ncfg = cfg.ingest.normalize
+            revision = review_sample(
+                kbdocs, norm_report, raw, ncfg.review_fraction, ncfg.review_seed
+            )
         chunks = chunk_documents(docs, cfg.chunking)
         for c in chunks:
             c.metadata = scalarize_metadata(c.metadata)
         collection = cfg.kb_snapshot.replace("-", "_")
         with tracker.stage("index"):
-            build_index(chunks, emb, out_dir / "chroma", collection)
+            collections = build_indexes(
+                chunks, emb, out_dir / "chroma", collection, cfg.index.layout
+            )
     finally:
         reset_tracker(token)
 
@@ -195,6 +274,10 @@ def build_snapshot(
                 )
                 + "\n"
             )
+    if revision:
+        with open(out_dir / "normalizacion_revision.jsonl", "w", encoding="utf-8") as f:
+            for row in revision:
+                f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     campaigns = sorted(
         {str(d.metadata["campaign_id"]) for d in docs if d.metadata.get("campaign_id")}
@@ -207,12 +290,27 @@ def build_snapshot(
         "config_version": cfg.version,
         "config_hash": cfg.config_hash(),
         "collection": collection,
+        "index_layout": cfg.index.layout,
+        "collections": collections,
         "ingest": cfg.ingest.model_dump(mode="json"),
         "chunking": cfg.chunking.model_dump(mode="json"),
         "embeddings": {"model": getattr(emb, "model", cfg.embeddings.model)},
+        "normalizer_version": normalizer_version,
         "n_docs": len(docs),
         "n_chunks": len(chunks),
         "counts": _counts(docs, chunks),
+        "cobertura": coverage([c.metadata for c in chunks], cfg.ingest.min_casos_por_modalidad),
+        "normalizacion": norm_report.to_dict() if norm_report else None,
+        "revision_muestra": [r["doc_id"] for r in revision],
+        # Los mensajes pueden contener inyecciones a propósito (ejemplos de ataque) y la
+        # taxonomía es curada por el equipo: se auditan los casos, guías y señales de fuentes
+        # externas, que son lo que el modelo toma como referencia.
+        "auditoria_inyeccion": audit_injection(
+            (c.metadata["doc_id"], c.page_content)
+            for c in chunks
+            if c.metadata["doc_tipo"] != DocTipo.MENSAJE
+            and c.metadata.get("fuente_tipo") != "taxonomia"
+        ),
         "fuentes": report["fuentes"],
         "filtros_descartados": dict(report["filtros"]),
         "duplicados_cercanos": report.get("duplicados_cercanos", []),
@@ -242,6 +340,14 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Snapshot {m['snapshot']} ({m['kb_hash']}): {m['n_docs']} docs → {m['n_chunks']} chunks")
     print(f"  por tipo: {m['counts']['chunks_por_tipo']}")
     print(f"  descartados: {m['filtros_descartados']} · PII: {m['pii_redactada']}")
+    if n := m.get("normalizacion"):
+        print(f"  normalización: {n['metodo']} · descartados {n['descartados']} · errores {len(n['errores'])}")  # fmt: skip
+        print(f"  revisión manual: {len(m['revision_muestra'])} docs en normalizacion_revision.jsonl")  # fmt: skip
+    cob = m["cobertura"]
+    if bajo := cob["modalidades_bajo_umbral"]:
+        print(f"  ✗ cobertura: {len(bajo)} modalidad(es) con < {cob['min_casos_por_modalidad']} casos: {', '.join(bajo)}")  # fmt: skip
+    if m["auditoria_inyeccion"]:
+        print(f"  ⚠ auditoría de inyección: {len(m['auditoria_inyeccion'])} chunk(s) para revisar")  # fmt: skip
     print(f"  embeddings: {m['uso']['tokens']['embed']} tokens · USD {m['uso']['costo_usd']:.5f}")
     return 0
 
