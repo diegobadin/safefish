@@ -216,3 +216,62 @@ def find_contacts(text: str) -> list[str]:
     emails = RE_EMAIL.findall(text)
     links = [u for u in find_links(text) if not any(u in e for e in emails)]
     return list(dict.fromkeys([*find_phones(text), *emails, *links]))
+
+
+# ---------------------------------------------------------------------------
+# Delimitadores de prompt: el texto no confiable (mensaje, fuentes, KB) nunca debe poder
+# abrir o cerrar un tag del prompt. Se reemplazan los ángulos (no se borran: borrar en una
+# pasada permite reconstruir un tag anidado) y las comillas de los atributos.
+# ---------------------------------------------------------------------------
+
+
+def escape_tags(text: str) -> str:
+    return str(text).replace("<", "‹").replace(">", "›")
+
+
+def escape_attr(value: object) -> str:
+    return escape_tags(str(value)).replace('"', "'").replace("\n", " ")
+
+
+# ---------------------------------------------------------------------------
+# Contactos respaldados (R5, normalizador, métrica de contactos alucinados): comparación
+# estructurada contra los contactos extraídos de la fuente, no por substring de la prosa.
+# ---------------------------------------------------------------------------
+
+_PHONE_ONLY = re.compile(r"[\d\s()+.*#-]+")
+
+
+def _url_parts(u: str) -> tuple[str, str]:
+    u = re.sub(r"(?i)^(?:https?://)?(?:www\.)?", "", u.strip()).rstrip("/.,;:")
+    host, _, path = u.partition("/")
+    return host.lower(), path
+
+
+def contacto_respaldado(c: str, fuente: str) -> bool:
+    """`c` (teléfono, mail o URL) figura en `fuente`:
+
+    - mail: igualdad exacta (sin distinguir mayúsculas);
+    - teléfono: mismos dígitos, o uno es sufijo del otro con ≥ 8 dígitos (prefijos +54 / 11);
+    - URL: mismo host y la ruta de `c` es prefijo de la de la fuente (acortar está bien,
+      agregar una ruta no).
+    """
+    contactos = find_contacts(fuente)
+    if "@" in c:
+        return c.lower() in {x.lower() for x in contactos if "@" in x}
+    if _PHONE_ONLY.fullmatch(c):
+        d = re.sub(r"\D", "", c)
+        for x in contactos:
+            if not _PHONE_ONLY.fullmatch(x):
+                continue
+            g = re.sub(r"\D", "", x)
+            if d == g or (min(len(d), len(g)) >= 8 and (g.endswith(d) or d.endswith(g))):
+                return True
+        return False
+    host, path = _url_parts(c)
+    for x in contactos:
+        if "@" in x or _PHONE_ONLY.fullmatch(x):
+            continue
+        h, p = _url_parts(x)
+        if h == host and (not path or p == path or p.startswith(path.rstrip("/") + "/")):
+            return True
+    return False

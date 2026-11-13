@@ -198,3 +198,16 @@ def test_r5_si_no_queda_plan_usa_los_pasos_literales_de_la_guia():
 def test_reglas_desconocidas_fallan():
     with pytest.raises(ValueError):
         RuleVerifier(["R9"])
+
+
+def test_r5_no_acepta_contactos_por_substring_de_la_guia():
+    # Comparación estructurada: teléfonos por dígitos (tolera el prefijo +54), URLs por host.
+    plan = [
+        PasoPlan(paso="Llamá al 11 5071-0040.", guide_id="G-1"),  # mismo número sin +54: ok
+        PasoPlan(paso="Llamá al 351 5071-0040.", guide_id="G-1"),  # otra característica
+        PasoPlan(paso="Entrá a whatsapp-recupero.com/ayuda", guide_id="G-1"),
+    ]
+    res, ev = RuleVerifier(["R5"]).check_plan(_bundle(), _out(plan=plan))
+    assert res.plan[0].paso == plan[0].paso
+    assert CONTACTO_ELIMINADO in res.plan[1].paso and CONTACTO_ELIMINADO in res.plan[2].paso
+    assert _acciones(ev).count(("R5", "contacto_inventado")) == 2

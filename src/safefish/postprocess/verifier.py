@@ -32,6 +32,7 @@ from safefish.schemas import (
 from safefish.taxonomia import senales_criticas
 from safefish.textutils import (
     cita_score,
+    contacto_respaldado,
     find_contacts,
     find_organismos,
     normalize_for_match,
@@ -163,7 +164,6 @@ class RuleVerifier:
                 ev.append(Evento("R5", "guide_id_inexistente", {"paso": i, "guide_id": guide_id}))
                 guide_id = None
             fuente = guias[guide_id] if guide_id else todas
-            norm_fuente = normalize_for_match(fuente)
 
             inventados = find_organismos(p.paso) - find_organismos(fuente)
             if inventados:
@@ -173,7 +173,7 @@ class RuleVerifier:
             texto = p.paso
             contactos = find_contacts(texto)
             for c in sorted(contactos, key=len, reverse=True):
-                if c in texto and normalize_for_match(c) not in norm_fuente:
+                if c in texto and not contacto_respaldado(c, fuente):
                     ev.append(Evento("R5", "contacto_inventado", {"paso": i, "contacto": c}))
                     texto = texto.replace(c, CONTACTO_ELIMINADO)
             plan.append(PasoPlan(paso=texto, guide_id=guide_id))

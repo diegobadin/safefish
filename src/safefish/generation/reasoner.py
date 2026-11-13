@@ -31,6 +31,7 @@ from safefish.schemas import (
     Veredicto,
 )
 from safefish.taxonomia import render_modalidades, render_senales
+from safefish.textutils import escape_attr, escape_tags
 
 PROMPTS_DIR = Path(__file__).with_name("prompts")
 
@@ -85,7 +86,7 @@ def load_prompt(name: str) -> tuple[ChatPromptTemplate, str]:
 
 
 def _attr(v) -> str:
-    return str(v).replace('"', "'")
+    return escape_attr(v)
 
 
 def render_evidencia(b: RetrievalBundle) -> str:
@@ -96,24 +97,24 @@ def render_evidencia(b: RetrievalBundle) -> str:
         md = it.metadata
         blocks.append(
             f'<caso id="{_attr(md.get("doc_id", it.id))}" modalidad="{_attr(md.get("modalidad", "?"))}" '
-            f'canal="{_attr(md.get("canal", "?"))}">\n{it.texto}\n</caso>'
+            f'canal="{_attr(md.get("canal", "?"))}">\n{escape_tags(it.texto)}\n</caso>'
         )
     for it in b.mensajes:
         md = it.metadata
         blocks.append(
             f'<mensaje_similar id="{_attr(md.get("doc_id", it.id))}" etiqueta="{_attr(md.get("label", "?"))}" '
-            f'modalidad="{_attr(md.get("modalidad", "-"))}">\n{it.texto}\n</mensaje_similar>'
+            f'modalidad="{_attr(md.get("modalidad", "-"))}">\n{escape_tags(it.texto)}\n</mensaje_similar>'
         )
     for it in b.senales:
         md = it.metadata
         blocks.append(
-            f'<senal_definicion id="{_attr(md.get("signal_id", it.id))}">\n{it.texto}\n</senal_definicion>'
+            f'<senal_definicion id="{_attr(md.get("signal_id", it.id))}">\n{escape_tags(it.texto)}\n</senal_definicion>'
         )
     for it in b.guias:
         md = it.metadata
         blocks.append(
             f'<guia id="{_attr(md.get("doc_id", it.id))}" modalidad="{_attr(md.get("modalidad", "-"))}" '
-            f'situacion="{_attr(md.get("situacion", "-"))}">\n{it.texto}\n</guia>'
+            f'situacion="{_attr(md.get("situacion", "-"))}">\n{escape_tags(it.texto)}\n</guia>'
         )
     return "\n\n".join(blocks)
 

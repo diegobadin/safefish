@@ -16,7 +16,7 @@ import numpy as np
 from sklearn.metrics import cohen_kappa_score, f1_score
 
 from safefish.schemas import VEREDICTO_ORDEN, VEREDICTOS_POSITIVOS, Veredicto
-from safefish.textutils import cita_en_texto, find_contacts, normalize_for_match
+from safefish.textutils import cita_en_texto, contacto_respaldado, find_contacts
 
 
 def _pred(row: dict) -> dict | None:
@@ -149,9 +149,9 @@ def _contactos_inventados(pred: dict | None, row: dict) -> int:
     todas = " ".join(por_id.values()) or " ".join(row.get("contexto_guias") or [])
     total = 0
     for paso in pred["plan"]:
-        fuente = normalize_for_match(por_id.get(paso.get("guide_id") or "", todas))
+        fuente = por_id.get(paso.get("guide_id") or "", todas)
         for c in find_contacts(paso["paso"]):
-            total += normalize_for_match(c) not in fuente
+            total += not contacto_respaldado(c, fuente)
     return total
 
 

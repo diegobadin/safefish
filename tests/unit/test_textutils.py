@@ -35,3 +35,14 @@ def test_entidades():
     assert "bit.ly/abc" in find_links(t)
     assert any("4567-8901" in p for p in find_phones(t))
     assert "foo.bar.baz" in find_cbu_alias(t)
+
+
+def test_contacto_respaldado_es_estructurado_no_por_substring():
+    from safefish.textutils import contacto_respaldado
+
+    guia = "Reclamá en https://www.bcra.gob.ar/reclamos/fraude o al (+54 11) 4348-3500."
+    assert contacto_respaldado("bcra.gob.ar", guia)
+    assert contacto_respaldado("11 4348-3500", guia)
+    assert not contacto_respaldado("gob.ar", guia)  # substring de la prosa, otro host
+    assert not contacto_respaldado("bcra.gob.ar/reclamos/fraude-express", guia)
+    assert not contacto_respaldado("351 4348-3500", guia)

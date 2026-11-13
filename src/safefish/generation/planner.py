@@ -33,6 +33,7 @@ from safefish.schemas import (
     Situacion,
 )
 from safefish.taxonomia import load_taxonomia
+from safefish.textutils import escape_attr, escape_tags
 
 PROMPTS_DIR = Path(__file__).with_name("prompts")
 GENERALES = {"general", "no_determinada", ""}
@@ -185,9 +186,10 @@ class PlanResult:
 def render_guias(sel: list[tuple[GuideRecord, str]]) -> str:
     blocks = []
     for g, _ in sel:
-        pasos = "\n".join(f"{i}. {p}" for i, p in enumerate(g.pasos, 1))
-        org = str(g.metadata.get("organismo") or "-").replace('"', "'")
-        blocks.append(f'<guia id="{g.id}" organismo="{org}">\n{pasos}\n</guia>')
+        # Los pasos vienen de la KB (fuentes externas): no pueden abrir ni cerrar delimitadores.
+        pasos = "\n".join(f"{i}. {escape_tags(p)}" for i, p in enumerate(g.pasos, 1))
+        org = escape_attr(g.metadata.get("organismo") or "-")
+        blocks.append(f'<guia id="{escape_attr(g.id)}" organismo="{org}">\n{pasos}\n</guia>')
     return "\n\n".join(blocks)
 
 

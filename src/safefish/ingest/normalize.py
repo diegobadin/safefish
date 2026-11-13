@@ -51,8 +51,10 @@ from safefish.schemas import (
 from safefish.taxonomia import load_taxonomia, render_modalidades, render_senales
 from safefish.textutils import (
     cita_score,
+    contacto_respaldado,
+    escape_attr,
+    escape_tags,
     find_contacts,
-    normalize_for_match,
     strip_accents,
 )
 
@@ -271,16 +273,17 @@ class NormalizeReport:
 
 
 def _sanitize_fuente(text: str) -> str:
-    return re.sub(r"(?i)</?\s*fuente_no_confiable[^>]*>", "", text)[:MAX_CHARS_LLM]
+    """La fuente va dentro de <fuente_no_confiable>: se escapan los ángulos para que no pueda
+    abrir ni cerrar ningún delimitador (un borrado de una pasada se evade anidando tags)."""
+    return escape_tags(text[:MAX_CHARS_LLM])
 
 
 def redact_unsupported_contacts(paso: str, fuente: str) -> tuple[str, int]:
     """Reemplaza teléfonos, URLs y mails que no están literalmente en `fuente`."""
-    norm_src = normalize_for_match(fuente)
     n = 0
     for c in sorted(find_contacts(paso), key=len, reverse=True):
         # `c in paso`: un link puede haberse ido junto con el mail que lo contenía
-        if c in paso and normalize_for_match(c) not in norm_src:
+        if c in paso and not contacto_respaldado(c, fuente):
             paso = paso.replace(c, CONTACTO_REDACTADO)
             n += 1
     return paso, n
@@ -303,8 +306,8 @@ class LLMNormalizer:
             modalidades=render_modalidades(),
             senales=render_senales(),
             situaciones=", ".join(s.value for s in Situacion),
-            fuente_url=md.get("fuente_url") or "-",
-            titulo=md.get("titulo") or "-",
+            fuente_url=escape_attr(md.get("fuente_url") or "-"),
+            titulo=escape_attr(md.get("titulo") or "-"),
             fuente=_sanitize_fuente(doc.page_content),
         )
 
