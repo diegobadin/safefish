@@ -163,6 +163,23 @@ class SafeFishPipeline:
         reasoner = LLMReasoner(llm, prompt=g.prompt, max_retries=g.max_retries)
         return cls(cfg, extractor, retriever, reasoner, verifier, manifest, planner)
 
+    def retrieve_only(self, raw: RawInput) -> PipelineResult:
+        """Barridos de solo retrieval (§2.0): extract + retrieve, sin generación."""
+        tracker = UsageTracker()
+        token = set_tracker(tracker)
+        m = b = None
+        error = None
+        try:
+            with tracker.stage("extract"):
+                m = self.extractor.extract(raw)
+            with tracker.stage("retrieve"):
+                b = self.retriever.retrieve(m)
+        except Exception as e:
+            error = f"{type(e).__name__}: {e}"
+        finally:
+            reset_tracker(token)
+        return PipelineResult(None, m, b, tracker.summary(), error)
+
     def run(self, raw: RawInput) -> PipelineResult:
         tracker = UsageTracker()
         token = set_tracker(tracker)
@@ -203,7 +220,7 @@ class SafeFishPipeline:
                     out = out.model_copy(update={"meta": out.meta.model_copy(update={"modelos": modelos})})  # fmt: skip
             if staged:
                 with tracker.stage("verify"):
-                    out, ev = v.check_plan(b, out)
+                    out, ev = v.check_plan(b, out, m)
                 eventos += [e.to_dict() for e in ev]
             elif v is not None:
                 with tracker.stage("verify"):

@@ -103,3 +103,21 @@ def test_arnes_v3(kb_v2, tmp_path, fake_llm):
     assert metrics["meta"]["planner"]["mode"] == "llm"
     row = json.loads((out_dir / "predictions.jsonl").read_text(encoding="utf-8").splitlines()[0])
     assert {"pred_pre_verify", "verificacion", "plan_info", "contexto_guias_por_id"} <= set(row)
+
+
+def test_arnes_solo_retrieval_no_llama_al_razonador(kb_v2, tmp_path):
+    from safefish.llm import FakeStructuredLLM
+
+    def no_llamar(messages, schema):
+        raise AssertionError("el barrido de solo retrieval no debe generar")
+
+    _, emb = kb_v2
+    cfg = _cfg("v2-fixture.yaml")
+    golden = FIXTURES / "golden" / "dev.jsonl"
+    pipe = SafeFishPipeline.from_config(cfg, llm=FakeStructuredLLM(no_llamar), embeddings=emb)
+    _, metrics = run_eval(
+        cfg, load_golden(golden), pipe, tmp_path / "r", split="dev", golden_file=golden,
+        retrieval_only=True,
+    )  # fmt: skip
+    assert metrics["modo"] == "retrieval_only" and metrics["task"] == {}
+    assert metrics["retrieval"]["k"] == 4 and metrics["retrieval"]["n_eval_casos"] > 0

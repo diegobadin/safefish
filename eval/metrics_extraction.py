@@ -4,16 +4,18 @@
   Levenshtein sobre caracteres / palabras normalizadas, como `jiwer`).
 - F1 de entidades (links, teléfonos, montos, CBU/alias, mails) extraídas del texto predicho
   vs. del texto de referencia.
-- % de señales verificadas con bbox (localización; el IoU contra bbox de referencia se
-  calcula cuando el golden las incluya).
+- Localización: % de citas de referencia (`citas_bbox` del golden) cubiertas por una señal
+  verificada con la misma cita (fuzzy ≥ 0.8) y bbox con IoU ≥ 0.5; y % de señales
+  verificadas que tienen bbox.
 """
 
 from __future__ import annotations
 
 import numpy as np
 
+from safefish.extract.align import iou
 from safefish.extract.text import extract_entities
-from safefish.textutils import normalize_for_match, normalize_unicode
+from safefish.textutils import cita_score, normalize_for_match, normalize_unicode
 
 
 def levenshtein(a: list | str, b: list | str) -> int:
@@ -60,11 +62,28 @@ def compute_extraction_metrics(rows: list[dict]) -> dict:
     prec = tp / (tp + fp) if tp + fp else 0.0
     rec = tp / (tp + fn) if tp + fn else 0.0
     senales = [s for r in caps if r.get("pred") for s in r["pred"]["senales"] if s["verificada"]]
+    loc = []
+    for r in caps:
+        pred = (
+            [s for s in (r["pred"] or {}).get("senales", []) if s["verificada"] and s.get("bbox")]
+            if r.get("pred")
+            else []
+        )
+        for g in r.get("citas_bbox_gold") or []:
+            loc.append(
+                any(
+                    max(cita_score(g["cita"], s["cita"]), cita_score(s["cita"], g["cita"])) >= 0.8
+                    and iou(tuple(s["bbox"]), tuple(g["bbox"])) >= 0.5
+                    for s in pred
+                )
+            )
     return {
         "n_capturas": len(caps),
         "cer": round(float(np.mean(cers)), 4),
         "wer": round(float(np.mean(wers)), 4),
         "f1_entidades": round(2 * prec * rec / (prec + rec), 4) if prec + rec else 0.0,
+        "localizacion_iou50": round(float(np.mean(loc)), 4) if loc else None,
+        "n_citas_bbox_gold": len(loc),
         "senales_con_bbox": round(sum(1 for s in senales if s.get("bbox")) / len(senales), 4)
         if senales
         else None,

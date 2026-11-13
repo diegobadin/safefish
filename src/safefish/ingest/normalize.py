@@ -144,17 +144,30 @@ def parse_case_template(text: str, md: dict) -> CaseDoc | None:
     )
 
 
+MAX_CONTEXTO_TEMPLATE = 400  # más texto antes del primer paso = no es una guía curada
+
+
 def parse_guide_template(text: str, md: dict) -> GuideDoc | None:
-    """Guías curadas: contexto + lista numerada o con viñetas de pasos."""
+    """Guías curadas: un encabezado corto + lista numerada o con viñetas de pasos.
+
+    El texto ya pasó por `normalize_unicode` (líneas sin sangría), así que toda línea no
+    vacía después del primer paso que no abre un paso nuevo es continuación del anterior:
+    nada se descarta (un "al 0800-…" en la línea siguiente sigue siendo parte del paso).
+    Si antes del primer paso hay más de `MAX_CONTEXTO_TEMPLATE` caracteres, es una página
+    con estructura propia (p. ej. una nota con una viñeta suelta): va al LLM.
+    """
     contexto, pasos = [], []
     for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
         if m := _PASO.match(line):
             pasos.append(m.group(1).strip())
-        elif pasos and line.strip() and line.startswith((" ", "\t")):
-            pasos[-1] += " " + line.strip()  # continuación del paso anterior
-        elif not pasos and line.strip():
-            contexto.append(line.strip())
-    if not pasos:
+        elif pasos:
+            pasos[-1] += " " + line
+        else:
+            contexto.append(line)
+    if not pasos or len(" ".join(contexto)) > MAX_CONTEXTO_TEMPLATE:
         return None
     return GuideDoc(
         **_provenance(md, "template"),
@@ -311,6 +324,12 @@ class LLMNormalizer:
             fuente=_sanitize_fuente(doc.page_content),
         )
 
+    @staticmethod
+    def _sin_contactos_inventados(texto: str, doc: Document, report: NormalizeReport) -> str:
+        texto, n = redact_unsupported_contacts(texto, doc.page_content)
+        report.contactos_redactados += n
+        return texto
+
     def cases(self, doc: Document, report: NormalizeReport) -> list[CaseDoc] | None:
         r = self.llm.invoke(self._messages("caso", doc), CasosNorm, stage="normalize")
         if r.parsed is None:
@@ -339,9 +358,9 @@ class LLMNormalizer:
                     modalidad=modalidad,
                     canales=_canales(md["canal"]) if md.get("canal") else c.canales,
                     entidad_suplantada=md.get("entidad_suplantada") or c.entidad_suplantada,
-                    descripcion=c.descripcion,
+                    descripcion=self._sin_contactos_inventados(c.descripcion, doc, report),
                     frases_tipicas=frases,
-                    mecanismo=c.mecanismo,
+                    mecanismo=self._sin_contactos_inventados(c.mecanismo, doc, report),
                     signal_ids=c.signal_ids,
                 )
             )
@@ -377,7 +396,7 @@ class LLMNormalizer:
                     if md.get("situacion")
                     else g.situaciones,  # fmt: skip
                     organismo=md.get("organismo") or g.organismo,
-                    contexto=g.contexto,
+                    contexto=self._sin_contactos_inventados(g.contexto, doc, report),
                     pasos=pasos,
                 )
             )
@@ -461,7 +480,12 @@ def normalize_documents(
 ) -> tuple[list[KBDoc], NormalizeReport]:
     def one(d: Document) -> tuple[list[KBDoc], NormalizeReport]:
         rep = NormalizeReport()  # un reporte por tarea: sin estado compartido entre hilos
-        return normalize_one(d, cfg, llm, rep), rep
+        try:
+            return normalize_one(d, cfg, llm, rep), rep
+        except ValueError as e:  # incluye ValidationError: metadata curada fuera del enum
+            rep.descartados["metadata_invalida"] += 1
+            rep.errores.append({"doc_id": d.metadata.get("doc_id"), "error": str(e)[:300]})
+            return [], rep
 
     # Cada tarea corre en una copia del contexto: el UsageTracker (ContextVar) sigue contando.
     with ThreadPoolExecutor(max_workers=max(1, workers)) as ex:

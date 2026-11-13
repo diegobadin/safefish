@@ -18,6 +18,7 @@ retrieval:
   enabled: true
   query: {strategy: raw}
   filter_canal: "off"
+  k_eval: 4  # mismo k para comparar casos entre V1, V2a y V2 (§2.0)
   # Las guías no van al contexto del razonador: el planner las elige por metadata.
   top_n: {casos: 4, mensajes: 6, senales: 6, guias: 0}
 generation:

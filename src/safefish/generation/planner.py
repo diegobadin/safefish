@@ -186,10 +186,11 @@ class PlanResult:
 def render_guias(sel: list[tuple[GuideRecord, str]]) -> str:
     blocks = []
     for g, _ in sel:
-        # Los pasos vienen de la KB (fuentes externas): no pueden abrir ni cerrar delimitadores.
-        pasos = "\n".join(f"{i}. {escape_tags(p)}" for i, p in enumerate(g.pasos, 1))
+        # Contexto + pasos numerados: el mismo texto contra el que R5 verifica el plan. Viene de
+        # la KB (fuentes externas): no puede abrir ni cerrar delimitadores.
         org = escape_attr(g.metadata.get("organismo") or "-")
-        blocks.append(f'<guia id="{escape_attr(g.id)}" organismo="{org}">\n{pasos}\n</guia>')
+        texto = escape_tags(g.texto)
+        blocks.append(f'<guia id="{escape_attr(g.id)}" organismo="{org}">\n{texto}\n</guia>')
     return "\n\n".join(blocks)
 
 

@@ -13,6 +13,8 @@ from concurrent.futures import ThreadPoolExecutor
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, ConfigDict, Field
 
+from safefish.observability import UsageTracker, reset_tracker, set_tracker
+
 JUDGE_VERSION = "plan_judge_v1"
 
 SYSTEM = """Evaluás planes de acción para víctimas de estafas por mensajes en Argentina.
@@ -53,20 +55,50 @@ def coverage_from_judgement(out: PlanJudgeOutput, n_esperados: int) -> float:
     return len(cubiertos) / n_esperados
 
 
-def judge_rows(rows: list[dict], gold_pasos: dict[str, list[str]], llm, workers: int = 4) -> None:
-    """Agrega `cobertura_plan` (o None) a cada fila con pasos clave esperados, in place."""
+FALLO = "fallo"
 
-    def one(r: dict) -> float | None:
+
+def judge_rows(rows: list[dict], gold_pasos: dict[str, list[str]], llm, workers: int = 4) -> dict:
+    """Agrega `cobertura_plan` a cada fila con pasos clave esperados, in place, y devuelve
+    el resumen del juez: casos juzgados, fallidos (no se promedian pero se reportan) y uso
+    de tokens/costo (el juez no es parte del pipeline: va aparte en `metrics.json`)."""
+    tracker = UsageTracker()
+
+    def one(r: dict) -> float | str | None:
         esperados = gold_pasos.get(r["id"]) or []
-        if not esperados or not r.get("pred"):
-            return None if not esperados else 0.0
+        if not esperados:
+            return None
+        if not r.get("pred"):
+            return 0.0  # sin salida no hay plan: cobertura 0
         res = llm.invoke(
             judge_messages(esperados, [p["paso"] for p in r["pred"]["plan"]]),
             PlanJudgeOutput,
             stage="judge_plan",
         )
-        return None if res.parsed is None else coverage_from_judgement(res.parsed, len(esperados))
+        return FALLO if res.parsed is None else coverage_from_judgement(res.parsed, len(esperados))
+
+    def run(r: dict):
+        token = set_tracker(tracker)  # cada hilo publica el tracker compartido
+        try:
+            return one(r)
+        finally:
+            reset_tracker(token)
 
     with ThreadPoolExecutor(max_workers=max(1, workers)) as ex:
-        for r, cov in zip(rows, ex.map(one, rows), strict=True):
-            r["cobertura_plan"] = None if cov is None else round(cov, 4)
+        resultados = list(ex.map(run, rows))
+    fallidos = []
+    for r, cov in zip(rows, resultados, strict=True):
+        if cov == FALLO:
+            fallidos.append(r["id"])
+            cov = None
+        r["cobertura_plan"] = None if cov is None else round(cov, 4)
+    usage = tracker.summary()
+    return {
+        "version": JUDGE_VERSION,
+        "modelo": getattr(llm, "model", None),
+        "n_juzgados": sum(1 for x in resultados if x not in (None, FALLO)),
+        "n_fallidos": len(fallidos),
+        "fallidos": fallidos,
+        "tokens": usage["tokens"],
+        "costo_usd": usage["costo_usd"],
+    }

@@ -86,6 +86,32 @@ deja abiertas o que ajustan el esqueleto de contratos del §1.5.
   `veredictos_modificados`, métricas del planner, `cobertura_plan` (juez LLM, `--judge-plan`) y
   métricas de extracción (CER/WER, F1 de entidades, % de señales con bbox).
 
+### Ajustes tras la revisión de código y de seguridad
+
+- **Contactos:** `find_contacts` es un detector *amplio* (cualquier TLD, teléfonos con
+  puntos, números cortos como `134` o `*611`): un falso positivo solo redacta de más. La
+  comparación (`contacto_respaldado`) es estructurada: mails exactos, URLs por host + prefijo
+  de ruta, teléfonos por igualdad tras quitar solo prefijos de país/troncales (la
+  característica de área cuenta). R5 también limpia contactos de `explicacion` y `por_que` que
+  no están en el mensaje ni en la evidencia.
+- **Delimitadores:** todo texto no confiable (mensaje, fuente, KB) se inserta con los ángulos
+  escapados y los atributos sin comillas: no puede abrir ni cerrar tags del prompt.
+- **R1:** citas de < 5 caracteres normalizados se descartan (`cita_trivial`) y la subcadena
+  exacta respeta límites de palabra ("cambio" no está en "intercambio"). **R3** cuenta señales
+  *distintas*. **R5** toma el `organismo` de la metadata de la guía como parte de la fuente.
+- **Plantilla de guías:** las líneas después del primer paso son continuación (el texto ya
+  viene sin sangría) y más de 400 caracteres antes del primer paso mandan la fuente al LLM.
+  El planner ve el texto completo de la guía (contexto + pasos), el mismo que verifica R5.
+- **Normalizador:** metadata fuera del enum descarta el documento (`metadata_invalida`) sin
+  abortar el build; los contactos inventados se redactan también en `contexto`,
+  `descripcion` y `mecanismo`.
+- **Snapshot:** `kb_hash` incluye la metadata (la curación de modalidad/situación cambia el
+  hash). La muestra de revisión es el 10 % de casos + guías, priorizando lo hecho por LLM.
+- **Barrido V2a:** `retrieval.k_eval: 4` en V1/V2a/V2/V3 para medir los casos con el mismo k
+  aunque cambie el layout, y `make eval … RETRIEVAL_ONLY=1` (sin generación: solo embeddings).
+- **Métricas:** `GoldenCase.citas_bbox` y `localizacion_iou50` (§4.3); el juez del plan
+  registra tokens, costo y fallidos en `metrics.json → juez_plan`.
+
 ## Consecuencias
 
 - El `config_hash` de V0/V1 cambia porque el config suma secciones con defaults

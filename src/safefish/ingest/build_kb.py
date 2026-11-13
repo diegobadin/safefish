@@ -52,7 +52,7 @@ from safefish.ingest.normalize import (
 )
 from safefish.ingest.pii import redact_pii
 from safefish.observability import UsageTracker, reset_tracker, set_tracker
-from safefish.schemas import DocTipo, KBDoc
+from safefish.schemas import CaseDoc, DocTipo, GuideDoc, KBDoc
 from safefish.textutils import normalize_unicode
 
 
@@ -66,9 +66,12 @@ def git_sha() -> str | None:
 
 
 def kb_hash(chunks: list[Document]) -> str:
+    """Hash de contenido **y metadata**: en V2 el planner y R2 dependen de la modalidad y la
+    situación curadas, que no están en el texto; cambiar la curación cambia el snapshot."""
     h = hashlib.sha256()
     for d in sorted(chunks, key=lambda d: d.id):
-        h.update(f"{d.id}\n{d.page_content}\n".encode())
+        md = json.dumps(d.metadata, sort_keys=True, ensure_ascii=False, default=str)
+        h.update(f"{d.id}\n{d.page_content}\n{md}\n".encode())
     return h.hexdigest()[:16]
 
 
@@ -190,14 +193,23 @@ def review_sample(
 ) -> list[dict]:
     """Muestra para revisión manual (§2.3). Prioriza lo normalizado por LLM: lo determinístico
     (plantillas, taxonomía, CSV etiquetado) no necesita revisión de contenido."""
-    llm_ids = set(report.llm_doc_ids)
-    pool = [d for d in kbdocs if d.doc_id in llm_ids] or [
-        d for d in kbdocs if d.normalizer_version != "template"
-    ]
-    if not pool:
+    # Base: casos y guías (mensajes y señales son conversiones determinísticas). Se revisa el
+    # 10 % de esa base, llenando primero con lo normalizado por LLM, después lo crudo y por
+    # último lo parseado por plantilla.
+    base = [d for d in kbdocs if isinstance(d, CaseDoc | GuideDoc)]
+    if not base:
         return []
-    n = min(len(pool), max(1, round(frac * len(pool))))
-    sample = random.Random(seed).sample(sorted(pool, key=lambda d: d.doc_id), n)
+    n = min(len(base), max(1, round(frac * len(base))))
+    rng = random.Random(seed)
+    llm_ids = set(report.llm_doc_ids)
+
+    def prioridad(d: KBDoc) -> int:
+        return 0 if d.doc_id in llm_ids else 1 if d.normalizer_version == "crudo" else 2
+
+    sample: list[KBDoc] = []
+    for nivel in (0, 1, 2):
+        grupo = sorted((d for d in base if prioridad(d) == nivel), key=lambda d: d.doc_id)
+        sample += rng.sample(grupo, min(len(grupo), n - len(sample)))
 
     def fuente(doc_id: str) -> str:  # los casos múltiples de una fuente llevan sufijo -N
         return raw.get(doc_id) or raw.get(doc_id.rsplit("-", 1)[0], "")

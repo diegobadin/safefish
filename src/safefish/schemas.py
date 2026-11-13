@@ -296,6 +296,13 @@ KBDoc = CaseDoc | MessageDoc | SignalDoc | GuideDoc
 # ---------------------------------------------------------------------------
 
 
+class CitaBBox(_Strict):
+    """Cita clave de una captura con su caja de referencia (slice `capturas`)."""
+
+    cita: str
+    bbox: BBox
+
+
 class GoldenCase(_Strict):
     id: str
     split: Literal["dev", "test"]
@@ -313,6 +320,7 @@ class GoldenCase(_Strict):
     entidad: str | None = None  # entidad suplantada (relevancia graduada de retrieval, §4.3)
     senales_esperadas: list[SignalId] = Field(default_factory=list)
     pasos_clave_esperados: list[str] = Field(default_factory=list)
+    citas_bbox: list[CitaBBox] = Field(default_factory=list)  # 1–3 citas clave en capturas
     referencia: str = ""
     campaign_id: str | None = None
     fuente: str = "recolectado"

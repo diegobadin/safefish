@@ -32,7 +32,7 @@ def _cita(texto: str, kw: str) -> str:
     return texto[start : end if end != -1 else len(texto)]
 
 
-_GUIA = re.compile(r'<guia id="([^"]+)"[^>]*>\n1\. ([^\n]+)')
+_GUIA = re.compile(r'<guia id="([^"]+)"[^>]*>.*?^1\. ([^\n]+)', re.S | re.M)
 
 
 def planner_responder(messages, schema):

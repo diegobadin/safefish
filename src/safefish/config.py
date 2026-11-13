@@ -109,8 +109,14 @@ class RetrievalCfg(_Cfg):
     top_k: int = 6  # layout single: top-k total
     top_n: dict[str, int] = Field(default_factory=dict)  # layout per_tipo: por colección
 
+    # k fijo para las métricas de retrieval de casos. Fijarlo igual en V1/V2a/V2 hace
+    # comparables Hit/MRR/Recall/nDCG@k aunque cambie cuántos casos llegan al contexto.
+    k_eval: int | None = None
+
     def k_casos(self) -> int:
         """k con el que se miden las métricas de retrieval de casos."""
+        if self.k_eval is not None:
+            return self.k_eval
         return self.top_n.get("casos", self.top_k) if self.top_n else self.top_k
 
     @field_validator("filter_canal", mode="before")

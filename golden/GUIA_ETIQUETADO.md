@@ -65,7 +65,7 @@ No es negativo difícil un mensaje personal trivial ("¿venís a cenar?"): ese v
 - La cita debe ser una subcadena **literal** de `texto` (se tolera diferencia de mayúsculas,
   tildes y espacios). Es lo que después verifica la regla R1.
 - Citar el fragmento mínimo que demuestra la señal (una frase, no el mensaje entero).
-- En capturas (`slices: ["capturas"]`) se agrega el bbox de 1–3 citas clave.
+- En capturas (`slices: ["capturas"]`) se agrega el bbox de 1–3 citas clave en `citas_bbox`: `[{"cita": "<fragmento literal>", "bbox": [x0, y0, x1, y1]}]`, en píxeles de la imagen redactada. Se usa para la métrica de localización (IoU ≥ 0.5).
 
 ## 5. Otros slices
 

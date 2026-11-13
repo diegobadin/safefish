@@ -2,6 +2,7 @@
 
     python -m eval.run --config configs/v1.yaml --split dev [--golden-dir golden] [--limit N]
                        [--judge-plan]   # cobertura del plan con juez LLM (V2+, cuesta)
+                       [--retrieval-only]  # barridos: sin generación, solo embeddings
 
 Escribe `results/<run_id>/`: predictions.jsonl, retrieval.jsonl, metrics.json, costs.json y
 config.yaml. `metrics.json` registra git_sha, config_hash, kb_snapshot/kb_hash,
@@ -71,6 +72,7 @@ def prediction_row(case: GoldenCase, res: PipelineResult) -> dict:
         "origen": case.origen,
         "texto": res.extracted.texto if res.extracted else case.texto,
         "texto_gold": case.texto,
+        "citas_bbox_gold": [c.model_dump(mode="json") for c in case.citas_bbox],
         "label": case.label,
         "veredicto_esperado": [v.value for v in case.veredicto_esperado],
         "modalidad_gold": case.modalidad.value if case.modalidad else None,
@@ -147,6 +149,7 @@ def run_eval(
     golden_file: Path,
     workers: int = 4,
     plan_judge=None,
+    retrieval_only: bool = False,
 ) -> tuple[Path, dict]:
     stamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
     run_id = f"{cfg.version}-{split}-{stamp}"
@@ -154,17 +157,21 @@ def run_eval(
     out_dir.mkdir(parents=True, exist_ok=False)
 
     def one(case: GoldenCase) -> PipelineResult:
-        return pipeline.run(case.to_raw_input())
+        raw = case.to_raw_input()
+        return pipeline.retrieve_only(raw) if retrieval_only else pipeline.run(raw)
 
     with ThreadPoolExecutor(max_workers=max(1, workers)) as ex:
         results = list(ex.map(one, cases))
 
     preds = [prediction_row(c, r) for c, r in zip(cases, results, strict=True)]
     retr = [retrieval_row(c, r) for c, r in zip(cases, results, strict=True)]
+    juez = None
     if plan_judge is not None:
         from eval.plan_judge import judge_rows
 
-        judge_rows(preds, {c.id: c.pasos_clave_esperados for c in cases}, plan_judge, workers)
+        juez = judge_rows(
+            preds, {c.id: c.pasos_clave_esperados for c in cases}, plan_judge, workers
+        )
     for name, rows in (("predictions.jsonl", preds), ("retrieval.jsonl", retr)):
         with open(out_dir / name, "w", encoding="utf-8") as f:
             for row in rows:
@@ -213,11 +220,13 @@ def run_eval(
             "planner": {"mode": planner.mode, "prompt": planner.prompt, "hash": planner.prompt_hash} if planner else None,
             "verifier": sorted(pipeline.verifier.rules) if getattr(pipeline.verifier, "rules", None) else None,
         },
-        "task": compute_task_metrics(preds),
-        "extraccion": compute_extraction_metrics(preds),
+        "modo": "retrieval_only" if retrieval_only else "completo",
+        "task": {} if retrieval_only else compute_task_metrics(preds),
+        "extraccion": {} if retrieval_only else compute_extraction_metrics(preds),
         "retrieval": retrieval_metrics,
         "ops": ops_metrics(preds),
     }  # fmt: skip
+    metrics["juez_plan"] = juez
     metrics["por_slice"] = by_slice(preds)
     (out_dir / "metrics.json").write_text(
         json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8"
@@ -239,6 +248,11 @@ def run_eval(
 
 def print_summary(out_dir: Path, metrics: dict) -> None:
     t, r, o = metrics["task"], metrics["retrieval"], metrics["ops"]
+    if not t:  # retrieval-only: no hay métricas de tarea
+        print(f"\n{metrics['meta']['run_id']} (solo retrieval) → {out_dir}")
+        for k, v in r.items():
+            print(f"  {k:<28} {v}")
+        return
     print(f"\n{metrics['meta']['run_id']} → {out_dir}")
     for k in KEY_METRICS:
         print(f"  {k:<28} {t.get(k)}")
@@ -267,6 +281,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out-dir", default=str(REPO_ROOT / "results"))
     ap.add_argument("--judge-plan", action="store_true", help="cobertura del plan con juez LLM")
     ap.add_argument("--judge-model", default="gpt-4.1-mini-2025-04-14")
+    ap.add_argument(
+        "--retrieval-only",
+        action="store_true",
+        help="barrido de solo retrieval: sin generación (§2.0)",
+    )
     args = ap.parse_args(argv)
 
     cfg = load_config(args.config)
@@ -287,6 +306,7 @@ def main(argv: list[str] | None = None) -> int:
         golden_file=gfile,
         workers=args.workers,
         plan_judge=judge,
+        retrieval_only=args.retrieval_only,
     )
     print_summary(out_dir, metrics)
     with open(out_dir / "predictions.jsonl", encoding="utf-8") as f:

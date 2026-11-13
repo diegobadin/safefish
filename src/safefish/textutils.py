@@ -52,7 +52,8 @@ def cita_score(cita: str, texto: str) -> float:
     c, t = normalize_for_match(cita), normalize_for_match(texto)
     if not c:
         return 0.0
-    if c in t:
+    # Subcadena exacta, pero respetando límites de palabra: "cambio" no está en "intercambio".
+    if re.search(rf"(?<!\w){re.escape(c)}(?!\w)", t):
         return 1.0
     cw, tw = c.split(), t.split()
     n = len(cw)
@@ -211,11 +212,36 @@ def find_organismos(text: str) -> set[str]:
     }
 
 
+# Detector **amplio** para los controles de contactos (R5, normalizador, métrica): cualquier
+# TLD, teléfonos con puntos y números cortos de servicio. Es más agresivo que `find_links` /
+# `find_phones` (que usan la PII y las entidades) a propósito: un falso positivo acá solo
+# hace que se redacte de más; un falso negativo deja pasar un contacto inventado.
+RE_URL_LAX = re.compile(
+    r"""(?ix)
+    (?<![@\w.-])
+    (?:https?://)?(?:www\.)?
+    (?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}
+    (?![\w-])
+    (?:/[^\s<>"'()]*)?
+    """
+)
+RE_PHONE_DOTS = re.compile(
+    r"(?<![\d.])(?:\+?54[ .]?(?:9[ .]?)?)?(?:\(?0?\d{2,4}\)?[ .])?\d{2,4}\.\d{3,4}\.\d{4}(?![\d.])"
+)  # el último grupo de 4 dígitos excluye montos (grupos de 3)
+RE_SHORT_CODE = re.compile(
+    r"(?i)(?<![\w*])\*\d{2,5}(?!\d)|(?<!\w)(?:al|l[ií]nea|n[uú]mero|marc[aá]\w*)\s+(\d{3,4})(?![.,\s-]?\d)"
+)
+
+
 def find_contacts(text: str) -> list[str]:
-    """Teléfonos, mails y links del texto, sin contar dos veces el dominio de un mail."""
+    """Teléfonos, mails y links del texto (detector amplio), sin contar dos veces el dominio
+    de un mail."""
     emails = RE_EMAIL.findall(text)
-    links = [u for u in find_links(text) if not any(u in e for e in emails)]
-    return list(dict.fromkeys([*find_phones(text), *emails, *links]))
+    links = [m.group(0).rstrip(".,;:!?") for m in RE_URL_LAX.finditer(text)]
+    links = [u for u in links if not any(u in e for e in emails)]
+    phones = find_phones(text) + [m.group(0) for m in RE_PHONE_DOTS.finditer(text)]
+    shorts = [m.group(1) or m.group(0) for m in RE_SHORT_CODE.finditer(text)]
+    return list(dict.fromkeys([*phones, *shorts, *emails, *links]))
 
 
 # ---------------------------------------------------------------------------

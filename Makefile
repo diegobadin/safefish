@@ -19,6 +19,7 @@ help:
 	@echo "make demo-fixture-v3                 Igual, para V2 y V3 (4 colecciones, planner, verificador)"
 	@echo "make coverage CONFIG=configs/v2.yaml Panel de cobertura: casos por modalidad × canal (§2.3)"
 	@echo "make eval ... JUDGE=1                Suma la cobertura del plan con juez LLM (V2+)"
+	@echo "make eval ... RETRIEVAL_ONLY=1       Barrido de solo retrieval: sin generación (V2a, §2.0)"
 
 install:
 	uv sync
@@ -41,7 +42,7 @@ kb:
 	$(RUN) python -m safefish.ingest.build_kb --config $(CONFIG)
 
 eval:
-	$(RUN) python -m eval.run --config $(CONFIG) --split $(SPLIT) --golden-dir $(GOLDEN) $(if $(LIMIT),--limit $(LIMIT),) $(if $(JUDGE),--judge-plan,)
+	$(RUN) python -m eval.run --config $(CONFIG) --split $(SPLIT) --golden-dir $(GOLDEN) $(if $(LIMIT),--limit $(LIMIT),) $(if $(JUDGE),--judge-plan,) $(if $(RETRIEVAL_ONLY),--retrieval-only,)
 
 coverage:
 	$(RUN) python -m safefish.ingest.coverage --config $(CONFIG)
