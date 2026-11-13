@@ -33,9 +33,9 @@ from safefish.taxonomia import senales_criticas
 from safefish.textutils import (
     cita_score,
     contacto_respaldado,
-    find_contacts,
     find_organismos,
     normalize_for_match,
+    redact_contacts,
 )
 
 CONTACTO_ELIMINADO = "[contacto eliminado: usá el canal oficial que ya conozcas]"
@@ -186,12 +186,11 @@ class RuleVerifier:
                 ev.append(Evento("R5", "paso_con_organismo_inventado", {"paso": i, "organismos": sorted(inventados), "texto": p.paso[:200]}))  # fmt: skip
                 continue
 
-            texto = p.paso
-            contactos = find_contacts(texto)
-            for c in sorted(contactos, key=len, reverse=True):
-                if c in texto and not contacto_respaldado(c, fuente):
-                    ev.append(Evento("R5", "contacto_inventado", {"paso": i, "contacto": c}))
-                    texto = texto.replace(c, CONTACTO_ELIMINADO)
+            texto, eliminados = redact_contacts(
+                p.paso, lambda c, f=fuente: contacto_respaldado(c, f), CONTACTO_ELIMINADO
+            )
+            for c in eliminados:
+                ev.append(Evento("R5", "contacto_inventado", {"paso": i, "contacto": c}))
             plan.append(PasoPlan(paso=texto, guide_id=guide_id))
 
         if not plan and b.guias:  # nunca dejar al usuario sin plan si hay guía: pasos literales
@@ -211,10 +210,11 @@ class RuleVerifier:
         fuente = "\n".join([m.texto if m else "", *(it.texto for it in b.all_items())])
 
         def limpiar(texto: str, campo: str) -> str:
-            for c in sorted(find_contacts(texto), key=len, reverse=True):
-                if c in texto and not contacto_respaldado(c, fuente):
-                    ev.append(Evento("R5", "contacto_inventado_en_explicacion", {"campo": campo, "contacto": c}))  # fmt: skip
-                    texto = texto.replace(c, CONTACTO_ELIMINADO)
+            texto, eliminados = redact_contacts(
+                texto, lambda c: contacto_respaldado(c, fuente), CONTACTO_ELIMINADO
+            )
+            for c in eliminados:
+                ev.append(Evento("R5", "contacto_inventado_en_explicacion", {"campo": campo, "contacto": c}))  # fmt: skip
             return texto
 
         senales = [

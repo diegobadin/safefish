@@ -274,3 +274,20 @@ def test_contactos_con_esquema_ip_e_idn():
     assert find_contacts("Entrá a http://190.12.4.5:8080/login ya") == ["http://190.12.4.5:8080/login"]  # fmt: skip
     assert find_contacts("Entrá a bancó-seguro.ar") == ["bancó-seguro.ar"]
     assert find_contacts("Entrá a https://bit.ly/abc") == ["https://bit.ly/abc"]  # sin duplicar
+
+
+def test_contacto_suelto_que_tambien_aparece_en_una_url_se_controla_aparte():
+    from safefish.textutils import find_contact_spans
+
+    texto = "Llamá al 0800-999-1111. Info: www.x-falso.com/0800-999-1111"
+    spans = find_contact_spans(texto)
+    assert [texto[a:b] for a, b in spans] == ["0800-999-1111", "www.x-falso.com/0800-999-1111"]
+    # La guía respalda la URL pero no el teléfono suelto: el teléfono se redacta igual.
+    b = RetrievalBundle(
+        guias=[
+            EvidenceItem(id="G-1", coleccion="guias", texto="Info: www.x-falso.com/0800-999-1111")
+        ]  # fmt: skip
+    )
+    res, ev = RuleVerifier(["R5"]).check_plan(b, _out(plan=[PasoPlan(paso=texto, guide_id="G-1")]))
+    assert res.plan[0].paso == f"Llamá al {CONTACTO_ELIMINADO}. Info: www.x-falso.com/0800-999-1111"
+    assert [e.detalle["contacto"] for e in ev] == ["0800-999-1111"]

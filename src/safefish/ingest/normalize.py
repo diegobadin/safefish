@@ -54,7 +54,7 @@ from safefish.textutils import (
     contacto_respaldado,
     escape_attr,
     escape_tags,
-    find_contacts,
+    redact_contacts,
     strip_accents,
 )
 
@@ -292,14 +292,11 @@ def _sanitize_fuente(text: str) -> str:
 
 
 def redact_unsupported_contacts(paso: str, fuente: str) -> tuple[str, int]:
-    """Reemplaza teléfonos, URLs y mails que no están literalmente en `fuente`."""
-    n = 0
-    for c in sorted(find_contacts(paso), key=len, reverse=True):
-        # `c in paso`: un link puede haberse ido junto con el mail que lo contenía
-        if c in paso and not contacto_respaldado(c, fuente):
-            paso = paso.replace(c, CONTACTO_REDACTADO)
-            n += 1
-    return paso, n
+    """Reemplaza (por posición) teléfonos, URLs y mails que no están en `fuente`."""
+    paso, eliminados = redact_contacts(
+        paso, lambda c: contacto_respaldado(c, fuente), CONTACTO_REDACTADO
+    )
+    return paso, len(eliminados)
 
 
 class LLMNormalizer:

@@ -235,23 +235,69 @@ RE_SHORT_CODE = re.compile(
 )
 
 
+Span = tuple[int, int]
+
+
+def find_contact_spans(text: str) -> list[Span]:
+    """Posiciones `(inicio, fin)` de teléfonos, mails y links (detector amplio).
+
+    Un match se descarta solo si su **posición** está dentro de la de otro match más largo
+    (el dominio de un mail, `bit.ly/x` dentro de `https://bit.ly/x`, los dígitos de una IP).
+    Nunca por substring del texto: un teléfono suelto que además aparece dentro de una URL
+    sigue siendo un contacto propio y se controla aparte."""
+    spans: set[Span] = set()
+
+    def add(start: int, end: int) -> None:
+        frag = text[start:end]
+        trimmed = frag.rstrip(".,;:!?")
+        lead = len(frag) - len(frag.lstrip())
+        end = start + len(trimmed)
+        start += lead
+        if end > start:
+            spans.add((start, end))
+
+    for rx in (RE_EMAIL, RE_URL_SCHEME, RE_URL_LAX, RE_IPV4, RE_0800, RE_PHONE_DOTS):
+        for m in rx.finditer(text):
+            add(*m.span())
+    for m in RE_URL.finditer(text):
+        if "@" not in m.group(0):
+            add(*m.span())
+    for m in RE_PHONE.finditer(text):
+        if 8 <= len(re.sub(r"\D", "", m.group(0))) <= 13:
+            add(*m.span())
+    for m in RE_SHORT_CODE.finditer(text):
+        add(*(m.span(1) if m.group(1) else m.span()))
+
+    def contenido(a: Span, b: Span) -> bool:
+        return a != b and b[0] <= a[0] and a[1] <= b[1]
+
+    return sorted(s for s in spans if not any(contenido(s, o) for o in spans))
+
+
 def find_contacts(text: str) -> list[str]:
-    """Teléfonos, mails y links del texto (detector amplio), sin contar dos veces el dominio
-    de un mail."""
-    emails = RE_EMAIL.findall(text)
-    links = [
-        m.group(0).rstrip(".,;:!?")
-        for rx in (RE_URL_SCHEME, RE_URL_LAX, RE_IPV4)
-        for m in rx.finditer(text)
-    ] + find_links(text)
-    links = [u for u in links if u and not any(u in e for e in emails)]
-    phones = find_phones(text) + [m.group(0) for m in RE_PHONE_DOTS.finditer(text)]
-    phones = [p for p in phones if not any(p in u for u in links)]  # dígitos de una IP/URL
-    shorts = [m.group(1) or m.group(0) for m in RE_SHORT_CODE.finditer(text)]
-    found = list(dict.fromkeys([*phones, *shorts, *emails, *links]))
-    # Un contacto contenido en otro más largo (bit.ly/x dentro de https://bit.ly/x) no se
-    # cuenta aparte: R5 lo reemplaza junto con el largo y la métrica no lo duplica.
-    return [c for c in found if not any(c != o and c in o for o in found)]
+    """Teléfonos, mails y links del texto (detector amplio), uno por posición."""
+    return list(dict.fromkeys(text[a:b] for a, b in find_contact_spans(text)))
+
+
+def redact_contacts(text: str, respaldado, reemplazo: str) -> tuple[str, list[str]]:
+    """Reemplaza **por posición** (de derecha a izquierda) cada contacto para el que
+    `respaldado(contacto)` es falso. Devuelve (texto, contactos eliminados en orden)."""
+    eliminados: list[str] = []
+    spans = find_contact_spans(text)
+    # Spans solapados que no se contienen: se redacta la unión para no dejar restos.
+    merged: list[list[int]] = []
+    for a, b in spans:
+        c = text[a:b]
+        if respaldado(c):
+            continue
+        eliminados.append(c)
+        if merged and a < merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], b)
+        else:
+            merged.append([a, b])
+    for a, b in reversed(merged):
+        text = text[:a] + reemplazo + text[b:]
+    return text, eliminados
 
 
 # ---------------------------------------------------------------------------

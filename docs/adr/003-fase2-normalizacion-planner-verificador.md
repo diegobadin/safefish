@@ -90,10 +90,11 @@ deja abiertas o que ajustan el esqueleto de contratos del §1.5.
 
 - **Contactos:** `find_contacts` es un detector *amplio* (cualquier TLD y dominios IDN, URLs
   con esquema de cualquier forma, IPs, teléfonos con puntos, números cortos como `134` o
-  `*611`; un contacto contenido en otro no se cuenta dos veces): un falso positivo solo
-  redacta de más. El `organismo` de la metadata de una guía cuenta para R5 solo como nombre de
-  organismo, nunca para respaldar un contacto. La
-  comparación (`contacto_respaldado`) es estructurada: mails exactos, URLs por host + prefijo
+  `*611`): un falso positivo solo redacta de más. Los contactos se tratan **por posición**:
+  un match se descarta solo si su span está dentro del de otro (nunca por substring del
+  texto) y la redacción es por span, de derecha a izquierda (`redact_contacts`). El
+  `organismo` de la metadata de una guía cuenta para R5 solo como nombre de organismo, nunca
+  para respaldar un contacto. La comparación (`contacto_respaldado`) es estructurada: mails exactos, URLs por host + prefijo
   de ruta, teléfonos por igualdad tras quitar solo prefijos de país/troncales (la
   característica de área cuenta). R5 también limpia contactos de `explicacion` y `por_que` que
   no están en el mensaje ni en la evidencia.
