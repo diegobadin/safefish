@@ -1,0 +1,104 @@
+version: v7
+descripcion: V6 + evidencia contrastiva (vecinos estafa y legítimos en mensajes).
+kb_snapshot: kb-v2
+ingest:
+  sources: data/sources.yaml
+  languages:
+  - es
+  min_chars_lang_detect: 60
+  dedupe:
+    exact: true
+    near_threshold: 0.95
+    near_method: tfidf
+  pii_por_tipo:
+    caso: true
+    mensaje: true
+    senal: false
+    guia: false
+  normalize:
+    mode: auto
+    model: gpt-4.1-mini-2025-04-14
+    prompt: normalizer_v1
+    min_frase_score: 0.85
+    review_fraction: 0.1
+    review_seed: 7
+    timeout_s: 90.0
+  min_casos_por_modalidad: 5
+chunking:
+  strategy: per_case
+  chunk_size: 800
+  chunk_overlap: 120
+  separators:
+  - '
+
+
+    '
+  - '
+
+    '
+  - .
+  - ' '
+index:
+  layout: per_tipo
+embeddings:
+  model: text-embedding-3-small
+retrieval:
+  enabled: true
+  query:
+    strategy: multi_query
+    facets: []
+    model: gpt-4.1-mini-2025-04-14
+    prompt: query_rewrite_v1
+    max_queries: 4
+  filter_canal: 'off'
+  hybrid:
+    enabled: true
+    weights:
+      dense: 1.0
+      bm25: 1.0
+  rerank:
+    enabled: true
+    model: gpt-4.1-mini-2025-04-14
+    prompt: rerank_v1
+    top_in: 20
+    max_chars: 600
+  mensajes_contrastivo: true
+  top_k: 6
+  top_n:
+    casos: 4
+    mensajes: 6
+    senales: 6
+    guias: 0
+  k_eval: 4
+generation:
+  reasoner: gpt-4.1-2025-04-14
+  temperature: 0.0
+  seed: 7
+  prompt: reasoner_v1
+  max_retries: 1
+  planner: true
+  planner_mode: llm
+  planner_model: gpt-4.1-mini-2025-04-14
+  planner_prompt: planner_v1
+  planner_top_guias: 2
+  planner_max_pasos: 5
+  timeout_s: 60.0
+postprocess:
+  verifier: true
+  rules:
+  - R1
+  - R2
+  - R3
+  - R4
+  - R5
+  cita_threshold: 0.9
+  bbox_threshold: 0.8
+  soporte_dirigido_margen: null
+extraction:
+  vision_model: gpt-4.1-2025-04-14
+  vision_prompt: vision_v2
+  ocr: tesseract
+  ocr_lang: spa
+  ocr_min_conf: 30.0
+  preprocess: true
+  timeout_s: 90.0

@@ -1,0 +1,4412 @@
+{
+  "snapshot": "kb-v1",
+  "kb_hash": "e44a661a08f44bb2",
+  "created_at": "2026-11-15T14:58:30+00:00",
+  "git_sha": "ee6476c",
+  "config_version": "v1",
+  "config_hash": "3002d1891445",
+  "collection": "kb_v1",
+  "index_layout": "single",
+  "collections": {
+    "casos": "kb_v1",
+    "mensajes": "kb_v1",
+    "senales": "kb_v1",
+    "guias": "kb_v1"
+  },
+  "ingest": {
+    "sources": "data/sources.yaml",
+    "languages": [
+      "es"
+    ],
+    "min_chars_lang_detect": 60,
+    "dedupe": {
+      "exact": true,
+      "near_threshold": 0.95,
+      "near_method": "tfidf"
+    },
+    "pii_por_tipo": {
+      "caso": true,
+      "mensaje": true,
+      "senal": false,
+      "guia": false
+    },
+    "normalize": {
+      "mode": "auto",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "prompt": "normalizer_v1",
+      "min_frase_score": 0.85,
+      "review_fraction": 0.1,
+      "review_seed": 7,
+      "timeout_s": 90.0
+    },
+    "min_casos_por_modalidad": 5
+  },
+  "chunking": {
+    "strategy": "recursive",
+    "chunk_size": 800,
+    "chunk_overlap": 120,
+    "separators": [
+      "\n\n",
+      "\n",
+      ".",
+      " "
+    ]
+  },
+  "embeddings": {
+    "model": "text-embedding-3-small"
+  },
+  "normalizer_version": null,
+  "n_docs": 3496,
+  "n_chunks": 6693,
+  "counts": {
+    "docs_por_tipo": {
+      "senal": 15,
+      "caso": 36,
+      "guia": 33,
+      "mensaje": 3412
+    },
+    "chunks_por_tipo": {
+      "senal": 15,
+      "caso": 409,
+      "guia": 369,
+      "mensaje": 5900
+    },
+    "docs_por_modalidad": {
+      "None": 7,
+      "deuda_multa_falsa": 4,
+      "inversion_falsa": 4,
+      "falso_soporte_acceso_remoto": 4,
+      "encomienda_retenida": 5,
+      "falso_familiar_cambio_numero": 3,
+      "robo_cuenta_whatsapp": 3,
+      "falso_empleo_tareas": 3,
+      "premio_sorteo_falso": 3
+    },
+    "chunks_casos_por_modalidad": {
+      "None": 98,
+      "deuda_multa_falsa": 33,
+      "inversion_falsa": 43,
+      "falso_soporte_acceso_remoto": 76,
+      "encomienda_retenida": 48,
+      "falso_familiar_cambio_numero": 24,
+      "robo_cuenta_whatsapp": 23,
+      "falso_empleo_tareas": 41,
+      "premio_sorteo_falso": 23
+    },
+    "chunks_casos_por_modalidad_entidad": {
+      "None|None": 98,
+      "deuda_multa_falsa|ARCA": 4,
+      "inversion_falsa|None": 43,
+      "falso_soporte_acceso_remoto|None": 76,
+      "encomienda_retenida|None": 37,
+      "encomienda_retenida|Correo Argentino": 11,
+      "falso_familiar_cambio_numero|None": 24,
+      "robo_cuenta_whatsapp|None": 23,
+      "falso_empleo_tareas|None": 41,
+      "deuda_multa_falsa|None": 29,
+      "premio_sorteo_falso|None": 23
+    },
+    "mensajes_por_label": {
+      "estafa": 2332,
+      "legitimo": 1080
+    },
+    "docs_por_fuente_tipo": {
+      "taxonomia": 15,
+      "alerta_oficial": 21,
+      "banco": 4,
+      "prensa": 37,
+      "organismo": 7,
+      "dataset": 3378,
+      "recolectado": 34
+    }
+  },
+  "cobertura": {
+    "min_casos_por_modalidad": 5,
+    "casos_por_modalidad": {
+      "falso_familiar_cambio_numero": 3,
+      "phishing_bancario": 0,
+      "robo_cuenta_whatsapp": 3,
+      "falso_comprador_vendedor": 0,
+      "falso_soporte_acceso_remoto": 4,
+      "premio_sorteo_falso": 3,
+      "inversion_falsa": 4,
+      "falso_empleo_tareas": 3,
+      "encomienda_retenida": 5,
+      "deuda_multa_falsa": 4
+    },
+    "casos_por_modalidad_canal": {
+      "falso_familiar_cambio_numero": {
+        "whatsapp": 3,
+        "sms": 3,
+        "email": 3
+      },
+      "phishing_bancario": {
+        "whatsapp": 0,
+        "sms": 0,
+        "email": 0
+      },
+      "robo_cuenta_whatsapp": {
+        "whatsapp": 3,
+        "sms": 3,
+        "email": 3
+      },
+      "falso_comprador_vendedor": {
+        "whatsapp": 0,
+        "sms": 0,
+        "email": 0
+      },
+      "falso_soporte_acceso_remoto": {
+        "whatsapp": 4,
+        "sms": 4,
+        "email": 4
+      },
+      "premio_sorteo_falso": {
+        "whatsapp": 3,
+        "sms": 3,
+        "email": 3
+      },
+      "inversion_falsa": {
+        "whatsapp": 4,
+        "sms": 4,
+        "email": 4
+      },
+      "falso_empleo_tareas": {
+        "whatsapp": 3,
+        "sms": 3,
+        "email": 3
+      },
+      "encomienda_retenida": {
+        "whatsapp": 5,
+        "sms": 5,
+        "email": 5
+      },
+      "deuda_multa_falsa": {
+        "whatsapp": 3,
+        "sms": 3,
+        "email": 4
+      }
+    },
+    "modalidades_bajo_umbral": [
+      "falso_familiar_cambio_numero",
+      "phishing_bancario",
+      "robo_cuenta_whatsapp",
+      "falso_comprador_vendedor",
+      "falso_soporte_acceso_remoto",
+      "premio_sorteo_falso",
+      "inversion_falsa",
+      "falso_empleo_tareas",
+      "deuda_multa_falsa"
+    ],
+    "modalidades_fuera_de_taxonomia": [
+      "None"
+    ]
+  },
+  "normalizacion": null,
+  "revision_muestra": [],
+  "auditoria_inyeccion": [],
+  "fuentes": [
+    {
+      "id": "senales-taxonomia",
+      "tipo": "senal",
+      "loader": "taxonomia",
+      "fuente_tipo": "taxonomia",
+      "docs_cargados": 15
+    },
+    {
+      "id": "caso-bcra-prevencion",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-bcra-recomendaciones",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-bna-seguridad",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "banco",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-argentina-cibercuidados",
+      "tipo": "caso",
+      "loader": "pdf",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-eset-mercadolibre",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-incibe-smishing",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-arca-alerta-correo",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-cnv-ponzi",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-whatsapp-ministerio",
+      "tipo": "caso",
+      "loader": "pdf",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-bapro-accesos-remotos",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "banco",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-paquete-retenido-chequeado",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-paquete-retenido-eset",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-incibe-hijo-numero-nuevo",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-lanacion-papa-cambie-telefono",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-c5n-falsos-familiares",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-eset-falso-soporte-whatsapp",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-incibe-robo-whatsapp-cadena",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-lanacion-whatsapp-vacunacion",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-eset-cripto-whatsapp",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-infobae-ponzi-recomendaciones",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-incibe-inversiones-falsas",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-lanacion-ofertas-laborales-whatsapp",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-eset-trabajo-tiktok",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-lacapital-ufeci-ofertas-laborales",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-iprofesional-correo-argentino",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-incibe-paquete-aduanas",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-lmneuquen-arca-encomiendas",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-chequeado-arca-multas",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-unidiversidad-falsa-citacion",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-chequeado-multas-qr",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-incibe-iphone-gratis",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-diariojudicial-falsos-sorteos",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-incibe-instagram-ganador",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-eset-falso-banco-supremo",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-lanacion-falsos-agentes-ciberseguridad",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "caso-mpba-operativo-hermes",
+      "tipo": "caso",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-bcra-reclamo",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "organismo",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-ufeci",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "organismo",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-denunciar-delito",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "organismo",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-bna-seguridad",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "banco",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-defensoria-ba-protocolo",
+      "tipo": "guia",
+      "loader": "pdf",
+      "fuente_tipo": "organismo",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-whatsapp-ministerio",
+      "tipo": "guia",
+      "loader": "pdf",
+      "fuente_tipo": "organismo",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-arca-phishing",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "organismo",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-cnv-inversor",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "organismo",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-bapro-accesos-remotos",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "banco",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-incibe-hijo-numero-nuevo",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-lanacion-papa-cambie-telefono",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-c5n-falsos-familiares",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-eset-falso-soporte-whatsapp",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-incibe-robo-whatsapp-cadena",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-lanacion-whatsapp-vacunacion",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-eset-cripto-whatsapp",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-infobae-ponzi-recomendaciones",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-incibe-inversiones-falsas",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-lanacion-ofertas-laborales-whatsapp",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-eset-trabajo-tiktok",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-lacapital-ufeci-ofertas-laborales",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-iprofesional-correo-argentino",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-incibe-paquete-aduanas",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-lmneuquen-arca-encomiendas",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-chequeado-arca-multas",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-unidiversidad-falsa-citacion",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-chequeado-multas-qr",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-incibe-iphone-gratis",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-diariojudicial-falsos-sorteos",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-incibe-instagram-ganador",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-eset-falso-banco-supremo",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-lanacion-falsos-agentes-ciberseguridad",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "prensa",
+      "docs_cargados": 1
+    },
+    {
+      "id": "guia-mpba-operativo-hermes",
+      "tipo": "guia",
+      "loader": "html",
+      "fuente_tipo": "alerta_oficial",
+      "docs_cargados": 1
+    },
+    {
+      "id": "msg-spaphish",
+      "tipo": "mensaje",
+      "loader": "csv",
+      "fuente_tipo": "dataset",
+      "docs_cargados": 1255
+    },
+    {
+      "id": "msg-spearphishmx",
+      "tipo": "mensaje",
+      "loader": "csv",
+      "fuente_tipo": "dataset",
+      "docs_cargados": 3005
+    },
+    {
+      "id": "msg-recolectados",
+      "tipo": "mensaje",
+      "loader": "csv",
+      "fuente_tipo": "recolectado",
+      "docs_cargados": 38
+    }
+  ],
+  "filtros_descartados": {
+    "vacios": 1,
+    "idioma": 147,
+    "dedupe_exacto": 13,
+    "dedupe_cercano": 725
+  },
+  "duplicados_cercanos": [
+    {
+      "doc_id": "spaphish-f2c21a359d1181d9",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9722
+    },
+    {
+      "doc_id": "spaphish-0e389eb8030ea132",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9813
+    },
+    {
+      "doc_id": "spaphish-6b0fb4be6b23e30d",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9559
+    },
+    {
+      "doc_id": "spaphish-c4793ea726f41dce",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9785
+    },
+    {
+      "doc_id": "spaphish-6598b1dcd874d9ed",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.968
+    },
+    {
+      "doc_id": "spaphish-274cd5d85157a02e",
+      "de": "spaphish-6fef66810b856fed",
+      "sim": 0.9647
+    },
+    {
+      "doc_id": "spaphish-66e35f174dc6e0bd",
+      "de": "spaphish-65d78c8eb4ca67b3",
+      "sim": 0.9928
+    },
+    {
+      "doc_id": "spaphish-d6b32f0980142cb1",
+      "de": "spaphish-65d78c8eb4ca67b3",
+      "sim": 0.9992
+    },
+    {
+      "doc_id": "spaphish-caceea558c3ea0d5",
+      "de": "spaphish-15ceddf8f77411b2",
+      "sim": 0.9853
+    },
+    {
+      "doc_id": "spaphish-516c5a1f8380afc7",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9586
+    },
+    {
+      "doc_id": "spaphish-69be13a080157b2c",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9742
+    },
+    {
+      "doc_id": "spaphish-e3ed483e33bb6f7b",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9511
+    },
+    {
+      "doc_id": "spaphish-7bfc8adb0808afa7",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9545
+    },
+    {
+      "doc_id": "spaphish-d4ca25fea5439ade",
+      "de": "spaphish-21fd8640b2ed76db",
+      "sim": 0.9801
+    },
+    {
+      "doc_id": "spaphish-e502882a305f15ce",
+      "de": "spaphish-3e2cc19177592765",
+      "sim": 0.9512
+    },
+    {
+      "doc_id": "spaphish-816e5e594d329c35",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9721
+    },
+    {
+      "doc_id": "spaphish-905309e2d3e2e334",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9675
+    },
+    {
+      "doc_id": "spaphish-6fecffe4ad836d12",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9689
+    },
+    {
+      "doc_id": "spaphish-adcf9f2233255a50",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9686
+    },
+    {
+      "doc_id": "spaphish-86ea6a10ded114c9",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.981
+    },
+    {
+      "doc_id": "spaphish-829af79ef6750c33",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9723
+    },
+    {
+      "doc_id": "spaphish-211726dab40ae4d7",
+      "de": "spaphish-3e2cc19177592765",
+      "sim": 0.9532
+    },
+    {
+      "doc_id": "spaphish-044e2d37ba7f3404",
+      "de": "spaphish-1159018cc32cbaee",
+      "sim": 0.9778
+    },
+    {
+      "doc_id": "spaphish-076f6065216c8817",
+      "de": "spaphish-eed59fb4135d0c90",
+      "sim": 0.9658
+    },
+    {
+      "doc_id": "spaphish-270f701d4aa6b736",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9816
+    },
+    {
+      "doc_id": "spaphish-ddc78ec0647150b3",
+      "de": "spaphish-1159018cc32cbaee",
+      "sim": 0.9845
+    },
+    {
+      "doc_id": "spaphish-662b47a2e5cb0bfb",
+      "de": "spaphish-1159018cc32cbaee",
+      "sim": 0.9791
+    },
+    {
+      "doc_id": "spaphish-4857c45763fb10a3",
+      "de": "spaphish-82629f3c320e74c0",
+      "sim": 0.9924
+    },
+    {
+      "doc_id": "spaphish-4e338ac46da0e68c",
+      "de": "spaphish-caf5f49ab30000a0",
+      "sim": 0.9546
+    },
+    {
+      "doc_id": "spaphish-878de794639b8682",
+      "de": "spaphish-697edf9492585678",
+      "sim": 0.969
+    },
+    {
+      "doc_id": "spaphish-163936c40fc74cf2",
+      "de": "spaphish-7cb99c378f32efbd",
+      "sim": 0.9786
+    },
+    {
+      "doc_id": "spaphish-c23d0d0ee6cd9c55",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9612
+    },
+    {
+      "doc_id": "spaphish-3e8d1ad9ba744a25",
+      "de": "spaphish-5e2578ae9f5fbb0a",
+      "sim": 0.9578
+    },
+    {
+      "doc_id": "spaphish-009c5dc058564264",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.968
+    },
+    {
+      "doc_id": "spaphish-6068ccb1b0687ecd",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9676
+    },
+    {
+      "doc_id": "spaphish-cb0b2228f7e70fc1",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9671
+    },
+    {
+      "doc_id": "spaphish-98e3b3bfcdcb7731",
+      "de": "spaphish-12087bc0be06f232",
+      "sim": 0.9934
+    },
+    {
+      "doc_id": "spaphish-e0a29da3acc53f7d",
+      "de": "spaphish-7cb99c378f32efbd",
+      "sim": 0.9543
+    },
+    {
+      "doc_id": "spaphish-07eff3869743698e",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9835
+    },
+    {
+      "doc_id": "spaphish-fbe17823242770ee",
+      "de": "spaphish-7cb99c378f32efbd",
+      "sim": 0.9541
+    },
+    {
+      "doc_id": "spaphish-392ec3a49c09ae8d",
+      "de": "spaphish-65d78c8eb4ca67b3",
+      "sim": 0.9585
+    },
+    {
+      "doc_id": "spaphish-0dd5e02ce84a953e",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9683
+    },
+    {
+      "doc_id": "spaphish-cb1f7fcc2635840d",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9843
+    },
+    {
+      "doc_id": "spaphish-41a884ac60276cfb",
+      "de": "spaphish-7cb99c378f32efbd",
+      "sim": 0.9618
+    },
+    {
+      "doc_id": "spaphish-85b1ea855ff042f7",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9772
+    },
+    {
+      "doc_id": "spaphish-6b23b60f431d008e",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9651
+    },
+    {
+      "doc_id": "spaphish-c77825bbea79460f",
+      "de": "spaphish-7de105abc5d1cd9d",
+      "sim": 0.9774
+    },
+    {
+      "doc_id": "spaphish-6d54b95e1d19e171",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9502
+    },
+    {
+      "doc_id": "spaphish-203c14ac2fcb475d",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9908
+    },
+    {
+      "doc_id": "spaphish-324d27a4c9f4dec8",
+      "de": "spaphish-ebf8fbaf5a173ae1",
+      "sim": 0.9645
+    },
+    {
+      "doc_id": "spaphish-482d6849e4156977",
+      "de": "spaphish-61180b0f754a38c8",
+      "sim": 0.9887
+    },
+    {
+      "doc_id": "spaphish-a930e71e2e8252b5",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9811
+    },
+    {
+      "doc_id": "spaphish-fc801c2634e70faa",
+      "de": "spaphish-7de105abc5d1cd9d",
+      "sim": 0.9754
+    },
+    {
+      "doc_id": "spaphish-0de79395b27b8f9d",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9677
+    },
+    {
+      "doc_id": "spaphish-4127f1a254f2b377",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9546
+    },
+    {
+      "doc_id": "spaphish-11f436a0fb91fc2b",
+      "de": "spaphish-7de105abc5d1cd9d",
+      "sim": 0.9697
+    },
+    {
+      "doc_id": "spaphish-8062dc3f5d83c24d",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9818
+    },
+    {
+      "doc_id": "spaphish-5f9f1690f416473c",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9881
+    },
+    {
+      "doc_id": "spaphish-873d55775727d2f5",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9542
+    },
+    {
+      "doc_id": "spaphish-218792029aa174d1",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9822
+    },
+    {
+      "doc_id": "spaphish-3721b71ba7eefd7b",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9654
+    },
+    {
+      "doc_id": "spaphish-f7a8365d7277d884",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9551
+    },
+    {
+      "doc_id": "spaphish-10e54fbf4357c533",
+      "de": "spaphish-7de105abc5d1cd9d",
+      "sim": 0.9728
+    },
+    {
+      "doc_id": "spaphish-70e34a009947d1e4",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9763
+    },
+    {
+      "doc_id": "spaphish-c53af7deca57ec77",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9821
+    },
+    {
+      "doc_id": "spaphish-d90812779cc0cf2f",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9738
+    },
+    {
+      "doc_id": "spaphish-033b2e5817f4272d",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9833
+    },
+    {
+      "doc_id": "spaphish-a01646b55794b86a",
+      "de": "spaphish-88e8e4cd1cc96041",
+      "sim": 0.997
+    },
+    {
+      "doc_id": "spaphish-f9b1c92f62923268",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9547
+    },
+    {
+      "doc_id": "spaphish-3ec14a6b68a19fe1",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9541
+    },
+    {
+      "doc_id": "spaphish-08dfcbb1a2f79a17",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9671
+    },
+    {
+      "doc_id": "spaphish-7e2db86e71dbe68a",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.966
+    },
+    {
+      "doc_id": "spaphish-0990b2971e979f5c",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9549
+    },
+    {
+      "doc_id": "spaphish-43a60f136d7fcf72",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9516
+    },
+    {
+      "doc_id": "spaphish-988513ee3806f621",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.955
+    },
+    {
+      "doc_id": "spaphish-6eb369c8fc4aed8d",
+      "de": "spaphish-282b6268640c436e",
+      "sim": 0.9501
+    },
+    {
+      "doc_id": "spaphish-04d73ba5c991edec",
+      "de": "spaphish-369ba8315ded7bd6",
+      "sim": 0.9776
+    },
+    {
+      "doc_id": "spaphish-fa0047c19e7909f7",
+      "de": "spaphish-b2867475cd567faa",
+      "sim": 0.9617
+    },
+    {
+      "doc_id": "spaphish-f3436cdf45b7a292",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9839
+    },
+    {
+      "doc_id": "spaphish-19399fe42379d9c6",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9651
+    },
+    {
+      "doc_id": "spaphish-4c71a84ac28ce262",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9802
+    },
+    {
+      "doc_id": "spaphish-60f9d57ecdad4952",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9833
+    },
+    {
+      "doc_id": "spaphish-e3b35aff1047476f",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.964
+    },
+    {
+      "doc_id": "spaphish-134e667142d9a33d",
+      "de": "spaphish-282b6268640c436e",
+      "sim": 0.9524
+    },
+    {
+      "doc_id": "spaphish-f09d1de078f8bcb6",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9668
+    },
+    {
+      "doc_id": "spaphish-194b944fc42d5fd6",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9672
+    },
+    {
+      "doc_id": "spaphish-0fde991c8fbda60e",
+      "de": "spaphish-5d061dacfa372975",
+      "sim": 0.9922
+    },
+    {
+      "doc_id": "spaphish-3b7421238356bdf4",
+      "de": "spaphish-a17e5e36a9fde9e2",
+      "sim": 0.9743
+    },
+    {
+      "doc_id": "spaphish-9986a9161120fa16",
+      "de": "spaphish-9ed4d7987b28b4de",
+      "sim": 0.9925
+    },
+    {
+      "doc_id": "spaphish-cd3cfdb9ff12d5dd",
+      "de": "spaphish-a8bcf0016d9580f7",
+      "sim": 0.9542
+    },
+    {
+      "doc_id": "spaphish-155a974681a45a29",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9813
+    },
+    {
+      "doc_id": "spaphish-0831711b12968262",
+      "de": "spaphish-a17e5e36a9fde9e2",
+      "sim": 0.9733
+    },
+    {
+      "doc_id": "spaphish-43a69d34278e196d",
+      "de": "spaphish-61180b0f754a38c8",
+      "sim": 0.9827
+    },
+    {
+      "doc_id": "spaphish-d2dfea9279b92b75",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9679
+    },
+    {
+      "doc_id": "spaphish-4e114497ce5c98b9",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9816
+    },
+    {
+      "doc_id": "spaphish-9070f6e2ef9dd72e",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9873
+    },
+    {
+      "doc_id": "spaphish-f101acd3381d73eb",
+      "de": "spaphish-a8bcf0016d9580f7",
+      "sim": 0.9591
+    },
+    {
+      "doc_id": "spaphish-79781debeaafda77",
+      "de": "spaphish-d503f44fcfa5fd75",
+      "sim": 0.9997
+    },
+    {
+      "doc_id": "spaphish-122bf6591791acda",
+      "de": "spaphish-369ba8315ded7bd6",
+      "sim": 0.9639
+    },
+    {
+      "doc_id": "spaphish-ff272731fd77e35c",
+      "de": "spaphish-282b6268640c436e",
+      "sim": 0.954
+    },
+    {
+      "doc_id": "spaphish-43a462cb25bb4d18",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9843
+    },
+    {
+      "doc_id": "spaphish-d39bffc1ec467c79",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9843
+    },
+    {
+      "doc_id": "spaphish-2864bac49314718a",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9843
+    },
+    {
+      "doc_id": "spaphish-0e585d28ac3a5127",
+      "de": "spaphish-a8bcf0016d9580f7",
+      "sim": 0.9514
+    },
+    {
+      "doc_id": "spaphish-1c7ebfa06cd716d0",
+      "de": "spaphish-a17e5e36a9fde9e2",
+      "sim": 0.9706
+    },
+    {
+      "doc_id": "spaphish-bb2c0c6551fc3595",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9826
+    },
+    {
+      "doc_id": "spaphish-af55bf750e13371d",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9737
+    },
+    {
+      "doc_id": "spaphish-5427d7c14831edb1",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9843
+    },
+    {
+      "doc_id": "spaphish-6efd4d703aeb54d0",
+      "de": "spaphish-df110bb107de43c4",
+      "sim": 0.9876
+    },
+    {
+      "doc_id": "spaphish-76daee11a6dfc85f",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.982
+    },
+    {
+      "doc_id": "spaphish-0150af908bd14468",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9738
+    },
+    {
+      "doc_id": "spaphish-bf3b35bbe3006169",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9829
+    },
+    {
+      "doc_id": "spaphish-0b8f004d5c603894",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.967
+    },
+    {
+      "doc_id": "spaphish-a7a7695587f92273",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9865
+    },
+    {
+      "doc_id": "spaphish-6ebda341de44a45e",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9834
+    },
+    {
+      "doc_id": "spaphish-a74fb6761efb7688",
+      "de": "spaphish-6c1362ea30671569",
+      "sim": 0.9588
+    },
+    {
+      "doc_id": "spaphish-02f16bbe82a51fb5",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9692
+    },
+    {
+      "doc_id": "spaphish-b9ac270fe2766d99",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9738
+    },
+    {
+      "doc_id": "spaphish-74bd306f4e5ed9ee",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9848
+    },
+    {
+      "doc_id": "spaphish-aa3c4773e30039fd",
+      "de": "spaphish-2c8ea9856c6281be",
+      "sim": 0.9679
+    },
+    {
+      "doc_id": "spaphish-eae95a784248b5d5",
+      "de": "spaphish-5d061dacfa372975",
+      "sim": 0.9517
+    },
+    {
+      "doc_id": "spaphish-4db4874e5f4ce815",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9841
+    },
+    {
+      "doc_id": "spaphish-857fe482108022fc",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9683
+    },
+    {
+      "doc_id": "spaphish-ff8d35cc86e708b2",
+      "de": "spaphish-df110bb107de43c4",
+      "sim": 0.9591
+    },
+    {
+      "doc_id": "spaphish-203328b5d2711f2c",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9665
+    },
+    {
+      "doc_id": "spaphish-4be57a30f495b8fe",
+      "de": "spaphish-5e2578ae9f5fbb0a",
+      "sim": 0.9771
+    },
+    {
+      "doc_id": "spaphish-11393af5fd8e783c",
+      "de": "spaphish-a8bcf0016d9580f7",
+      "sim": 0.9532
+    },
+    {
+      "doc_id": "spaphish-1f6786a82bfd7651",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9837
+    },
+    {
+      "doc_id": "spaphish-205932c8938edf77",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9709
+    },
+    {
+      "doc_id": "spaphish-bd2dbb3f122d56c6",
+      "de": "spaphish-3a3831fa814c950c",
+      "sim": 0.958
+    },
+    {
+      "doc_id": "spaphish-a8be1f3ec42d4c7a",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9765
+    },
+    {
+      "doc_id": "spaphish-c970d643c18a2963",
+      "de": "spaphish-a17e5e36a9fde9e2",
+      "sim": 0.972
+    },
+    {
+      "doc_id": "spaphish-fa570f228df73d67",
+      "de": "spaphish-14beb3df2c864824",
+      "sim": 0.9517
+    },
+    {
+      "doc_id": "spaphish-42c5d46154cc0715",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9825
+    },
+    {
+      "doc_id": "spaphish-5d295f28a848d3f4",
+      "de": "spaphish-a8bcf0016d9580f7",
+      "sim": 0.9524
+    },
+    {
+      "doc_id": "spaphish-5f254d4acef32004",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9593
+    },
+    {
+      "doc_id": "spaphish-64039aeaf7e6cd7d",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9822
+    },
+    {
+      "doc_id": "spaphish-36e0f448eb9fd464",
+      "de": "spaphish-25940db66ecd935a",
+      "sim": 0.9705
+    },
+    {
+      "doc_id": "spaphish-92e0db331f141c8e",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9845
+    },
+    {
+      "doc_id": "spaphish-2677f0e551a26cdf",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.984
+    },
+    {
+      "doc_id": "spaphish-7c720a3d14d01e77",
+      "de": "spaphish-d75155d901028fc9",
+      "sim": 0.9725
+    },
+    {
+      "doc_id": "spaphish-074b5674d6c031f7",
+      "de": "spaphish-fb899c1f4446d588",
+      "sim": 0.9893
+    },
+    {
+      "doc_id": "spaphish-e9e4eb3fa0679a5e",
+      "de": "spaphish-e99c0eea67c68733",
+      "sim": 0.9889
+    },
+    {
+      "doc_id": "spaphish-15b48da6fe1f5a62",
+      "de": "spaphish-120dd2e72484fd32",
+      "sim": 0.9963
+    },
+    {
+      "doc_id": "spaphish-023479f3689d69f8",
+      "de": "spaphish-a6f5d242ffa515ff",
+      "sim": 0.9877
+    },
+    {
+      "doc_id": "spaphish-56e90428fc899502",
+      "de": "spaphish-22d4c5a4b3d5d2c4",
+      "sim": 0.9775
+    },
+    {
+      "doc_id": "spaphish-56f4b2f13ecbf325",
+      "de": "spaphish-a7b8a3cc19b159e7",
+      "sim": 0.9667
+    },
+    {
+      "doc_id": "spaphish-a3dcd66649395675",
+      "de": "spaphish-a7b8a3cc19b159e7",
+      "sim": 0.9737
+    },
+    {
+      "doc_id": "spaphish-99e549edbb676df1",
+      "de": "spaphish-548b145962723632",
+      "sim": 0.9521
+    },
+    {
+      "doc_id": "spaphish-f58b6e9eaa3c7a9a",
+      "de": "spaphish-8b62f4f3b041945a",
+      "sim": 0.9734
+    },
+    {
+      "doc_id": "spaphish-b161e5f91cbd2d7f",
+      "de": "spaphish-77fae0f4f58ddeba",
+      "sim": 0.9519
+    },
+    {
+      "doc_id": "spaphish-a4ba27f8e4f94cca",
+      "de": "spaphish-d23e46cd36f8f950",
+      "sim": 0.9641
+    },
+    {
+      "doc_id": "spaphish-e67a5f931383cc28",
+      "de": "spaphish-7aca4d790facc996",
+      "sim": 0.9778
+    },
+    {
+      "doc_id": "spaphish-7c83bd5399cbdeed",
+      "de": "spaphish-7aca4d790facc996",
+      "sim": 0.9907
+    },
+    {
+      "doc_id": "spaphish-901dc395fb2de887",
+      "de": "spaphish-e9cd733093ceb86e",
+      "sim": 0.9506
+    },
+    {
+      "doc_id": "spaphish-5f0e3d883f096857",
+      "de": "spaphish-4912e8e1fb3bee7e",
+      "sim": 0.9689
+    },
+    {
+      "doc_id": "spaphish-858ae00a9d33f959",
+      "de": "spaphish-5e64d343942656f7",
+      "sim": 0.9946
+    },
+    {
+      "doc_id": "spearphishmx-55fd6cf97cb1ae0c",
+      "de": "spearphishmx-6af7f9f025cdc14b",
+      "sim": 0.9837
+    },
+    {
+      "doc_id": "spearphishmx-751f63db39eeb2e6",
+      "de": "spaphish-2f68d4d5a20a4a1e",
+      "sim": 0.9574
+    },
+    {
+      "doc_id": "spearphishmx-62044719c7753d95",
+      "de": "spaphish-4ff203c783225089",
+      "sim": 0.9815
+    },
+    {
+      "doc_id": "spearphishmx-d770ded6ad57d9b6",
+      "de": "spearphishmx-9ebade6229d0a97f",
+      "sim": 0.9709
+    },
+    {
+      "doc_id": "spearphishmx-38cc65484931bfe4",
+      "de": "spaphish-bff0e53743113b06",
+      "sim": 0.9663
+    },
+    {
+      "doc_id": "spearphishmx-92f1acb83ce68c69",
+      "de": "spaphish-4ff203c783225089",
+      "sim": 0.982
+    },
+    {
+      "doc_id": "spearphishmx-a62ac9a31e0f2ad2",
+      "de": "spaphish-b6036c8746efa408",
+      "sim": 0.9674
+    },
+    {
+      "doc_id": "spearphishmx-7b638960305e7d3a",
+      "de": "spearphishmx-aadeaf197815f809",
+      "sim": 0.9709
+    },
+    {
+      "doc_id": "spearphishmx-40137d96764f0a91",
+      "de": "spaphish-563439ea68dd7357",
+      "sim": 0.9514
+    },
+    {
+      "doc_id": "spearphishmx-c632bb3de43f0126",
+      "de": "spearphishmx-b332cf986bbc1d86",
+      "sim": 0.9943
+    },
+    {
+      "doc_id": "spearphishmx-87a821b55d971d1d",
+      "de": "spaphish-55cf9378416fe75d",
+      "sim": 0.9823
+    },
+    {
+      "doc_id": "spearphishmx-b3bf1d59526bfc67",
+      "de": "spaphish-b6036c8746efa408",
+      "sim": 0.9707
+    },
+    {
+      "doc_id": "spearphishmx-a02a551a66a8615b",
+      "de": "spearphishmx-c87db9907d21966e",
+      "sim": 0.9694
+    },
+    {
+      "doc_id": "spearphishmx-2ec03bce1976aca0",
+      "de": "spearphishmx-aadeaf197815f809",
+      "sim": 0.9699
+    },
+    {
+      "doc_id": "spearphishmx-d564208826d74a5e",
+      "de": "spaphish-fb899c1f4446d588",
+      "sim": 0.9545
+    },
+    {
+      "doc_id": "spearphishmx-9bf759a5e20ad9de",
+      "de": "spaphish-d25584891f9e87ab",
+      "sim": 0.9511
+    },
+    {
+      "doc_id": "spearphishmx-9a2ac5bf82748807",
+      "de": "spearphishmx-99ed556e8d357228",
+      "sim": 0.9931
+    },
+    {
+      "doc_id": "spearphishmx-9cb8ae505b35a2fe",
+      "de": "spaphish-22d4c5a4b3d5d2c4",
+      "sim": 0.9549
+    },
+    {
+      "doc_id": "spearphishmx-d93c0442870a1571",
+      "de": "spearphishmx-47fee96788aff0fe",
+      "sim": 0.9898
+    },
+    {
+      "doc_id": "spearphishmx-c044332d8062864b",
+      "de": "spaphish-a9afcc3df17de73f",
+      "sim": 0.9941
+    },
+    {
+      "doc_id": "spearphishmx-22410b7be3794bf1",
+      "de": "spearphishmx-171587d1fdb3bb4b",
+      "sim": 0.9709
+    },
+    {
+      "doc_id": "spearphishmx-92201ce8eac056c9",
+      "de": "spaphish-0b2a7d623af10c50",
+      "sim": 0.9561
+    },
+    {
+      "doc_id": "spearphishmx-465d8b2cff5147a5",
+      "de": "spearphishmx-171587d1fdb3bb4b",
+      "sim": 0.957
+    },
+    {
+      "doc_id": "spearphishmx-b4e0754a8fc174b9",
+      "de": "spearphishmx-d47f9e72b73f580e",
+      "sim": 0.956
+    },
+    {
+      "doc_id": "spearphishmx-998243f76862e20f",
+      "de": "spearphishmx-ab273e633578a286",
+      "sim": 0.9628
+    },
+    {
+      "doc_id": "spearphishmx-f56fe86a3fbf4b3b",
+      "de": "spearphishmx-e517eed58fcb820f",
+      "sim": 0.9887
+    },
+    {
+      "doc_id": "spearphishmx-830435b70ead47d9",
+      "de": "spearphishmx-52ff2aa48088d0f7",
+      "sim": 0.9984
+    },
+    {
+      "doc_id": "spearphishmx-c49f8480ced805c2",
+      "de": "spearphishmx-d47f9e72b73f580e",
+      "sim": 0.9669
+    },
+    {
+      "doc_id": "spearphishmx-e13a681f44251e18",
+      "de": "spearphishmx-a3147b18ccb80a3f",
+      "sim": 0.9785
+    },
+    {
+      "doc_id": "spearphishmx-b806f9e46392a61b",
+      "de": "spaphish-ec327bef1e6c42e5",
+      "sim": 0.9804
+    },
+    {
+      "doc_id": "spearphishmx-edc17c7d8b75cc29",
+      "de": "spaphish-1742f895d8a8295a",
+      "sim": 0.9813
+    },
+    {
+      "doc_id": "spearphishmx-5a7fc1c449079a31",
+      "de": "spearphishmx-d4dbaa0fc7058214",
+      "sim": 0.9827
+    },
+    {
+      "doc_id": "spearphishmx-510da7f47bbccb9a",
+      "de": "spearphishmx-5812205c70ffaff3",
+      "sim": 0.959
+    },
+    {
+      "doc_id": "spearphishmx-8270919e56aa85ed",
+      "de": "spaphish-65d78c8eb4ca67b3",
+      "sim": 0.9504
+    },
+    {
+      "doc_id": "spearphishmx-f053f2f2c7473907",
+      "de": "spaphish-131d5737b8f552da",
+      "sim": 0.9879
+    },
+    {
+      "doc_id": "spearphishmx-76e185885f33425d",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9873
+    },
+    {
+      "doc_id": "spearphishmx-34474d0284345275",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9724
+    },
+    {
+      "doc_id": "spearphishmx-6f381186e2d13202",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9813
+    },
+    {
+      "doc_id": "spearphishmx-b355a5ef54ec359a",
+      "de": "spaphish-ffcd5916bf9af552",
+      "sim": 0.9962
+    },
+    {
+      "doc_id": "spearphishmx-8d000814a0a20a2d",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9556
+    },
+    {
+      "doc_id": "spearphishmx-9cbe41337ed4625b",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9789
+    },
+    {
+      "doc_id": "spearphishmx-e4023bfbe5ec88a0",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9838
+    },
+    {
+      "doc_id": "spearphishmx-50a17b6b7b34cddd",
+      "de": "spaphish-237da9094162a7a3",
+      "sim": 0.987
+    },
+    {
+      "doc_id": "spearphishmx-0ac514922c8bd931",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9689
+    },
+    {
+      "doc_id": "spearphishmx-f223bad04ceccf1f",
+      "de": "spaphish-282b6268640c436e",
+      "sim": 0.9762
+    },
+    {
+      "doc_id": "spearphishmx-2332b369e0805257",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9679
+    },
+    {
+      "doc_id": "spearphishmx-fd4c8f73850a980c",
+      "de": "spaphish-282b6268640c436e",
+      "sim": 0.9786
+    },
+    {
+      "doc_id": "spearphishmx-ce0885ba5e83f95a",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9724
+    },
+    {
+      "doc_id": "spearphishmx-ff229c28163d05c4",
+      "de": "spaphish-3ccfad6075369cf6",
+      "sim": 0.9722
+    },
+    {
+      "doc_id": "spearphishmx-9ce524564d761362",
+      "de": "spaphish-d3cf84b0b69f4349",
+      "sim": 0.9679
+    },
+    {
+      "doc_id": "spearphishmx-3ea27c3869d6f495",
+      "de": "spaphish-df110bb107de43c4",
+      "sim": 0.9771
+    },
+    {
+      "doc_id": "spearphishmx-8a37141fe97efcf8",
+      "de": "spaphish-65d78c8eb4ca67b3",
+      "sim": 0.9523
+    },
+    {
+      "doc_id": "spearphishmx-504c43cfdd25e70c",
+      "de": "spearphishmx-c3c58281e87a7139",
+      "sim": 0.9726
+    },
+    {
+      "doc_id": "spearphishmx-df12c20bf6c8ce10",
+      "de": "spearphishmx-c87db9907d21966e",
+      "sim": 0.9852
+    },
+    {
+      "doc_id": "spearphishmx-16e51df5d62bbf04",
+      "de": "spaphish-9d03b8d3f310f4f1",
+      "sim": 0.9815
+    },
+    {
+      "doc_id": "spearphishmx-ec654ecfc16ed32a",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9532
+    },
+    {
+      "doc_id": "spearphishmx-fe46e1e466ae876c",
+      "de": "spaphish-fb9dce98436b23f5",
+      "sim": 0.9696
+    },
+    {
+      "doc_id": "spearphishmx-4d00ed18e62a3a54",
+      "de": "spaphish-65d78c8eb4ca67b3",
+      "sim": 0.9512
+    },
+    {
+      "doc_id": "spearphishmx-c1dfdb94e6d14336",
+      "de": "spaphish-cb7ad988e8eb5e7e",
+      "sim": 0.9606
+    },
+    {
+      "doc_id": "spearphishmx-1ae491646cf0a729",
+      "de": "spaphish-42ef3aa68ecef9b7",
+      "sim": 0.968
+    },
+    {
+      "doc_id": "spearphishmx-d7a8cb33c4e37d92",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9787
+    },
+    {
+      "doc_id": "spearphishmx-15bf2258ccc8e575",
+      "de": "spaphish-65d78c8eb4ca67b3",
+      "sim": 0.9515
+    },
+    {
+      "doc_id": "spearphishmx-a15c56678da72826",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9735
+    },
+    {
+      "doc_id": "spearphishmx-aff6910300548153",
+      "de": "spearphishmx-ee04220c37265c40",
+      "sim": 0.9919
+    },
+    {
+      "doc_id": "spearphishmx-9e7240465100261e",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9533
+    },
+    {
+      "doc_id": "spearphishmx-984ae9c86ecbee71",
+      "de": "spaphish-45466e7157798f29",
+      "sim": 0.988
+    },
+    {
+      "doc_id": "spearphishmx-28ad5c0ac110e150",
+      "de": "spearphishmx-ee04220c37265c40",
+      "sim": 0.9895
+    },
+    {
+      "doc_id": "spearphishmx-008eaa8adce421fc",
+      "de": "spaphish-61180b0f754a38c8",
+      "sim": 0.9913
+    },
+    {
+      "doc_id": "spearphishmx-7846ebe12c7941a2",
+      "de": "spaphish-b998f153dd17d0e7",
+      "sim": 0.9634
+    },
+    {
+      "doc_id": "spearphishmx-3881bc682adcc027",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9817
+    },
+    {
+      "doc_id": "spearphishmx-1c6e4af2fe9b35b5",
+      "de": "spaphish-ae28232c9d3f2177",
+      "sim": 0.9932
+    },
+    {
+      "doc_id": "spearphishmx-488c73006ae72bfd",
+      "de": "spaphish-21fd8640b2ed76db",
+      "sim": 0.9925
+    },
+    {
+      "doc_id": "spearphishmx-f4e68b034d733e69",
+      "de": "spaphish-e498c2c0f6253452",
+      "sim": 0.9958
+    },
+    {
+      "doc_id": "spearphishmx-875f4d2e88eb6d09",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9718
+    },
+    {
+      "doc_id": "spearphishmx-942ee9fe087be3af",
+      "de": "spearphishmx-ee04220c37265c40",
+      "sim": 0.9828
+    },
+    {
+      "doc_id": "spearphishmx-12aca08e8d26d779",
+      "de": "spaphish-3fbcf4061f97592f",
+      "sim": 0.9866
+    },
+    {
+      "doc_id": "spearphishmx-1242c239791aefca",
+      "de": "spaphish-562ce5602b21af29",
+      "sim": 0.982
+    },
+    {
+      "doc_id": "spearphishmx-7f51023beea2f1ff",
+      "de": "spaphish-282b6268640c436e",
+      "sim": 0.9774
+    },
+    {
+      "doc_id": "spearphishmx-a896683e7dfabc60",
+      "de": "spaphish-df110bb107de43c4",
+      "sim": 0.9587
+    },
+    {
+      "doc_id": "spearphishmx-f03fcb360feba387",
+      "de": "spearphishmx-4509d828a0111cb9",
+      "sim": 0.9587
+    },
+    {
+      "doc_id": "spearphishmx-b3abdb3381e577ec",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9527
+    },
+    {
+      "doc_id": "spearphishmx-56a552811058fb96",
+      "de": "spaphish-5e2578ae9f5fbb0a",
+      "sim": 0.9657
+    },
+    {
+      "doc_id": "spearphishmx-4d74bfa90f3da9ef",
+      "de": "spaphish-bf0336db680b051d",
+      "sim": 0.998
+    },
+    {
+      "doc_id": "spearphishmx-1455d95f308bf2d4",
+      "de": "spaphish-2de3a4995989d34d",
+      "sim": 0.9659
+    },
+    {
+      "doc_id": "spearphishmx-b7089ac66a0bb448",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9531
+    },
+    {
+      "doc_id": "spearphishmx-06360178f4a7f867",
+      "de": "spaphish-21fd8640b2ed76db",
+      "sim": 0.9683
+    },
+    {
+      "doc_id": "spearphishmx-a1bbe56811ab1089",
+      "de": "spaphish-562ce5602b21af29",
+      "sim": 0.9655
+    },
+    {
+      "doc_id": "spearphishmx-46bb4d3695e7f5a0",
+      "de": "spaphish-3e7049f40004fe6d",
+      "sim": 0.9731
+    },
+    {
+      "doc_id": "spearphishmx-9778d1dd20370adf",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9512
+    },
+    {
+      "doc_id": "spearphishmx-5e5cc61ad408c472",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9714
+    },
+    {
+      "doc_id": "spearphishmx-35af43e32ef3423f",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9662
+    },
+    {
+      "doc_id": "spearphishmx-a99315ca7d15e6f9",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9661
+    },
+    {
+      "doc_id": "spearphishmx-e8c84a3e1a0b49cf",
+      "de": "spearphishmx-b332cf986bbc1d86",
+      "sim": 0.9633
+    },
+    {
+      "doc_id": "spearphishmx-75cf665b4924fd2e",
+      "de": "spaphish-19c57d7b72f740fc",
+      "sim": 0.9633
+    },
+    {
+      "doc_id": "spearphishmx-9af4fdb029019fb7",
+      "de": "spaphish-c8aa10aa7a700854",
+      "sim": 0.9536
+    },
+    {
+      "doc_id": "spearphishmx-b0d04695c4f6e462",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9663
+    },
+    {
+      "doc_id": "spearphishmx-3c9de9992cf74077",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9651
+    },
+    {
+      "doc_id": "spearphishmx-f257e53d6a55b4f9",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9527
+    },
+    {
+      "doc_id": "spearphishmx-1e48b27a1b1c3ecf",
+      "de": "spearphishmx-9c02af69ddf15981",
+      "sim": 0.9925
+    },
+    {
+      "doc_id": "spearphishmx-ba2f9b004a06f15f",
+      "de": "spaphish-f8129c0c970245ae",
+      "sim": 0.971
+    },
+    {
+      "doc_id": "spearphishmx-f1dd47eb2c8a5d8f",
+      "de": "spaphish-f022fd1c3cb3e068",
+      "sim": 0.9728
+    },
+    {
+      "doc_id": "spearphishmx-4733ec64ad687a23",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9794
+    },
+    {
+      "doc_id": "spearphishmx-001699bc4d07a2a6",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9722
+    },
+    {
+      "doc_id": "spearphishmx-c7dc812cba2d2fbb",
+      "de": "spaphish-7cb99c378f32efbd",
+      "sim": 0.9832
+    },
+    {
+      "doc_id": "spearphishmx-a63152a876f8058e",
+      "de": "spearphishmx-eda0babb63ebb77c",
+      "sim": 0.9813
+    },
+    {
+      "doc_id": "spearphishmx-2a7acf41a6e6075f",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9805
+    },
+    {
+      "doc_id": "spearphishmx-db51164da509bd10",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9557
+    },
+    {
+      "doc_id": "spearphishmx-650852fba44a5668",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9725
+    },
+    {
+      "doc_id": "spearphishmx-13d159e7a4e41e00",
+      "de": "spaphish-7cb99c378f32efbd",
+      "sim": 0.9622
+    },
+    {
+      "doc_id": "spearphishmx-8b88433aa1c6f699",
+      "de": "spaphish-369ba8315ded7bd6",
+      "sim": 0.9873
+    },
+    {
+      "doc_id": "spearphishmx-495dba7942421583",
+      "de": "spaphish-255b2ce1745ea09c",
+      "sim": 0.9942
+    },
+    {
+      "doc_id": "spearphishmx-6f1c0e4f9c7d918b",
+      "de": "spaphish-87fb9d6aaf3bdb0b",
+      "sim": 0.984
+    },
+    {
+      "doc_id": "spearphishmx-1caa2f1c8a89122d",
+      "de": "spaphish-3004d34a4d882480",
+      "sim": 0.9944
+    },
+    {
+      "doc_id": "spearphishmx-bee8a7cc2d3399b1",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9752
+    },
+    {
+      "doc_id": "spearphishmx-c7713e244fe2f345",
+      "de": "spaphish-9ed4d7987b28b4de",
+      "sim": 0.9727
+    },
+    {
+      "doc_id": "spearphishmx-ebbd9137f47007b2",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9515
+    },
+    {
+      "doc_id": "spearphishmx-dd5678cdc91764dd",
+      "de": "spaphish-25940db66ecd935a",
+      "sim": 0.9532
+    },
+    {
+      "doc_id": "spearphishmx-548bc384f2bd84c8",
+      "de": "spaphish-d503f44fcfa5fd75",
+      "sim": 0.966
+    },
+    {
+      "doc_id": "spearphishmx-22c5339ee95b5b1a",
+      "de": "spearphishmx-0d6395cad31f4282",
+      "sim": 0.9728
+    },
+    {
+      "doc_id": "spearphishmx-ac6dee726fe203a9",
+      "de": "spaphish-ea92607fbeebc3f7",
+      "sim": 0.9676
+    },
+    {
+      "doc_id": "spearphishmx-634bd989c8af3c69",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9534
+    },
+    {
+      "doc_id": "spearphishmx-33299d986c3fd777",
+      "de": "spaphish-88e8e4cd1cc96041",
+      "sim": 0.9982
+    },
+    {
+      "doc_id": "spearphishmx-20573ab958c5648c",
+      "de": "spaphish-fecaba3e6c3df0f3",
+      "sim": 0.9924
+    },
+    {
+      "doc_id": "spearphishmx-1d46d5f425ba5104",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9811
+    },
+    {
+      "doc_id": "spearphishmx-419b47c680fc0dc4",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9834
+    },
+    {
+      "doc_id": "spearphishmx-df6471df401ecd70",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9782
+    },
+    {
+      "doc_id": "spearphishmx-798f41f4fda6a40f",
+      "de": "spaphish-4ff203c783225089",
+      "sim": 0.9872
+    },
+    {
+      "doc_id": "spearphishmx-ac9cb45a21803f67",
+      "de": "spaphish-77b9b05178a73b9b",
+      "sim": 0.9684
+    },
+    {
+      "doc_id": "spearphishmx-b4cd3694bcaa0c30",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9516
+    },
+    {
+      "doc_id": "spearphishmx-5fffeabee1d7efb3",
+      "de": "spaphish-184eb06710c9e642",
+      "sim": 0.9502
+    },
+    {
+      "doc_id": "spearphishmx-35d1c0b690aee194",
+      "de": "spaphish-5d061dacfa372975",
+      "sim": 0.9595
+    },
+    {
+      "doc_id": "spearphishmx-64ce18ec5ffcdc5f",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9721
+    },
+    {
+      "doc_id": "spearphishmx-27f2dfed5f13a913",
+      "de": "spearphishmx-6a1c4f3be8795cc9",
+      "sim": 0.9787
+    },
+    {
+      "doc_id": "spearphishmx-ab72394a339123d3",
+      "de": "spaphish-affa43acdcaa8390",
+      "sim": 0.995
+    },
+    {
+      "doc_id": "spearphishmx-4e96a360efbc9aa9",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9835
+    },
+    {
+      "doc_id": "spearphishmx-771cda47c5f669ad",
+      "de": "spaphish-d6e82524b22544ce",
+      "sim": 0.9825
+    },
+    {
+      "doc_id": "spearphishmx-af7ac0deaa9e2938",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9539
+    },
+    {
+      "doc_id": "spearphishmx-0a4dbd842a38fc86",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9619
+    },
+    {
+      "doc_id": "spearphishmx-b07e3fc8e16de3e6",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9827
+    },
+    {
+      "doc_id": "spearphishmx-64859346a40306a8",
+      "de": "spearphishmx-df0563c3cc610d1e",
+      "sim": 0.9977
+    },
+    {
+      "doc_id": "spearphishmx-201afba5ccbf09fb",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.965
+    },
+    {
+      "doc_id": "spearphishmx-93a9149bc4a61703",
+      "de": "spearphishmx-6fb5f621a2d72576",
+      "sim": 0.9501
+    },
+    {
+      "doc_id": "spearphishmx-a3dce8f3e66dd919",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9831
+    },
+    {
+      "doc_id": "spearphishmx-732e7fc992508705",
+      "de": "spearphishmx-1d58e050d1842b60",
+      "sim": 0.9767
+    },
+    {
+      "doc_id": "spearphishmx-dbd320da47ff280b",
+      "de": "spaphish-9c67b1dc576141c2",
+      "sim": 0.9797
+    },
+    {
+      "doc_id": "spearphishmx-6b34d3d38377db66",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9817
+    },
+    {
+      "doc_id": "spearphishmx-ebd333f4470da316",
+      "de": "spaphish-a9f7bab5b7759241",
+      "sim": 0.9512
+    },
+    {
+      "doc_id": "spearphishmx-05b73653e672b24e",
+      "de": "spaphish-7cb99c378f32efbd",
+      "sim": 0.9615
+    },
+    {
+      "doc_id": "spearphishmx-fa82dd501ebc3699",
+      "de": "spaphish-89f43e338bfcd616",
+      "sim": 0.9609
+    },
+    {
+      "doc_id": "spearphishmx-86724ef20ad210de",
+      "de": "spaphish-5e2578ae9f5fbb0a",
+      "sim": 0.9646
+    },
+    {
+      "doc_id": "spearphishmx-1f601bf7a90a02e5",
+      "de": "spearphishmx-6c16695cffc4cf2d",
+      "sim": 0.9531
+    },
+    {
+      "doc_id": "spearphishmx-12c472fa45d4ed8f",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9582
+    },
+    {
+      "doc_id": "spearphishmx-e1a0c3fe21ce1c47",
+      "de": "spaphish-f3a303c68cf414e3",
+      "sim": 0.9932
+    },
+    {
+      "doc_id": "spearphishmx-ada4133e3c645308",
+      "de": "spaphish-88e8ac972f7edd6a",
+      "sim": 0.9713
+    },
+    {
+      "doc_id": "spearphishmx-e95e72a808cd43e6",
+      "de": "spaphish-c0c4210c073baaa6",
+      "sim": 0.9898
+    },
+    {
+      "doc_id": "spearphishmx-d79572e35fd5f81d",
+      "de": "spaphish-2de3a4995989d34d",
+      "sim": 0.9953
+    },
+    {
+      "doc_id": "spearphishmx-571c8d9a15176c47",
+      "de": "spaphish-bfdcd838ebcea05a",
+      "sim": 0.9937
+    },
+    {
+      "doc_id": "spearphishmx-46b1c1a3a8e026c6",
+      "de": "spaphish-817149abae8d7b5c",
+      "sim": 0.9739
+    },
+    {
+      "doc_id": "spearphishmx-718a91f6c83eaeaf",
+      "de": "spaphish-12926f805f9faae8",
+      "sim": 0.9889
+    },
+    {
+      "doc_id": "spearphishmx-d64bb52466337f3e",
+      "de": "spaphish-4cc10fefc356385f",
+      "sim": 0.9926
+    },
+    {
+      "doc_id": "spearphishmx-c8908554b1c02bf2",
+      "de": "spaphish-12087bc0be06f232",
+      "sim": 0.996
+    },
+    {
+      "doc_id": "spearphishmx-b61972e0d1197ab4",
+      "de": "spaphish-40e5aefb8a32d9ef",
+      "sim": 0.9841
+    },
+    {
+      "doc_id": "spearphishmx-b9dd8b97b299f6bb",
+      "de": "spearphishmx-a3b191908d57dd15",
+      "sim": 0.9862
+    },
+    {
+      "doc_id": "spearphishmx-2ca186885613ec05",
+      "de": "spaphish-4e2aa531ef0ba9b7",
+      "sim": 0.9652
+    },
+    {
+      "doc_id": "spearphishmx-996f46661fecd764",
+      "de": "spaphish-d1fe53ab9774ce05",
+      "sim": 0.9698
+    },
+    {
+      "doc_id": "spearphishmx-316ca46f26f0b7b0",
+      "de": "spaphish-d15f8968617c2aa0",
+      "sim": 0.9773
+    },
+    {
+      "doc_id": "spearphishmx-1a5685da1f7c5532",
+      "de": "spaphish-245168cf79386735",
+      "sim": 0.9914
+    },
+    {
+      "doc_id": "spearphishmx-a9e75f9008349e09",
+      "de": "spaphish-52fe7f5699fa0abe",
+      "sim": 0.9782
+    },
+    {
+      "doc_id": "spearphishmx-b3dd6ff7763ff716",
+      "de": "spaphish-12087bc0be06f232",
+      "sim": 0.9893
+    },
+    {
+      "doc_id": "spearphishmx-8825b3236ac91c02",
+      "de": "spearphishmx-415494e04a910b53",
+      "sim": 0.9903
+    },
+    {
+      "doc_id": "spearphishmx-d26c0d33279aac4a",
+      "de": "spaphish-7cb99c378f32efbd",
+      "sim": 0.958
+    },
+    {
+      "doc_id": "spearphishmx-5f59138c67693cb1",
+      "de": "spearphishmx-4509d828a0111cb9",
+      "sim": 0.9604
+    },
+    {
+      "doc_id": "spearphishmx-f8e50a1ea988b1b5",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9833
+    },
+    {
+      "doc_id": "spearphishmx-09955271382e7207",
+      "de": "spaphish-7cb99c378f32efbd",
+      "sim": 0.9581
+    },
+    {
+      "doc_id": "spearphishmx-e3b22d41f0b21b77",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.981
+    },
+    {
+      "doc_id": "spearphishmx-170385c9b14f15e3",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9689
+    },
+    {
+      "doc_id": "spearphishmx-391ac60582d3de3e",
+      "de": "spaphish-7becf922567630d9",
+      "sim": 0.9686
+    },
+    {
+      "doc_id": "spearphishmx-58f8293bd8c6c986",
+      "de": "spaphish-65d78c8eb4ca67b3",
+      "sim": 0.9554
+    },
+    {
+      "doc_id": "spearphishmx-b8e021c8cd6d1018",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9648
+    },
+    {
+      "doc_id": "spearphishmx-6de7f2235750a07f",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9831
+    },
+    {
+      "doc_id": "spearphishmx-2036112a421fc1a7",
+      "de": "spaphish-3a51dcd750716660",
+      "sim": 0.9932
+    },
+    {
+      "doc_id": "spearphishmx-f965fabf3410f00c",
+      "de": "spaphish-c0de2a39c02aae02",
+      "sim": 0.9688
+    },
+    {
+      "doc_id": "spearphishmx-ca9fe4a52b5f350f",
+      "de": "spaphish-7cb99c378f32efbd",
+      "sim": 0.9585
+    },
+    {
+      "doc_id": "spearphishmx-20329a9bc8b6fbf1",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9739
+    },
+    {
+      "doc_id": "spearphishmx-fc0ce4e32e7f6fd3",
+      "de": "spaphish-55a2879feb87f118",
+      "sim": 0.99
+    },
+    {
+      "doc_id": "spearphishmx-6f8b992045740208",
+      "de": "spaphish-dba820c1aa7d0461",
+      "sim": 0.9943
+    },
+    {
+      "doc_id": "spearphishmx-faa83345e0777f21",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9636
+    },
+    {
+      "doc_id": "spearphishmx-33fd3596d2b9147d",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9692
+    },
+    {
+      "doc_id": "spearphishmx-40ed78e2b14c00fe",
+      "de": "spaphish-2925e1f7748738ca",
+      "sim": 0.956
+    },
+    {
+      "doc_id": "spearphishmx-08a8928f9bf084db",
+      "de": "spearphishmx-975cb2a3b98c01b8",
+      "sim": 0.9751
+    },
+    {
+      "doc_id": "spearphishmx-d0337eb739bd5fb9",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9888
+    },
+    {
+      "doc_id": "spearphishmx-eb56052ccd6c058c",
+      "de": "spaphish-d4d4a18a56b12a10",
+      "sim": 0.9537
+    },
+    {
+      "doc_id": "spearphishmx-ea05dcfd75c9185e",
+      "de": "spaphish-e611da2ad45b63f6",
+      "sim": 0.9867
+    },
+    {
+      "doc_id": "spearphishmx-72479962839d4419",
+      "de": "spaphish-3a3831fa814c950c",
+      "sim": 0.9885
+    },
+    {
+      "doc_id": "spearphishmx-b61b9ad02a4278ab",
+      "de": "spaphish-61180b0f754a38c8",
+      "sim": 0.9894
+    },
+    {
+      "doc_id": "spearphishmx-4d5299da60c9fc99",
+      "de": "spaphish-1a3d3aa0ace7288b",
+      "sim": 0.9731
+    },
+    {
+      "doc_id": "spearphishmx-1a3e6954391de22c",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9813
+    },
+    {
+      "doc_id": "spearphishmx-e5401836cadf0e2e",
+      "de": "spaphish-282b6268640c436e",
+      "sim": 0.9867
+    },
+    {
+      "doc_id": "spearphishmx-d914b38c3c9dc3d5",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9536
+    },
+    {
+      "doc_id": "spearphishmx-52a625fd33c5d1e1",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9681
+    },
+    {
+      "doc_id": "spearphishmx-6e81642a7a69ef46",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.968
+    },
+    {
+      "doc_id": "spearphishmx-dc6290739402f8fd",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9513
+    },
+    {
+      "doc_id": "spearphishmx-feb2b6ea479886dc",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9712
+    },
+    {
+      "doc_id": "spearphishmx-25d004f526153482",
+      "de": "spaphish-562ce5602b21af29",
+      "sim": 0.9905
+    },
+    {
+      "doc_id": "spearphishmx-1511074f0aae418d",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9594
+    },
+    {
+      "doc_id": "spearphishmx-5f7d2b7319aacadd",
+      "de": "spearphishmx-a3b191908d57dd15",
+      "sim": 0.9759
+    },
+    {
+      "doc_id": "spearphishmx-54ca8dcebccad6da",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9809
+    },
+    {
+      "doc_id": "spearphishmx-f64fb42131347efd",
+      "de": "spaphish-e7d5c99d2f0e901d",
+      "sim": 0.9949
+    },
+    {
+      "doc_id": "spearphishmx-73240b2dbd94909b",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9871
+    },
+    {
+      "doc_id": "spearphishmx-aaa4a3301b8c1fdf",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9534
+    },
+    {
+      "doc_id": "spearphishmx-9037b22e0d2fbfdf",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9816
+    },
+    {
+      "doc_id": "spearphishmx-62ddca0af3b34e3c",
+      "de": "spaphish-be621b7b77d87775",
+      "sim": 0.9785
+    },
+    {
+      "doc_id": "spearphishmx-830e93f2e0ec7690",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9527
+    },
+    {
+      "doc_id": "spearphishmx-b50d0a2602ce094c",
+      "de": "spaphish-da2df3e8bd5cfc9e",
+      "sim": 0.9948
+    },
+    {
+      "doc_id": "spearphishmx-7a11ce8b56013adb",
+      "de": "spearphishmx-1261e2d5abd1c276",
+      "sim": 0.9809
+    },
+    {
+      "doc_id": "spearphishmx-1180e47b3ebac99d",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.961
+    },
+    {
+      "doc_id": "spearphishmx-27ea05b01523eeaf",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9728
+    },
+    {
+      "doc_id": "spearphishmx-11002f878cd7a057",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9819
+    },
+    {
+      "doc_id": "spearphishmx-c9be8dac9547a9d9",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9735
+    },
+    {
+      "doc_id": "spearphishmx-f9371b7f4375ccf1",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.984
+    },
+    {
+      "doc_id": "spearphishmx-40dd8d4b0461a542",
+      "de": "spaphish-88e8e4cd1cc96041",
+      "sim": 0.9987
+    },
+    {
+      "doc_id": "spearphishmx-97f3cf3828856540",
+      "de": "spaphish-369ba8315ded7bd6",
+      "sim": 0.9931
+    },
+    {
+      "doc_id": "spearphishmx-dc55451f86130f8f",
+      "de": "spaphish-282b6268640c436e",
+      "sim": 0.9774
+    },
+    {
+      "doc_id": "spearphishmx-8f23d2e9cb3098d8",
+      "de": "spaphish-e0345cc83011dae4",
+      "sim": 0.9923
+    },
+    {
+      "doc_id": "spearphishmx-42cf1396e5af6697",
+      "de": "spaphish-f6787b8daabab7fe",
+      "sim": 0.9674
+    },
+    {
+      "doc_id": "spearphishmx-001fbd22f470a330",
+      "de": "spaphish-55152b14d8ae4bb2",
+      "sim": 0.9543
+    },
+    {
+      "doc_id": "spearphishmx-0aab59ab8dbf607d",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9512
+    },
+    {
+      "doc_id": "spearphishmx-3ccbf55fb7ff1bfb",
+      "de": "spearphishmx-afa7a02a79184e0b",
+      "sim": 0.9761
+    },
+    {
+      "doc_id": "spearphishmx-014a13b6e5afcbe7",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9531
+    },
+    {
+      "doc_id": "spearphishmx-62e9ccfd2f737953",
+      "de": "spaphish-d9e537e58794cd4a",
+      "sim": 0.9899
+    },
+    {
+      "doc_id": "spearphishmx-2642fc4ddb9de22f",
+      "de": "spaphish-a2b65a36f9817bd5",
+      "sim": 0.9826
+    },
+    {
+      "doc_id": "spearphishmx-199366c77361066d",
+      "de": "spaphish-b0d10f3417626584",
+      "sim": 0.9868
+    },
+    {
+      "doc_id": "spearphishmx-644e4f1cdc8929a2",
+      "de": "spaphish-c121ee79d479f36e",
+      "sim": 0.9948
+    },
+    {
+      "doc_id": "spearphishmx-d4cd3dabad088969",
+      "de": "spaphish-d0ef068787bb95fc",
+      "sim": 0.9689
+    },
+    {
+      "doc_id": "spearphishmx-d8fb0b9b17e44dfa",
+      "de": "spaphish-7045ee9a8a72c0a0",
+      "sim": 0.9819
+    },
+    {
+      "doc_id": "spearphishmx-dfe253ce2d13583c",
+      "de": "spaphish-0011e12bc1db64f3",
+      "sim": 0.9559
+    },
+    {
+      "doc_id": "spearphishmx-d3ec9d9d246b5dd3",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9509
+    },
+    {
+      "doc_id": "spearphishmx-abb9e6f63c6bedf4",
+      "de": "spaphish-216ef9e4c0ca5b6e",
+      "sim": 0.997
+    },
+    {
+      "doc_id": "spearphishmx-dc339a88af4d7f8b",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9529
+    },
+    {
+      "doc_id": "spearphishmx-3231871ecafd80e1",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9653
+    },
+    {
+      "doc_id": "spearphishmx-25f8d79646abd193",
+      "de": "spearphishmx-4d80fc706b4607bf",
+      "sim": 0.9751
+    },
+    {
+      "doc_id": "spearphishmx-c3ba65d8299f84c1",
+      "de": "spaphish-432328c4d8aef85c",
+      "sim": 0.9632
+    },
+    {
+      "doc_id": "spearphishmx-5c01fb851c21821f",
+      "de": "spaphish-282b6268640c436e",
+      "sim": 0.9763
+    },
+    {
+      "doc_id": "spearphishmx-d1b785c189bab887",
+      "de": "spaphish-369ba8315ded7bd6",
+      "sim": 0.9602
+    },
+    {
+      "doc_id": "spearphishmx-8c58b8e69531e67a",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9831
+    },
+    {
+      "doc_id": "spearphishmx-7565283b22fb5c4b",
+      "de": "spaphish-c2f8a22919552d85",
+      "sim": 0.9599
+    },
+    {
+      "doc_id": "spearphishmx-c3b0935ab8b6bc24",
+      "de": "spaphish-11eb4746d83db5fa",
+      "sim": 0.989
+    },
+    {
+      "doc_id": "spearphishmx-b200f06353f15016",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9795
+    },
+    {
+      "doc_id": "spearphishmx-66a1c92208d382c0",
+      "de": "spaphish-dade8b2b6dcf467d",
+      "sim": 0.9882
+    },
+    {
+      "doc_id": "spearphishmx-be6061c3e53cde16",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9817
+    },
+    {
+      "doc_id": "spearphishmx-c59c21214c5fa025",
+      "de": "spaphish-749079f8f4cd3f43",
+      "sim": 0.9599
+    },
+    {
+      "doc_id": "spearphishmx-8911b0af4182acfa",
+      "de": "spearphishmx-92c481d98d705993",
+      "sim": 0.9817
+    },
+    {
+      "doc_id": "spearphishmx-4ddc7418efc90dff",
+      "de": "spaphish-282b6268640c436e",
+      "sim": 0.985
+    },
+    {
+      "doc_id": "spearphishmx-a50b646b68087ed9",
+      "de": "spaphish-44726064843a7f37",
+      "sim": 0.9853
+    },
+    {
+      "doc_id": "spearphishmx-03d0e0eb23d7dbf8",
+      "de": "spaphish-bff0e53743113b06",
+      "sim": 0.9715
+    },
+    {
+      "doc_id": "spearphishmx-6db0479aa745a423",
+      "de": "spaphish-6ac788d834000e2d",
+      "sim": 0.9916
+    },
+    {
+      "doc_id": "spearphishmx-faa3f15decff63d9",
+      "de": "spaphish-282b6268640c436e",
+      "sim": 0.9829
+    },
+    {
+      "doc_id": "spearphishmx-9eeb5621de50e569",
+      "de": "spaphish-282b6268640c436e",
+      "sim": 0.9631
+    },
+    {
+      "doc_id": "spearphishmx-a804f7da0aa3dea3",
+      "de": "spearphishmx-f8b98ae90c2d96dc",
+      "sim": 0.9748
+    },
+    {
+      "doc_id": "spearphishmx-95e55ec34959eb3d",
+      "de": "spaphish-d5efdc7d01e425fe",
+      "sim": 0.9631
+    },
+    {
+      "doc_id": "spearphishmx-69593beb70b5b64a",
+      "de": "spaphish-d2de810eb70109c5",
+      "sim": 0.9637
+    },
+    {
+      "doc_id": "spearphishmx-1801be4961925aa3",
+      "de": "spaphish-4ff203c783225089",
+      "sim": 0.9875
+    },
+    {
+      "doc_id": "spearphishmx-274c232401ef76fe",
+      "de": "spaphish-3ccfad6075369cf6",
+      "sim": 0.9647
+    },
+    {
+      "doc_id": "spearphishmx-24c7ab66450a1391",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9662
+    },
+    {
+      "doc_id": "spearphishmx-2bad743243174643",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9602
+    },
+    {
+      "doc_id": "spearphishmx-5189b8eca517d04a",
+      "de": "spaphish-865f9722a59a7748",
+      "sim": 0.9829
+    },
+    {
+      "doc_id": "spearphishmx-e81bcf4d043f8910",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9524
+    },
+    {
+      "doc_id": "spearphishmx-9cac0b4355300fa2",
+      "de": "spaphish-3e9de7651ceda00b",
+      "sim": 0.9866
+    },
+    {
+      "doc_id": "spearphishmx-22f208292c8ee694",
+      "de": "spaphish-a6adb387ecb8a1c4",
+      "sim": 0.9762
+    },
+    {
+      "doc_id": "spearphishmx-679959bec6e30bc6",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9598
+    },
+    {
+      "doc_id": "spearphishmx-6d5b1e80cc52dd60",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9511
+    },
+    {
+      "doc_id": "spearphishmx-f703ca01d709308f",
+      "de": "spaphish-e8e48e3f25f132f8",
+      "sim": 0.9884
+    },
+    {
+      "doc_id": "spearphishmx-b4e6892d2911425e",
+      "de": "spaphish-9ed4d7987b28b4de",
+      "sim": 0.9601
+    },
+    {
+      "doc_id": "spearphishmx-c5968da53821c505",
+      "de": "spaphish-b6036c8746efa408",
+      "sim": 0.9822
+    },
+    {
+      "doc_id": "spearphishmx-c54562403f87e3a1",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9508
+    },
+    {
+      "doc_id": "spearphishmx-f5de313211f983e5",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9809
+    },
+    {
+      "doc_id": "spearphishmx-9b80d404ac09ff80",
+      "de": "spaphish-ed17a5bd8f166aae",
+      "sim": 0.9964
+    },
+    {
+      "doc_id": "spearphishmx-32fee148bff6368c",
+      "de": "spearphishmx-aadeaf197815f809",
+      "sim": 0.9597
+    },
+    {
+      "doc_id": "spearphishmx-5283a13062510628",
+      "de": "spaphish-563439ea68dd7357",
+      "sim": 0.9615
+    },
+    {
+      "doc_id": "spearphishmx-39253b43a6f5b3c5",
+      "de": "spaphish-161aa4d2be0dc149",
+      "sim": 0.9838
+    },
+    {
+      "doc_id": "spearphishmx-39e4a45d1b5a4571",
+      "de": "spaphish-df110bb107de43c4",
+      "sim": 0.9792
+    },
+    {
+      "doc_id": "spearphishmx-859836fecb57f62e",
+      "de": "spearphishmx-a2797119a89c67c9",
+      "sim": 0.9961
+    },
+    {
+      "doc_id": "spearphishmx-cf068b9b998f34df",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9829
+    },
+    {
+      "doc_id": "spearphishmx-dceafc712dc0a265",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9538
+    },
+    {
+      "doc_id": "spearphishmx-c3bd7454461c09a8",
+      "de": "spearphishmx-9722f255f90f39ff",
+      "sim": 0.9605
+    },
+    {
+      "doc_id": "spearphishmx-a6b9666cb7d00976",
+      "de": "spaphish-61180b0f754a38c8",
+      "sim": 0.9846
+    },
+    {
+      "doc_id": "spearphishmx-bddf7e229466de09",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9672
+    },
+    {
+      "doc_id": "spearphishmx-8d84b39270debfd6",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9808
+    },
+    {
+      "doc_id": "spearphishmx-0ed4958456d1c5eb",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9872
+    },
+    {
+      "doc_id": "spearphishmx-8fb53e68bd0abf09",
+      "de": "spaphish-86dd9c28792d8b46",
+      "sim": 0.9925
+    },
+    {
+      "doc_id": "spearphishmx-f4bc37939405246d",
+      "de": "spaphish-8e994310533c9189",
+      "sim": 0.9773
+    },
+    {
+      "doc_id": "spearphishmx-c84330378725c18f",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9528
+    },
+    {
+      "doc_id": "spearphishmx-9ace78c65f6465f8",
+      "de": "spaphish-ff5952dc8f9311c9",
+      "sim": 0.9674
+    },
+    {
+      "doc_id": "spearphishmx-f9b4cf9a9061bc78",
+      "de": "spaphish-d6d5e760668ad8c5",
+      "sim": 0.9604
+    },
+    {
+      "doc_id": "spearphishmx-556cae668b898e23",
+      "de": "spaphish-9f69b66e439f5b16",
+      "sim": 0.9699
+    },
+    {
+      "doc_id": "spearphishmx-c373200e2de6c471",
+      "de": "spaphish-d503f44fcfa5fd75",
+      "sim": 0.9749
+    },
+    {
+      "doc_id": "spearphishmx-1baf3171ffe3b5bb",
+      "de": "spaphish-d55d1d30dfc157cf",
+      "sim": 0.9902
+    },
+    {
+      "doc_id": "spearphishmx-f4406c38163afca0",
+      "de": "spaphish-1cef92d04aadc450",
+      "sim": 0.9695
+    },
+    {
+      "doc_id": "spearphishmx-fdf2f35083970a7e",
+      "de": "spaphish-c795b2cbdf59ab90",
+      "sim": 0.9783
+    },
+    {
+      "doc_id": "spearphishmx-6c35a238d404a765",
+      "de": "spearphishmx-b332cf986bbc1d86",
+      "sim": 0.9642
+    },
+    {
+      "doc_id": "spearphishmx-f4f3e443f3420caa",
+      "de": "spaphish-e16d4f4d7fd545d3",
+      "sim": 0.9761
+    },
+    {
+      "doc_id": "spearphishmx-95374f21db01486d",
+      "de": "spaphish-369ba8315ded7bd6",
+      "sim": 0.9599
+    },
+    {
+      "doc_id": "spearphishmx-2499e00a4e74c724",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9541
+    },
+    {
+      "doc_id": "spearphishmx-01b0900460400b42",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9824
+    },
+    {
+      "doc_id": "spearphishmx-9c7ea149f20dd49e",
+      "de": "spaphish-19570147d411c835",
+      "sim": 0.993
+    },
+    {
+      "doc_id": "spearphishmx-d004af528a598ff1",
+      "de": "spaphish-3cc5aab98245eea5",
+      "sim": 0.9629
+    },
+    {
+      "doc_id": "spearphishmx-2da1084d8db2ee21",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9827
+    },
+    {
+      "doc_id": "spearphishmx-418c1ed6368f1f87",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9825
+    },
+    {
+      "doc_id": "spearphishmx-005c215a0c3fd19e",
+      "de": "spaphish-282b6268640c436e",
+      "sim": 0.9748
+    },
+    {
+      "doc_id": "spearphishmx-f6a9e20fb219e42a",
+      "de": "spaphish-573d309d0f1da202",
+      "sim": 0.9937
+    },
+    {
+      "doc_id": "spearphishmx-3118cd6e4eca2ae2",
+      "de": "spaphish-49bce6673542fac2",
+      "sim": 0.9503
+    },
+    {
+      "doc_id": "spearphishmx-237dca532217b664",
+      "de": "spearphishmx-3b76e3fd5807d16a",
+      "sim": 0.9879
+    },
+    {
+      "doc_id": "spearphishmx-13c28695143d77f9",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9536
+    },
+    {
+      "doc_id": "spearphishmx-aeb9f24b10e9114f",
+      "de": "spaphish-c1124d3233c7f3eb",
+      "sim": 0.9612
+    },
+    {
+      "doc_id": "spearphishmx-8ef4d0ff4a3f3096",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.981
+    },
+    {
+      "doc_id": "spearphishmx-621b949796a509a3",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9726
+    },
+    {
+      "doc_id": "spearphishmx-4bb9f42b25b62c6b",
+      "de": "spaphish-9ed4d7987b28b4de",
+      "sim": 0.968
+    },
+    {
+      "doc_id": "spearphishmx-71712ceb5d8fa061",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9825
+    },
+    {
+      "doc_id": "spearphishmx-a190c190cab5247b",
+      "de": "spaphish-ed17a5bd8f166aae",
+      "sim": 0.9971
+    },
+    {
+      "doc_id": "spearphishmx-c40c565d5c790a05",
+      "de": "spaphish-e0c51c1b2e600a98",
+      "sim": 0.9888
+    },
+    {
+      "doc_id": "spearphishmx-9ec462b46b690819",
+      "de": "spaphish-df110bb107de43c4",
+      "sim": 0.9792
+    },
+    {
+      "doc_id": "spearphishmx-f8f93b7e7b579cea",
+      "de": "spaphish-a8d23c291002b791",
+      "sim": 0.9953
+    },
+    {
+      "doc_id": "spearphishmx-805b336c43c30906",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9825
+    },
+    {
+      "doc_id": "spearphishmx-13c0a8f9b7146c81",
+      "de": "spaphish-55cf9378416fe75d",
+      "sim": 0.9887
+    },
+    {
+      "doc_id": "spearphishmx-cd862f677041bc9a",
+      "de": "spaphish-400491a7c9a268d7",
+      "sim": 0.9678
+    },
+    {
+      "doc_id": "spearphishmx-2a9390f0b36a7d41",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.9511
+    },
+    {
+      "doc_id": "spearphishmx-054b0b579f7b45e1",
+      "de": "spearphishmx-853708c38fc1db85",
+      "sim": 0.9861
+    },
+    {
+      "doc_id": "spearphishmx-6db17d77d7f17e39",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.982
+    },
+    {
+      "doc_id": "spearphishmx-04f2f5b747e2054e",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9721
+    },
+    {
+      "doc_id": "spearphishmx-47156ffc97e0b63c",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9664
+    },
+    {
+      "doc_id": "spearphishmx-d61bf7f53393dcbd",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.982
+    },
+    {
+      "doc_id": "spearphishmx-72b9a73a91b89383",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9662
+    },
+    {
+      "doc_id": "spearphishmx-57ae11be2b8eadb7",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9847
+    },
+    {
+      "doc_id": "spearphishmx-49a55082a68b5c94",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9817
+    },
+    {
+      "doc_id": "spearphishmx-009b1eeea6cb18a5",
+      "de": "spaphish-c6694b9f065c32e0",
+      "sim": 0.979
+    },
+    {
+      "doc_id": "spearphishmx-419d7890bde8bb6e",
+      "de": "spaphish-3004d34a4d882480",
+      "sim": 0.9894
+    },
+    {
+      "doc_id": "spearphishmx-6e614255ccc64404",
+      "de": "spaphish-9b7f3a388387ae85",
+      "sim": 0.994
+    },
+    {
+      "doc_id": "spearphishmx-5714e417d6c3c84e",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9726
+    },
+    {
+      "doc_id": "spearphishmx-b45e803bbbc14c5e",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9835
+    },
+    {
+      "doc_id": "spearphishmx-6f5df954b996c9bf",
+      "de": "spaphish-6286f1ce4da35269",
+      "sim": 0.9854
+    },
+    {
+      "doc_id": "spearphishmx-7da7cd24c78eafbf",
+      "de": "spaphish-a7ec2858c5e31b87",
+      "sim": 0.9974
+    },
+    {
+      "doc_id": "spearphishmx-7ff46c9c5d90b888",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9832
+    },
+    {
+      "doc_id": "spearphishmx-e3e4d9d2f83154ce",
+      "de": "spaphish-44e4ef8d160b7789",
+      "sim": 0.9778
+    },
+    {
+      "doc_id": "spearphishmx-59a46ebbddfc1099",
+      "de": "spearphishmx-6dca64bdd55d9ec8",
+      "sim": 0.9528
+    },
+    {
+      "doc_id": "spearphishmx-0ff330f38194a8fd",
+      "de": "spaphish-ab1c94c538d6cb8a",
+      "sim": 0.9701
+    },
+    {
+      "doc_id": "spearphishmx-11ce2e8bbec811c7",
+      "de": "spaphish-b6036c8746efa408",
+      "sim": 0.9784
+    },
+    {
+      "doc_id": "spearphishmx-113ae71d7f6e8a71",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9806
+    },
+    {
+      "doc_id": "spearphishmx-8b34b518a1d40fb5",
+      "de": "spearphishmx-bc84597355dce0ec",
+      "sim": 0.9506
+    },
+    {
+      "doc_id": "spearphishmx-8fb7d03d9582acb3",
+      "de": "spaphish-5e2578ae9f5fbb0a",
+      "sim": 0.9689
+    },
+    {
+      "doc_id": "spearphishmx-25cdb57e46526b47",
+      "de": "spaphish-4b46ffd09d1013be",
+      "sim": 0.9739
+    },
+    {
+      "doc_id": "spearphishmx-279c5d37fba3c9f6",
+      "de": "spaphish-e17f4ff82333e078",
+      "sim": 0.95
+    },
+    {
+      "doc_id": "spearphishmx-1b463283b5ee977b",
+      "de": "spearphishmx-1694e91a636480ff",
+      "sim": 0.993
+    },
+    {
+      "doc_id": "spearphishmx-75beeb427876aef1",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9826
+    },
+    {
+      "doc_id": "spearphishmx-3652dbda32a4667a",
+      "de": "spaphish-65ed6442f9281a05",
+      "sim": 0.9788
+    },
+    {
+      "doc_id": "spearphishmx-af7e3ab9a2ae813c",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.97
+    },
+    {
+      "doc_id": "spearphishmx-0800e1f33beb1aa2",
+      "de": "spaphish-d08726427e519881",
+      "sim": 0.975
+    },
+    {
+      "doc_id": "spearphishmx-380c8e37301237da",
+      "de": "spearphishmx-2e1acffc65dff1f8",
+      "sim": 0.9624
+    },
+    {
+      "doc_id": "spearphishmx-4054deaaddf26867",
+      "de": "spaphish-ea92607fbeebc3f7",
+      "sim": 0.9838
+    },
+    {
+      "doc_id": "spearphishmx-2aafc39be2559d47",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9816
+    },
+    {
+      "doc_id": "spearphishmx-8de143015717a6cb",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9805
+    },
+    {
+      "doc_id": "spearphishmx-594b746371fe0828",
+      "de": "spearphishmx-2803bc922c87db67",
+      "sim": 0.9822
+    },
+    {
+      "doc_id": "spearphishmx-06b4a42b74a8f474",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9759
+    },
+    {
+      "doc_id": "spearphishmx-fb9e27677097149b",
+      "de": "spaphish-93ba18b882caec40",
+      "sim": 0.9744
+    },
+    {
+      "doc_id": "spearphishmx-6c6ef6b392b2c4e0",
+      "de": "spearphishmx-ea7f39316785208e",
+      "sim": 0.9748
+    },
+    {
+      "doc_id": "spearphishmx-29ea5ccf256f624e",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9813
+    },
+    {
+      "doc_id": "spearphishmx-726c756001604973",
+      "de": "spaphish-91e605c33a3b3932",
+      "sim": 0.953
+    },
+    {
+      "doc_id": "spearphishmx-f4912a352b512e35",
+      "de": "spaphish-1560e75974b82625",
+      "sim": 0.9767
+    },
+    {
+      "doc_id": "spearphishmx-5bfcfef99b30fe6f",
+      "de": "spaphish-e7adb823e2a241e2",
+      "sim": 0.9609
+    },
+    {
+      "doc_id": "spearphishmx-39a5067f64cc2fb1",
+      "de": "spaphish-f8129c0c970245ae",
+      "sim": 0.985
+    },
+    {
+      "doc_id": "spearphishmx-812d5cfd6e2856ab",
+      "de": "spaphish-dc6de5b8d9d6a340",
+      "sim": 0.9915
+    },
+    {
+      "doc_id": "spearphishmx-1340cf8c9f75b0cc",
+      "de": "spaphish-b2e5c50d85e7f81d",
+      "sim": 0.9895
+    },
+    {
+      "doc_id": "spearphishmx-a36aeb03f256f1d6",
+      "de": "spaphish-c72bbef7f3cdb1ff",
+      "sim": 0.9649
+    },
+    {
+      "doc_id": "spearphishmx-273ff1f77f6ecad6",
+      "de": "spaphish-8c23135043444e5f",
+      "sim": 0.9601
+    },
+    {
+      "doc_id": "spearphishmx-68855778034dd884",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9587
+    },
+    {
+      "doc_id": "spearphishmx-baeea839f47d669b",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9814
+    },
+    {
+      "doc_id": "spearphishmx-dd28d441fe7b9c75",
+      "de": "spaphish-3e7049f40004fe6d",
+      "sim": 0.9783
+    },
+    {
+      "doc_id": "spearphishmx-e71a52241aa6a746",
+      "de": "spearphishmx-c87db9907d21966e",
+      "sim": 0.9739
+    },
+    {
+      "doc_id": "spearphishmx-de541e8581d5677d",
+      "de": "spaphish-25940db66ecd935a",
+      "sim": 0.9624
+    },
+    {
+      "doc_id": "spearphishmx-0f304b368d2d3f7c",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9832
+    },
+    {
+      "doc_id": "spearphishmx-21a14c7b9670552b",
+      "de": "spaphish-22f16d03bc01b72f",
+      "sim": 0.9753
+    },
+    {
+      "doc_id": "spearphishmx-31d3491f3e01a86d",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.9866
+    },
+    {
+      "doc_id": "spearphishmx-f7368b89065b429f",
+      "de": "spaphish-2b9e167fa4419ec0",
+      "sim": 0.983
+    },
+    {
+      "doc_id": "spearphishmx-5261550da20b1fe1",
+      "de": "spearphishmx-a2797119a89c67c9",
+      "sim": 0.9946
+    },
+    {
+      "doc_id": "spearphishmx-dadb6c7dc1bcde09",
+      "de": "spearphishmx-aadeaf197815f809",
+      "sim": 0.961
+    },
+    {
+      "doc_id": "spearphishmx-944762e5bff5b5bd",
+      "de": "spaphish-630176d098399977",
+      "sim": 0.9847
+    },
+    {
+      "doc_id": "spearphishmx-7390c8862fdedc45",
+      "de": "spearphishmx-355ce6e8af7a40ee",
+      "sim": 0.9949
+    },
+    {
+      "doc_id": "spearphishmx-03ab176eaf079168",
+      "de": "spearphishmx-5812205c70ffaff3",
+      "sim": 0.9604
+    },
+    {
+      "doc_id": "spearphishmx-4a924093ae4e8db9",
+      "de": "spaphish-aa34c2c800d536a1",
+      "sim": 0.9783
+    },
+    {
+      "doc_id": "spearphishmx-fca1473024256b66",
+      "de": "spaphish-d25584891f9e87ab",
+      "sim": 0.9595
+    },
+    {
+      "doc_id": "spearphishmx-cbea5e7a06767bf4",
+      "de": "spearphishmx-7fa1d95d26cfb739",
+      "sim": 0.9934
+    },
+    {
+      "doc_id": "spearphishmx-38ea73aa61005973",
+      "de": "spearphishmx-6f6da1ba62db6707",
+      "sim": 0.9881
+    },
+    {
+      "doc_id": "spearphishmx-6c36ab3f47621dab",
+      "de": "spaphish-ef2caa85959cd7c1",
+      "sim": 0.9963
+    },
+    {
+      "doc_id": "spearphishmx-fae4cec934963541",
+      "de": "spaphish-998dd9aa1e432903",
+      "sim": 0.9984
+    },
+    {
+      "doc_id": "spearphishmx-49381ed1c4393373",
+      "de": "spaphish-0427918211b0a3a7",
+      "sim": 0.9567
+    },
+    {
+      "doc_id": "spearphishmx-04f633e9d679bc21",
+      "de": "spearphishmx-b84c60da4cd08d69",
+      "sim": 0.9632
+    },
+    {
+      "doc_id": "spearphishmx-cac242f7c1ee36b2",
+      "de": "spearphishmx-5812205c70ffaff3",
+      "sim": 0.966
+    },
+    {
+      "doc_id": "spearphishmx-e3450688f4334d36",
+      "de": "spearphishmx-3fcac7c97d5ddcb7",
+      "sim": 0.9857
+    },
+    {
+      "doc_id": "spearphishmx-ba68bc7248ebc8e8",
+      "de": "spearphishmx-df1597d3edc5eda5",
+      "sim": 0.9898
+    },
+    {
+      "doc_id": "spearphishmx-739491c77389f6d7",
+      "de": "spearphishmx-07395625050980cc",
+      "sim": 0.9977
+    },
+    {
+      "doc_id": "spearphishmx-822d6fa36dbd0250",
+      "de": "spaphish-71ba8015ea2f22ba",
+      "sim": 0.9858
+    },
+    {
+      "doc_id": "spearphishmx-dc39fad1ec9590c2",
+      "de": "spearphishmx-67a30fb2a3c61f74",
+      "sim": 0.9729
+    },
+    {
+      "doc_id": "spearphishmx-9da34f76461bba13",
+      "de": "spearphishmx-9061225897cc4768",
+      "sim": 0.9717
+    },
+    {
+      "doc_id": "spearphishmx-1d3dbd915cd15087",
+      "de": "spaphish-539233e7013ead8c",
+      "sim": 0.9876
+    },
+    {
+      "doc_id": "spearphishmx-c09651651bb63b76",
+      "de": "spearphishmx-03436cecced07e53",
+      "sim": 0.9585
+    },
+    {
+      "doc_id": "spearphishmx-f1c9bdcf330442da",
+      "de": "spearphishmx-e1121f225300c807",
+      "sim": 0.996
+    },
+    {
+      "doc_id": "spearphishmx-570e55a67544a0fc",
+      "de": "spearphishmx-a1cdcda7ec2203c4",
+      "sim": 0.9993
+    },
+    {
+      "doc_id": "spearphishmx-4edddb36666c21e4",
+      "de": "spearphishmx-1ab6c659546dd8a9",
+      "sim": 0.9975
+    },
+    {
+      "doc_id": "spearphishmx-5d32aeba0ef6ad19",
+      "de": "spaphish-aab4c46331ecf232",
+      "sim": 0.9549
+    },
+    {
+      "doc_id": "spearphishmx-629153465b46644d",
+      "de": "spearphishmx-0f6bb9db7b944f09",
+      "sim": 0.9688
+    },
+    {
+      "doc_id": "spearphishmx-1ef62f496c46e257",
+      "de": "spearphishmx-2029d911f089fead",
+      "sim": 0.9929
+    },
+    {
+      "doc_id": "spearphishmx-64ed5f48d8f035e5",
+      "de": "spearphishmx-2029d911f089fead",
+      "sim": 0.9559
+    },
+    {
+      "doc_id": "spearphishmx-166842058c3fe602",
+      "de": "spearphishmx-e070ad80f62c0445",
+      "sim": 0.9986
+    },
+    {
+      "doc_id": "spearphishmx-c475706109c6279d",
+      "de": "spearphishmx-37cb086fb8db6f12",
+      "sim": 0.9871
+    },
+    {
+      "doc_id": "spearphishmx-50356c3a13ac2c4a",
+      "de": "spearphishmx-b28bc7e9ff468330",
+      "sim": 0.9984
+    },
+    {
+      "doc_id": "spearphishmx-01f544374587b019",
+      "de": "spearphishmx-be6010b4a3548a80",
+      "sim": 0.9994
+    },
+    {
+      "doc_id": "spearphishmx-3659452ff7ea9044",
+      "de": "spearphishmx-5b534e4b55ddfe95",
+      "sim": 0.9981
+    },
+    {
+      "doc_id": "spearphishmx-4350b7c37acdf8ee",
+      "de": "spearphishmx-4e98dd89ec600ac7",
+      "sim": 0.9984
+    },
+    {
+      "doc_id": "spearphishmx-29064c18665b2c1d",
+      "de": "spearphishmx-039a6bdbcb8e5624",
+      "sim": 0.9914
+    },
+    {
+      "doc_id": "spearphishmx-440cdeb688f5f897",
+      "de": "spearphishmx-dfede6a16b9dd0a4",
+      "sim": 0.9933
+    },
+    {
+      "doc_id": "spearphishmx-b58ac8e657321aeb",
+      "de": "spearphishmx-22abc73026da6811",
+      "sim": 0.9974
+    },
+    {
+      "doc_id": "spearphishmx-82d7f39ef74cc937",
+      "de": "spearphishmx-99ed556e8d357228",
+      "sim": 0.993
+    },
+    {
+      "doc_id": "spearphishmx-04cf1ba80e23e636",
+      "de": "spearphishmx-99ed556e8d357228",
+      "sim": 0.9927
+    },
+    {
+      "doc_id": "spearphishmx-4454377359a73692",
+      "de": "spearphishmx-015d83360d39c5fb",
+      "sim": 0.9621
+    },
+    {
+      "doc_id": "spearphishmx-7768b830aad6e45e",
+      "de": "spaphish-2e7cef1a8d7b01d9",
+      "sim": 0.9773
+    },
+    {
+      "doc_id": "spearphishmx-12a9f9d3d0ddddbe",
+      "de": "spaphish-11ef4ef4d0fc9199",
+      "sim": 0.95
+    },
+    {
+      "doc_id": "spearphishmx-915bdc5b6b90435b",
+      "de": "spaphish-83c9f830a6215f8b",
+      "sim": 0.9811
+    },
+    {
+      "doc_id": "spearphishmx-7bfc9fdac2abde98",
+      "de": "spearphishmx-5812205c70ffaff3",
+      "sim": 0.9993
+    },
+    {
+      "doc_id": "spearphishmx-214e26f6e6c7dee4",
+      "de": "spearphishmx-44ca8983d887a9ef",
+      "sim": 0.9959
+    },
+    {
+      "doc_id": "spearphishmx-68515884b1ed81b1",
+      "de": "spaphish-3bc2f0c1203607fc",
+      "sim": 0.9766
+    },
+    {
+      "doc_id": "spearphishmx-a6c0844db763658e",
+      "de": "spearphishmx-69d21150be8c712f",
+      "sim": 0.9916
+    },
+    {
+      "doc_id": "spearphishmx-6d8e63397ed06ad5",
+      "de": "spaphish-c0d0a4f94c3bd176",
+      "sim": 0.9818
+    },
+    {
+      "doc_id": "spearphishmx-817ef1336a6bd16d",
+      "de": "spearphishmx-6833b44aca38a6d4",
+      "sim": 0.9763
+    },
+    {
+      "doc_id": "spearphishmx-94f4de69a780fd79",
+      "de": "spearphishmx-e71a4bfd8be28e24",
+      "sim": 0.9634
+    },
+    {
+      "doc_id": "spearphishmx-5c23218aeeac914c",
+      "de": "spearphishmx-2cc29971f96cd8f4",
+      "sim": 0.9521
+    },
+    {
+      "doc_id": "spearphishmx-13478c0583a67fd8",
+      "de": "spearphishmx-4241ffa5985867a4",
+      "sim": 0.9983
+    },
+    {
+      "doc_id": "spearphishmx-420f075f836377fb",
+      "de": "spearphishmx-171587d1fdb3bb4b",
+      "sim": 0.9996
+    },
+    {
+      "doc_id": "spearphishmx-4f32d2d0f360a369",
+      "de": "spaphish-22d4c5a4b3d5d2c4",
+      "sim": 0.9707
+    },
+    {
+      "doc_id": "spearphishmx-6aef1cdbc2f16ac0",
+      "de": "spearphishmx-e07de4bed73384d3",
+      "sim": 0.9839
+    },
+    {
+      "doc_id": "spearphishmx-292be5fc45e11fb1",
+      "de": "spearphishmx-d9ce1a78ccf2db3c",
+      "sim": 0.9681
+    },
+    {
+      "doc_id": "spearphishmx-ef7c9ff1cd0214e9",
+      "de": "spearphishmx-94e0b1669378148c",
+      "sim": 0.9758
+    },
+    {
+      "doc_id": "spearphishmx-3389deb415efd728",
+      "de": "spearphishmx-708a5026052ab708",
+      "sim": 0.9763
+    },
+    {
+      "doc_id": "spearphishmx-15c457090bed77aa",
+      "de": "spaphish-2c7de5fa29681600",
+      "sim": 0.9769
+    },
+    {
+      "doc_id": "spearphishmx-f40918d71a964db7",
+      "de": "spearphishmx-ead7050ded794a09",
+      "sim": 0.9707
+    },
+    {
+      "doc_id": "spearphishmx-53e1d5a8982df5d6",
+      "de": "spearphishmx-04dae69aa45c6e72",
+      "sim": 0.9521
+    },
+    {
+      "doc_id": "spearphishmx-76d127df40197a9f",
+      "de": "spaphish-a89c2ef083438eb6",
+      "sim": 0.9947
+    },
+    {
+      "doc_id": "spearphishmx-e5988229573373b6",
+      "de": "spaphish-390b2379eba44674",
+      "sim": 0.9989
+    },
+    {
+      "doc_id": "spearphishmx-ed0c58379737ce2c",
+      "de": "spaphish-77ba375f3b813c79",
+      "sim": 0.9875
+    },
+    {
+      "doc_id": "spearphishmx-94515733a3a19a2d",
+      "de": "spaphish-f02afac8b462b907",
+      "sim": 0.9711
+    },
+    {
+      "doc_id": "spearphishmx-9e63db032e38d4df",
+      "de": "spaphish-c4627df38a083550",
+      "sim": 0.995
+    },
+    {
+      "doc_id": "spearphishmx-54bf39a605620048",
+      "de": "spaphish-6f937b92d89f81f0",
+      "sim": 0.9966
+    },
+    {
+      "doc_id": "spearphishmx-8aa82975d78a8e99",
+      "de": "spearphishmx-b367267398a6a812",
+      "sim": 0.9591
+    },
+    {
+      "doc_id": "spearphishmx-683657682b4db6c0",
+      "de": "spearphishmx-8da6c8b75a4d19b1",
+      "sim": 0.9979
+    },
+    {
+      "doc_id": "spearphishmx-c238615486c13f88",
+      "de": "spearphishmx-5812205c70ffaff3",
+      "sim": 0.9651
+    },
+    {
+      "doc_id": "spearphishmx-8cf9f3ab56a5f914",
+      "de": "spearphishmx-757fe922884b3a3e",
+      "sim": 0.996
+    },
+    {
+      "doc_id": "spearphishmx-b307141c6e9d974c",
+      "de": "spaphish-ee0de0c0b0a5e0d3",
+      "sim": 0.9857
+    },
+    {
+      "doc_id": "spearphishmx-55be702b1139b479",
+      "de": "spaphish-d5f3bcfb2b3af906",
+      "sim": 0.9717
+    },
+    {
+      "doc_id": "spearphishmx-af811f2361773c9a",
+      "de": "spearphishmx-2971b42302475133",
+      "sim": 0.981
+    },
+    {
+      "doc_id": "spearphishmx-6a739c287b5e1835",
+      "de": "spearphishmx-8979a16137260239",
+      "sim": 0.9916
+    },
+    {
+      "doc_id": "spearphishmx-0dd8505a8a5ba068",
+      "de": "spearphishmx-65cc66e4911e1ae9",
+      "sim": 0.9971
+    },
+    {
+      "doc_id": "spearphishmx-3f092ae37d1a9395",
+      "de": "spearphishmx-d11d1f0c74935a54",
+      "sim": 0.9633
+    },
+    {
+      "doc_id": "spearphishmx-4bb39798676136c5",
+      "de": "spaphish-146f99fb593a9753",
+      "sim": 0.9958
+    },
+    {
+      "doc_id": "spearphishmx-0de19ecb263e7b14",
+      "de": "spaphish-c1417018bd06fdf5",
+      "sim": 0.9509
+    },
+    {
+      "doc_id": "spearphishmx-9de3afa666f933db",
+      "de": "spearphishmx-19e4299842135cfc",
+      "sim": 0.9962
+    },
+    {
+      "doc_id": "spearphishmx-3c8a8f43ddeaf2eb",
+      "de": "spaphish-b54910912205c757",
+      "sim": 0.9853
+    },
+    {
+      "doc_id": "spearphishmx-21d388c7d7236a21",
+      "de": "spearphishmx-613fcaf1bc39fffe",
+      "sim": 0.9951
+    },
+    {
+      "doc_id": "spearphishmx-62244fda9d1ff9d6",
+      "de": "spearphishmx-95d730c4eebf8af4",
+      "sim": 0.9866
+    },
+    {
+      "doc_id": "spearphishmx-12fe091a93f8e635",
+      "de": "spaphish-9579cbf7f7ee06cf",
+      "sim": 0.9642
+    },
+    {
+      "doc_id": "spearphishmx-c4fdfabd11dd7b32",
+      "de": "spearphishmx-21e647f5c507e3ab",
+      "sim": 0.99
+    },
+    {
+      "doc_id": "spearphishmx-91ab4ba7414c0430",
+      "de": "spearphishmx-926f32049094b279",
+      "sim": 0.9932
+    },
+    {
+      "doc_id": "spearphishmx-8c8e3d90abdbb06c",
+      "de": "spaphish-74c8daa37b76790e",
+      "sim": 0.9953
+    },
+    {
+      "doc_id": "spearphishmx-6527bc7ef1a5b939",
+      "de": "spaphish-0b2a7d623af10c50",
+      "sim": 0.9503
+    },
+    {
+      "doc_id": "spearphishmx-06d0d68069873b45",
+      "de": "spearphishmx-d6d2076b9782e457",
+      "sim": 0.998
+    },
+    {
+      "doc_id": "spearphishmx-bea724fae66ce238",
+      "de": "spearphishmx-1292d8070647613e",
+      "sim": 0.9963
+    },
+    {
+      "doc_id": "spearphishmx-f2b671da222075fa",
+      "de": "spaphish-3f78d1749919c341",
+      "sim": 0.9882
+    },
+    {
+      "doc_id": "spearphishmx-64580d8b192bfb2d",
+      "de": "spearphishmx-fbbcd0a7095048a2",
+      "sim": 0.9979
+    },
+    {
+      "doc_id": "spearphishmx-ccc7bad8390c1f75",
+      "de": "spearphishmx-3182a55d3ce5ea42",
+      "sim": 0.953
+    },
+    {
+      "doc_id": "spearphishmx-b1fe4ff0bd8ddc09",
+      "de": "spearphishmx-c9add9fcba306ae4",
+      "sim": 0.9871
+    },
+    {
+      "doc_id": "spearphishmx-8673c2ada0e52b49",
+      "de": "spearphishmx-3cb0cf77418b505a",
+      "sim": 0.9964
+    },
+    {
+      "doc_id": "spearphishmx-c1b513603385811e",
+      "de": "spearphishmx-3f5fc84bdcb7223d",
+      "sim": 0.994
+    },
+    {
+      "doc_id": "spearphishmx-de425cde7f02da7a",
+      "de": "spearphishmx-c4515314ebac4733",
+      "sim": 0.9984
+    },
+    {
+      "doc_id": "spearphishmx-24f220e431df904a",
+      "de": "spaphish-8ab422cb840982ae",
+      "sim": 0.9858
+    },
+    {
+      "doc_id": "spearphishmx-ad780de84eb51a71",
+      "de": "spearphishmx-dcfe9bc3390ad496",
+      "sim": 0.9847
+    },
+    {
+      "doc_id": "spearphishmx-f4df11a5f2805c52",
+      "de": "spearphishmx-1739c6c3b8b87987",
+      "sim": 0.988
+    },
+    {
+      "doc_id": "spearphishmx-d486bff278335f3b",
+      "de": "spearphishmx-c587e2e46524a8fe",
+      "sim": 0.9681
+    },
+    {
+      "doc_id": "spearphishmx-f8bf37acfbe1c4a6",
+      "de": "spearphishmx-9db05f632987db6c",
+      "sim": 0.9903
+    },
+    {
+      "doc_id": "spearphishmx-9a0731496121284f",
+      "de": "spaphish-22d4c5a4b3d5d2c4",
+      "sim": 0.9751
+    },
+    {
+      "doc_id": "spearphishmx-d60637e323bd6f8e",
+      "de": "spearphishmx-a0ae006d2b9032a7",
+      "sim": 0.9913
+    },
+    {
+      "doc_id": "spearphishmx-8f44b7a14d3b8c8a",
+      "de": "spearphishmx-7b522c02bf441119",
+      "sim": 0.9776
+    },
+    {
+      "doc_id": "spearphishmx-07b1e773f2fadc41",
+      "de": "spearphishmx-a07a5b179579be52",
+      "sim": 0.9732
+    },
+    {
+      "doc_id": "spearphishmx-18be63d3e47ac2eb",
+      "de": "spearphishmx-a07a5b179579be52",
+      "sim": 0.9631
+    },
+    {
+      "doc_id": "spearphishmx-4453a9a4211bed17",
+      "de": "spearphishmx-bf717c027ebca3f5",
+      "sim": 0.9677
+    },
+    {
+      "doc_id": "spearphishmx-ecdae4846c9624ce",
+      "de": "spearphishmx-82956b4d07185978",
+      "sim": 0.9839
+    },
+    {
+      "doc_id": "spearphishmx-b2dbba5993161362",
+      "de": "spearphishmx-0952f0f34bd56530",
+      "sim": 0.9711
+    },
+    {
+      "doc_id": "spearphishmx-cf9bb24b1fbc255f",
+      "de": "spearphishmx-198bd0b1a4c75340",
+      "sim": 0.9839
+    },
+    {
+      "doc_id": "spearphishmx-72420ef046725271",
+      "de": "spearphishmx-47c2a96a2c7534e2",
+      "sim": 0.9984
+    },
+    {
+      "doc_id": "spearphishmx-eec33325943965ea",
+      "de": "spaphish-7aca4d790facc996",
+      "sim": 0.9801
+    },
+    {
+      "doc_id": "spearphishmx-6dfefe35f12c0c96",
+      "de": "spearphishmx-3253a593f1b078af",
+      "sim": 0.9883
+    },
+    {
+      "doc_id": "spearphishmx-2549e4b956cafa98",
+      "de": "spaphish-7aca4d790facc996",
+      "sim": 0.9609
+    },
+    {
+      "doc_id": "spearphishmx-a5ec856953246626",
+      "de": "spaphish-7aca4d790facc996",
+      "sim": 0.9711
+    },
+    {
+      "doc_id": "spearphishmx-963ba0dac9d5900f",
+      "de": "spearphishmx-8d646984a2218047",
+      "sim": 0.9751
+    },
+    {
+      "doc_id": "spearphishmx-92654edf2fbb7a8e",
+      "de": "spearphishmx-5eb20b1f30082720",
+      "sim": 0.9971
+    },
+    {
+      "doc_id": "spearphishmx-ca321b990339ddfd",
+      "de": "spearphishmx-276a2741a2cdd391",
+      "sim": 0.9995
+    },
+    {
+      "doc_id": "spearphishmx-619bcf808d728947",
+      "de": "spearphishmx-04dae69aa45c6e72",
+      "sim": 0.9996
+    },
+    {
+      "doc_id": "spearphishmx-21c072a53de27f32",
+      "de": "spearphishmx-d47f9e72b73f580e",
+      "sim": 0.9679
+    },
+    {
+      "doc_id": "spearphishmx-eb879cb7f649c608",
+      "de": "spearphishmx-aa5c32ff04160a14",
+      "sim": 0.9991
+    },
+    {
+      "doc_id": "spearphishmx-c739e491e54e9e07",
+      "de": "spearphishmx-c2926a3c0f70b3b8",
+      "sim": 0.973
+    },
+    {
+      "doc_id": "spearphishmx-81dfc33df655f460",
+      "de": "spearphishmx-54215ff3cf7da6dd",
+      "sim": 0.9831
+    },
+    {
+      "doc_id": "spearphishmx-69eae18a4a5d0112",
+      "de": "spearphishmx-a17bb66a3c8aefa2",
+      "sim": 0.9785
+    },
+    {
+      "doc_id": "spearphishmx-2956d5089179c3b8",
+      "de": "spearphishmx-04606c772f67ea9f",
+      "sim": 0.9974
+    },
+    {
+      "doc_id": "spearphishmx-d3eff104e58beca3",
+      "de": "spaphish-14cdf9b45700d972",
+      "sim": 0.9578
+    },
+    {
+      "doc_id": "spearphishmx-a2bf7f6c4ac4199e",
+      "de": "spearphishmx-99545ef2580a051f",
+      "sim": 0.9932
+    },
+    {
+      "doc_id": "spearphishmx-0d3d174b0c7c6757",
+      "de": "spaphish-0d3f58498fb22e86",
+      "sim": 0.9772
+    },
+    {
+      "doc_id": "spearphishmx-e285f80e131fa969",
+      "de": "spearphishmx-ed8512e4a38b547f",
+      "sim": 0.9989
+    },
+    {
+      "doc_id": "spearphishmx-c71ee8a901937063",
+      "de": "spearphishmx-145a793a9893a1ff",
+      "sim": 0.9615
+    },
+    {
+      "doc_id": "spearphishmx-512a0e5d8b4a2e78",
+      "de": "spearphishmx-c468184f9d2a7b55",
+      "sim": 0.982
+    },
+    {
+      "doc_id": "spearphishmx-4ec30615bf550bde",
+      "de": "spaphish-8019e9e82b2fc221",
+      "sim": 0.9637
+    },
+    {
+      "doc_id": "spearphishmx-83cb103e4a0fc7cd",
+      "de": "spearphishmx-3db9fc71676749fc",
+      "sim": 0.9823
+    },
+    {
+      "doc_id": "spearphishmx-f964fa560f4cbd00",
+      "de": "spaphish-ec327bef1e6c42e5",
+      "sim": 0.9914
+    },
+    {
+      "doc_id": "spearphishmx-1e7b3e04f0e25fe6",
+      "de": "spearphishmx-bb6c0e113896fcd1",
+      "sim": 0.9996
+    },
+    {
+      "doc_id": "spearphishmx-9d10f95ac508b33c",
+      "de": "spaphish-91ff38a3cded1d3e",
+      "sim": 0.9992
+    },
+    {
+      "doc_id": "spearphishmx-6b3a7151830b2d62",
+      "de": "spaphish-5820210d5734d641",
+      "sim": 0.9552
+    },
+    {
+      "doc_id": "spearphishmx-3db141c81af4e021",
+      "de": "spaphish-7ede5885244831ee",
+      "sim": 0.9902
+    },
+    {
+      "doc_id": "spearphishmx-e2be132ea7708f92",
+      "de": "spaphish-6c9fa93251507af6",
+      "sim": 0.9783
+    },
+    {
+      "doc_id": "spearphishmx-3eaeaaf0f6a9c19e",
+      "de": "spaphish-508cd17757f0eca2",
+      "sim": 0.9966
+    },
+    {
+      "doc_id": "spearphishmx-83d75e124aab2217",
+      "de": "spaphish-8cf66d8e88e1fd97",
+      "sim": 0.9906
+    },
+    {
+      "doc_id": "spearphishmx-dc496c79985d556a",
+      "de": "spaphish-51c653cf615a5faf",
+      "sim": 0.977
+    },
+    {
+      "doc_id": "spearphishmx-b3783ff2f91fd3b0",
+      "de": "spaphish-751d7e65ce01930d",
+      "sim": 0.9923
+    },
+    {
+      "doc_id": "spearphishmx-d68d938de0daea1e",
+      "de": "spearphishmx-bb6c0e113896fcd1",
+      "sim": 0.9547
+    },
+    {
+      "doc_id": "spearphishmx-985a958d2d941be6",
+      "de": "spaphish-c57a81207f2e748e",
+      "sim": 0.99
+    },
+    {
+      "doc_id": "spearphishmx-dc379e7a56d9ab16",
+      "de": "spaphish-4824a73f2f0a2841",
+      "sim": 0.98
+    },
+    {
+      "doc_id": "spearphishmx-485a27dfcc9c652d",
+      "de": "spaphish-7deb3354bb9d4eac",
+      "sim": 0.9997
+    },
+    {
+      "doc_id": "spearphishmx-20c16a1e5bcc18d0",
+      "de": "spearphishmx-259a510800a0ffa5",
+      "sim": 0.9999
+    },
+    {
+      "doc_id": "spearphishmx-b43996aaffe5a345",
+      "de": "spaphish-9d4afe7867f6000e",
+      "sim": 0.9524
+    },
+    {
+      "doc_id": "spearphishmx-c90815f03253b0e5",
+      "de": "spearphishmx-3d56cf371f554161",
+      "sim": 0.9866
+    },
+    {
+      "doc_id": "spearphishmx-75904b7292fa7d1a",
+      "de": "spaphish-a0c8ea85b3580008",
+      "sim": 0.994
+    },
+    {
+      "doc_id": "spearphishmx-0371e9083b34b45d",
+      "de": "spearphishmx-8419f67f5cd91e21",
+      "sim": 0.951
+    },
+    {
+      "doc_id": "spearphishmx-e2f1fe813322602a",
+      "de": "spearphishmx-d4dbaa0fc7058214",
+      "sim": 0.9912
+    },
+    {
+      "doc_id": "spearphishmx-40db0f8a8b08d0e5",
+      "de": "spearphishmx-d4dbaa0fc7058214",
+      "sim": 0.9812
+    },
+    {
+      "doc_id": "spearphishmx-1006a75bfb733764",
+      "de": "spaphish-ba2e47bd55293b3c",
+      "sim": 0.9758
+    },
+    {
+      "doc_id": "spearphishmx-a4fdcf4095f5c282",
+      "de": "spearphishmx-407e54d08d0527f8",
+      "sim": 0.9793
+    },
+    {
+      "doc_id": "spearphishmx-57d228949a1393fc",
+      "de": "spaphish-9c0c80987f86213c",
+      "sim": 0.995
+    },
+    {
+      "doc_id": "spearphishmx-68f20f9ae50ba960",
+      "de": "spearphishmx-59137f2335618cca",
+      "sim": 0.9995
+    },
+    {
+      "doc_id": "spearphishmx-1056c411b20c78f3",
+      "de": "spaphish-deb0a0dc3d895f24",
+      "sim": 0.9992
+    },
+    {
+      "doc_id": "spearphishmx-d9d89afb7fc16908",
+      "de": "spearphishmx-b596996846ceceea",
+      "sim": 0.991
+    },
+    {
+      "doc_id": "spearphishmx-e5f00229b0608ee0",
+      "de": "spearphishmx-433685fccfa503f7",
+      "sim": 0.9949
+    },
+    {
+      "doc_id": "spearphishmx-b3ea28b945249c91",
+      "de": "spaphish-1cdf439760772fe0",
+      "sim": 0.9924
+    },
+    {
+      "doc_id": "spearphishmx-ea309e660eeedfbe",
+      "de": "spearphishmx-26d09ed05c4db3d0",
+      "sim": 0.999
+    },
+    {
+      "doc_id": "spearphishmx-6f59dc64fcc1d864",
+      "de": "spearphishmx-54ca14c14040bdb2",
+      "sim": 0.9996
+    },
+    {
+      "doc_id": "spearphishmx-9d8f8c7ad47f73f2",
+      "de": "spearphishmx-d48eea5a2b78b4c7",
+      "sim": 0.9947
+    },
+    {
+      "doc_id": "spearphishmx-1671d51a6b7abd70",
+      "de": "spearphishmx-ecee7cdd59401b00",
+      "sim": 0.99
+    },
+    {
+      "doc_id": "spearphishmx-5d9221f12cf2a541",
+      "de": "spearphishmx-81e5b635a339a867",
+      "sim": 0.9996
+    },
+    {
+      "doc_id": "spearphishmx-1c9ad4142571fbd8",
+      "de": "spaphish-4a8ff62b9b6c6049",
+      "sim": 0.9759
+    },
+    {
+      "doc_id": "spearphishmx-f6cd62cf7a080f2f",
+      "de": "spearphishmx-0acd1b40b2fcca5a",
+      "sim": 0.996
+    },
+    {
+      "doc_id": "spearphishmx-8a5d31e09e0940a6",
+      "de": "spaphish-8478e337e51ef9e2",
+      "sim": 0.9903
+    },
+    {
+      "doc_id": "spearphishmx-aeba770e00719de0",
+      "de": "spaphish-f6cb5457e5454d01",
+      "sim": 0.9968
+    },
+    {
+      "doc_id": "spearphishmx-c8907758c0131880",
+      "de": "spearphishmx-6d4c50ae6daedfd8",
+      "sim": 0.9959
+    },
+    {
+      "doc_id": "spearphishmx-93748e708eb42162",
+      "de": "spearphishmx-d7cc75cae1f968b9",
+      "sim": 0.9946
+    },
+    {
+      "doc_id": "spearphishmx-6d9231a0cd8b74c9",
+      "de": "spearphishmx-2d637da859985171",
+      "sim": 0.9975
+    },
+    {
+      "doc_id": "spearphishmx-9587cd7265bb1143",
+      "de": "spearphishmx-0e2ae2ef5ceb53e0",
+      "sim": 0.9902
+    },
+    {
+      "doc_id": "spearphishmx-2d8056eb7b9c56cc",
+      "de": "spearphishmx-52bbd499b2446c59",
+      "sim": 0.9927
+    },
+    {
+      "doc_id": "spearphishmx-f32bba8e533e7eae",
+      "de": "spearphishmx-5812205c70ffaff3",
+      "sim": 0.9577
+    },
+    {
+      "doc_id": "spearphishmx-e2852aa345b903a0",
+      "de": "spearphishmx-19fc7b744bfe3b9a",
+      "sim": 0.9968
+    },
+    {
+      "doc_id": "spearphishmx-1051b36a1b044eb3",
+      "de": "spearphishmx-26a45a78e5ec1c88",
+      "sim": 0.9982
+    },
+    {
+      "doc_id": "spearphishmx-15310383e4166b4e",
+      "de": "spearphishmx-b84c60da4cd08d69",
+      "sim": 0.9997
+    },
+    {
+      "doc_id": "spearphishmx-d36796935c668739",
+      "de": "spaphish-301ccdb92cc77857",
+      "sim": 0.9686
+    },
+    {
+      "doc_id": "spearphishmx-3e9dfc2c490c763b",
+      "de": "spearphishmx-bb6c0e113896fcd1",
+      "sim": 0.9667
+    },
+    {
+      "doc_id": "spearphishmx-3ada94e4126b16a5",
+      "de": "spearphishmx-bb6c0e113896fcd1",
+      "sim": 0.9603
+    },
+    {
+      "doc_id": "spearphishmx-6c917657e4dc6d93",
+      "de": "spearphishmx-7ce886c0d5bf1b52",
+      "sim": 0.9895
+    }
+  ],
+  "pii_redactada": {
+    "TEL": 576,
+    "EMAIL": 886,
+    "RUTA": 2814,
+    "NOMBRE": 2643,
+    "DNI": 43,
+    "CODIGO": 104,
+    "CBU": 4,
+    "LINK_ACORTADO": 24,
+    "CUIT": 1,
+    "TARJETA": 5
+  },
+  "campaign_ids": [
+    "C-estafa-10",
+    "C-estafa-13",
+    "C-estafa-14",
+    "C-estafa-16",
+    "C-estafa-17",
+    "C-estafa-22",
+    "C-estafa-23",
+    "C-estafa-24",
+    "C-estafa-27",
+    "C-estafa-29",
+    "C-estafa-3",
+    "C-estafa-30",
+    "C-estafa-31",
+    "C-estafa-33",
+    "C-estafa-34",
+    "C-estafa-35",
+    "C-estafa-36",
+    "C-estafa-38",
+    "C-estafa-40",
+    "C-estafa-9",
+    "C-legitimo-11",
+    "C-legitimo-14",
+    "C-legitimo-16",
+    "C-legitimo-17",
+    "C-legitimo-2",
+    "C-legitimo-20",
+    "C-legitimo-23",
+    "C-legitimo-26",
+    "C-legitimo-5",
+    "C-legitimo-8"
+  ],
+  "uso": {
+    "tokens": {
+      "in": 0,
+      "out": 0,
+      "embed": 922123
+    },
+    "costo_usd": 0.018442,
+    "costo_usd_pagado": 7.2e-05,
+    "llm_calls": 0,
+    "llm_cache_hits": 0,
+    "latencias_ms": {
+      "index": 13967.0
+    },
+    "tokens_por_etapa": {}
+  }
+}

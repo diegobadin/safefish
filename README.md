@@ -42,9 +42,9 @@ Con Poetry: `make eval RUN="poetry run"`.
 | Fase 1 · V0 + V1 Naive RAG | ✅ Código: ingesta → snapshot, retriever denso top-6, razonador con salida estructurada, métricas de tarea y retrieval, `compare` (McNemar + bootstrap). Verificado de punta a punta contra la API sobre fixtures |
 | Fase 2 · V2 + V3 | ✅ Código (ADR 003): normalizador (plantilla + LLM mini) a `CaseDoc/MessageDoc/SignalDoc/GuideDoc`, 1 caso = 1 chunk, 4 colecciones con `top_n`, cobertura y auditoría de inyección en el manifest, muestra de revisión del 10 %; planner desde Guías; verificador R1–R5; extracción de capturas (visión + OCR + `align`) y captura anotada. Barrido V2a. Verificado sin API sobre fixtures |
 | Datos | ✅ Fuentes públicas: `make data` las baja (manifiesto `data/descargas.yaml`) y `data/sources.yaml` ya las carga: 12 fuentes de casos, 9 de guías y 4.260 emails etiquetados (SpaPhish + SpearPhishMX). Qué se usa en cada fase y cómo dejar los mensajes propios: [`docs/datos.md`](docs/datos.md) |
-| Golden v1 | ✅ 125 casos (35 dev · 90 test): 35 SMS/WhatsApp/email recolectados, 60 emails de SpaPhish, 15 adversariales y 15 capturas; split por `campaign_id`, sin leakage contra la KB. **Pre-etiquetado con LLM: falta la revisión humana** ([`docs/datos.md`](docs/datos.md#golden-v1)) |
-| Fase 3 · V4–V6 | ✅ Multi-query + RRF (V4), híbrido denso + BM25 (V5), re-ranking listwise (V6) en [`retrieval/advanced.py`](src/safefish/retrieval/advanced.py); evidencia contrastiva lista como candidato de V7 |
-| Reporte y UI | ✅ `make report` (tabla de la ablación) y UI local: `python -m safefish.ui --config configs/v6.yaml` |
+| Golden v1 | ✅ 125 casos (35 dev · 90 test): 35 SMS/WhatsApp/email recolectados, 60 emails de SpaPhish, 15 adversariales y 15 capturas; split por `campaign_id`, sin leakage contra la KB. Pre-etiquetado con LLM y revisado (`golden/decisiones_revision.csv`) ([`docs/datos.md`](docs/datos.md#golden-v1)) |
+| Fase 3 · V4–V8 | ✅ Multi-query + RRF (V4), híbrido denso + BM25 (V5), re-ranking listwise (V6, Versión 1), evidencia contrastiva (V7) y respaldo dirigido para R2 (V8, Versión 2). Resultados y análisis: [`docs/ablation.md`](docs/ablation.md) |
+| Reporte y UI | ✅ `make report` (tabla de la ablación) y UI local: `python -m safefish.ui` (usa `configs/v8.yaml`) |
 
 ### Probar la Fase 1 sobre fixtures (≈ USD 0,08)
 
@@ -83,16 +83,22 @@ make eval CONFIG=configs/v4.yaml SPLIT=test JUDGE=1   # multi-query + RRF (mismo
 make eval CONFIG=configs/v5.yaml SPLIT=test JUDGE=1   # + híbrido BM25 (desde chunks.jsonl)
 make eval CONFIG=configs/v6.yaml SPLIT=test JUDGE=1   # + re-ranking listwise → Versión 1
 make eval CONFIG=configs/v7.yaml SPLIT=test JUDGE=1   # + evidencia contrastiva (error analysis)
+make eval CONFIG=configs/v8.yaml SPLIT=test JUDGE=1   # + respaldo dirigido para R2
 make report SPLIT=test                                 # → docs/ablation_tabla_test.md
 make compare A=results/<run_v6> B=results/<run_v7>     # IC bootstrap + McNemar
 ```
 
 Análisis, decisiones y ficha de V7: [`docs/ablation.md`](docs/ablation.md). Demo:
-`python -m safefish.ui --config configs/v6.yaml` → http://127.0.0.1:8501.
+`python -m safefish.ui` → http://127.0.0.1:8501. Por defecto usa V8 (V7 + respaldo dirigido para R2);
+acepta texto o captura, un contexto opcional ("es de un amigo, me pide plata") y la situación del
+usuario, que define qué guías arma el plan. El front ([`src/safefish/web/`](src/safefish/web/)) es
+Preact + htm sin paso de build; marca las citas sobre la captura en el navegador con Tesseract.js
+(necesita conexión para cargarlo desde el CDN; sin conexión, las citas se marcan solo en el texto).
 
-Para capturas, el OCR necesita el binario de Tesseract con el idioma `spa` (Windows: instalador
-de UB Mannheim; Debian/Ubuntu: `apt install tesseract-ocr tesseract-ocr-spa`). Sin Tesseract el
-pipeline funciona igual, pero las señales salen sin recuadro.
+En el pipeline de evaluación, el OCR con cajas usa el binario de Tesseract con el idioma `spa`
+(Windows: `winget install UB-Mannheim.TesseractOCR`, con Spanish en "Additional language data";
+Debian/Ubuntu: `apt install tesseract-ocr tesseract-ocr-spa`). Sin Tesseract el pipeline funciona
+igual, pero las métricas de recuadros quedan vacías.
 
 ## Estructura
 

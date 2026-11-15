@@ -1,0 +1,243 @@
+{
+  "meta": {
+    "run_id": "v1-test-20261115-145847",
+    "version": "v1",
+    "config_hash": "3002d1891445",
+    "kb_snapshot": "kb-v1",
+    "kb_hash": "e44a661a08f44bb2",
+    "split": "test",
+    "golden_path": "golden\\test.jsonl",
+    "golden_version": "7724b6e66eeb",
+    "n_casos": 90,
+    "git_sha": "ee6476c",
+    "git_dirty": true,
+    "fecha": "2026-11-15T14:58:56+00:00",
+    "modelos": {
+      "reasoner": "gpt-4.1-2025-04-14",
+      "embeddings": "text-embedding-3-small",
+      "planner": null,
+      "normalizer": null,
+      "plan_judge": "gpt-4.1-mini-2025-04-14"
+    },
+    "prompt": {
+      "name": "reasoner_v1",
+      "hash": "aaa9eaacdc0a"
+    },
+    "planner": null,
+    "verifier": null
+  },
+  "modo": "completo",
+  "task": {
+    "n": 90,
+    "tp": 44,
+    "fp": 3,
+    "fn": 7,
+    "tn": 36,
+    "precision": 0.9362,
+    "recall_estafas": 0.8627,
+    "f1_binario": 0.898,
+    "accuracy_binaria": 0.8889,
+    "fpr": 0.0769,
+    "fpr_hard_negative": 0.12,
+    "n_hard_negative": 25,
+    "veredicto_aceptable": 0.9667,
+    "kappa_ponderado": 0.7613,
+    "distribucion_veredictos": {
+      "estafa_confirmada": 23,
+      "levemente_sospechoso": 23,
+      "muy_sospechoso": 24,
+      "parece_legitimo": 20
+    },
+    "n_modalidad": 51,
+    "acc_modalidad": 0.8039,
+    "macro_f1_modalidad": 0.7345,
+    "f1_senales": 0.5157,
+    "precision_senales": 0.3874,
+    "recall_senales": 0.7708,
+    "n_citas": 192,
+    "grounding_citas": 0.9948,
+    "soporte_modalidad": 0.0732,
+    "contactos_no_respaldados": 2,
+    "n_adversarial": 9,
+    "n_sin_evidencia": 1,
+    "asr_inyeccion": 0.0,
+    "negative_rejection": 1.0,
+    "pasos_plan_promedio": 3.04,
+    "pasos_con_guide_id": 0.0401,
+    "cobertura_plan": 0.8744,
+    "n_cobertura_plan": 65,
+    "n_errores": 0,
+    "json_valido_sin_reintento": 1.0
+  },
+  "extraccion": {
+    "n_capturas": 10,
+    "cer": 0.133,
+    "wer": 0.1235,
+    "f1_entidades": 0.2,
+    "localizacion_iou50": null,
+    "n_citas_bbox_gold": 0,
+    "senales_con_bbox": null
+  },
+  "retrieval": {
+    "k": 4,
+    "n_eval_casos": 35,
+    "n_sin_cobertura_kb": 10,
+    "hit_modalidad@k": 0.0857,
+    "mrr_casos": 0.0857,
+    "recall@k_casos": 0.0214,
+    "ndcg@k_casos": 0.0335,
+    "pureza_knn_mensajes": 0.6994,
+    "recall@k_senales": 0.0,
+    "items_promedio_por_tipo": {
+      "casos": 0.12,
+      "mensajes": 5.73,
+      "senales": 0.0,
+      "guias": 0.14
+    }
+  },
+  "ops": {
+    "latencia_ms": {
+      "extract": {
+        "p50": 0.3,
+        "p95": 8.3
+      },
+      "reason": {
+        "p50": 1.7,
+        "p95": 3250.9
+      },
+      "retrieve": {
+        "p50": 5.6,
+        "p95": 169.3
+      },
+      "total": {
+        "p50": 23.1,
+        "p95": 3259.0
+      }
+    },
+    "tokens_in_promedio": 3550.4,
+    "tokens_out_promedio": 362.7,
+    "costo_usd_por_analisis": 0.007202,
+    "costo_usd_total": 0.648216,
+    "costo_usd_pagado_total": 0.06923,
+    "llm_calls": 100,
+    "llm_cache_hits": 90,
+    "nota": "latencias con caché no representan la API; medir p95 con SAFEFISH_NO_CACHE=1"
+  },
+  "juez_plan": {
+    "version": "plan_judge_v1",
+    "modelo": "gpt-4.1-mini-2025-04-14",
+    "n_juzgados": 65,
+    "n_fallidos": 0,
+    "fallidos": [],
+    "tokens": {
+      "in": 24021,
+      "out": 5870,
+      "embed": 0
+    },
+    "costo_usd": 0.019
+  },
+  "por_slice": {
+    "canal=email": {
+      "n": 54,
+      "f1_binario": 0.8889,
+      "recall_estafas": 0.875,
+      "fpr": 0.1364
+    },
+    "canal=sms": {
+      "n": 13,
+      "f1_binario": 0.8571,
+      "recall_estafas": 0.75,
+      "fpr": 0.0
+    },
+    "canal=whatsapp": {
+      "n": 23,
+      "f1_binario": 0.9524,
+      "recall_estafas": 0.9091,
+      "fpr": 0.0
+    },
+    "modalidad=deuda_multa_falsa": {
+      "n": 5,
+      "f1_binario": 0.8889,
+      "recall_estafas": 0.8,
+      "fpr": null
+    },
+    "modalidad=encomienda_retenida": {
+      "n": 13,
+      "f1_binario": 1.0,
+      "recall_estafas": 1.0,
+      "fpr": null
+    },
+    "modalidad=falso_empleo_tareas": {
+      "n": 6,
+      "f1_binario": 1.0,
+      "recall_estafas": 1.0,
+      "fpr": null
+    },
+    "modalidad=falso_familiar_cambio_numero": {
+      "n": 2,
+      "f1_binario": 1.0,
+      "recall_estafas": 1.0,
+      "fpr": null
+    },
+    "modalidad=falso_soporte_acceso_remoto": {
+      "n": 2,
+      "f1_binario": 0.0,
+      "recall_estafas": 0.0,
+      "fpr": null
+    },
+    "modalidad=no_determinada": {
+      "n": 6,
+      "f1_binario": 0.8,
+      "recall_estafas": 0.6667,
+      "fpr": null
+    },
+    "modalidad=phishing_bancario": {
+      "n": 10,
+      "f1_binario": 0.8889,
+      "recall_estafas": 0.8,
+      "fpr": null
+    },
+    "modalidad=premio_sorteo_falso": {
+      "n": 7,
+      "f1_binario": 1.0,
+      "recall_estafas": 1.0,
+      "fpr": null
+    },
+    "origen=captura": {
+      "n": 10,
+      "f1_binario": 0.8,
+      "recall_estafas": 0.6667,
+      "fpr": 0.0
+    },
+    "origen=texto": {
+      "n": 80,
+      "f1_binario": 0.9091,
+      "recall_estafas": 0.8889,
+      "fpr": 0.0857
+    },
+    "slice=adversarial": {
+      "n": 9,
+      "f1_binario": 1.0,
+      "recall_estafas": 1.0,
+      "fpr": null
+    },
+    "slice=capturas": {
+      "n": 10,
+      "f1_binario": 0.8,
+      "recall_estafas": 0.6667,
+      "fpr": 0.0
+    },
+    "slice=hard_negative": {
+      "n": 25,
+      "f1_binario": 0.0,
+      "recall_estafas": null,
+      "fpr": 0.12
+    },
+    "slice=sin_evidencia": {
+      "n": 1,
+      "f1_binario": 0.0,
+      "recall_estafas": 0.0,
+      "fpr": null
+    }
+  }
+}
