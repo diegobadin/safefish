@@ -39,3 +39,4 @@ results/
 
 # --- Metadatos de Windows/WSL (Alternate Data Streams) -------------------
 *:Zone.Identifier
+logs/

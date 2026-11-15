@@ -48,6 +48,31 @@ class PipelineResult:
     plan_info: dict | None = None
 
 
+def _advanced_retriever(cfg: PipelineConfig, stores, emb, names, seed):
+    """V4–V6: multi-query, híbrido BM25 y rerank sobre las 4 colecciones (Fase 3)."""
+    from safefish.llm import StructuredLLM
+    from safefish.retrieval.advanced import AdvancedRetriever, LLMReranker, QueryRewriter, load_bm25
+
+    r, t = cfg.retrieval, cfg.generation.timeout_s
+    rewriter = reranker = bm25 = None
+    if r.query.strategy == "multi_query":
+        qlm = StructuredLLM.from_cfg(r.query.model, 0.0, seed, t)
+        rewriter = QueryRewriter(qlm, r.query.prompt, r.query.max_queries)
+    if r.hybrid.enabled:
+        bm25 = load_bm25(cfg.snapshot_dir)
+    if r.rerank.enabled:
+        if not r.rerank.model:
+            raise ValueError("rerank.enabled necesita rerank.model")
+        rlm = StructuredLLM.from_cfg(r.rerank.model, 0.0, seed, t)
+        reranker = LLMReranker(rlm, r.rerank.prompt, r.rerank.max_chars)
+    weights = r.hybrid.weights if r.hybrid.enabled else {"dense": 1.0, "bm25": 0.0}
+    return AdvancedRetriever(
+        stores, r.top_n, emb, names,
+        rewriter=rewriter, bm25=bm25, weights=weights, reranker=reranker, top_in=r.rerank.top_in,
+        contrastivo=r.mensajes_contrastivo,
+    )  # fmt: skip
+
+
 def _merge_guias(b: RetrievalBundle, guias) -> RetrievalBundle:
     ids = {g.id for g in b.guias}
     return b.model_copy(update={"guias": [*b.guias, *(g for g in guias if g.id not in ids)]})
@@ -97,8 +122,16 @@ class SafeFishPipeline:
         if not r.enabled:
             retriever: Retriever = NullRetriever()
         else:
-            if r.query.strategy != "raw" or r.hybrid.enabled or r.rerank.enabled:
-                raise NotImplementedError("multi-query, híbrido y rerank: Fase 3 (V4–V6)")
+            advanced = (
+                r.query.strategy != "raw"
+                or r.hybrid.enabled
+                or r.rerank.enabled
+                or r.mensajes_contrastivo
+            )
+            if advanced and cfg.index.layout != "per_tipo":
+                raise ValueError(
+                    "multi-query, híbrido y rerank (V4–V6) van sobre las 4 colecciones"
+                )
             if r.filter_canal != "off":
                 raise NotImplementedError("filtro por canal: barrido de Fase 3")
             emb = embeddings or make_embeddings(cfg.embeddings)
@@ -123,7 +156,10 @@ class SafeFishPipeline:
             else:
                 names = manifest["collections"]
                 stores = open_collections(snap, emb, names)
-                retriever = MultiCollectionRetriever(stores, r.top_n, emb, names)
+                if advanced:
+                    retriever = _advanced_retriever(cfg, stores, emb, names, g.seed)
+                else:
+                    retriever = MultiCollectionRetriever(stores, r.top_n, emb, names)
                 if (gstore := stores.get("guias")) is not None:
 
                     def guias_dense(q: str, k: int) -> list[str]:

@@ -66,7 +66,13 @@ def check_golden(golden_dir: str | Path, kb_manifest: dict | None = None) -> lis
     dup_ids = [i for i, n in Counter(c.id for c in all_cases).items() if n > 1]
     if dup_ids:
         problems.append(f"ids repetidos: {dup_ids[:5]}")
-    dup_txt = [t[:60] for t, n in Counter(c.texto.strip() for c in all_cases).items() if n > 1]
+    # El slice `capturas` es el mismo caso en imagen: su texto (la transcripción GT) se repite a
+    # propósito. Se cuenta cada texto una vez por origen (texto / captura).
+    dup_txt = [
+        t[:60]
+        for (t, _), n in Counter((c.texto.strip(), c.origen) for c in all_cases).items()
+        if n > 1
+    ]
     if dup_txt:
         problems.append(f"textos repetidos: {dup_txt[:3]}")
 

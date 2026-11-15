@@ -4,14 +4,17 @@ Las fuentes se declaran en un registro YAML (`data/sources.yaml`), con *provenan
 (§5.4): cada documento sale con `source_id`, `doc_tipo`, `fuente_tipo` y `fuente_url`, más la
 metadata que el curador declare (modalidad, canal, entidad, campaign_id, label, fecha).
 
-Loaders soportados: `web` (WebBaseLoader), `pdf` (PyPDFLoader), `csv` (CSVLoader),
-`text` (archivos .txt/.md, con front matter YAML opcional) y `taxonomia` (señales de
-`taxonomias.yaml` como documentos de la colección `senales`).
+Loaders soportados: `web` (WebBaseLoader, baja en cada build), `html` (copias locales que
+guarda `safefish.ingest.fetch`, con su URL y fecha: el build es reproducible), `pdf`
+(PyPDFLoader), `csv` (CSVLoader), `text` (archivos .txt/.md, con front matter YAML opcional) y
+`taxonomia` (señales de `taxonomias.yaml` como documentos de la colección `senales`).
 """
 
 from __future__ import annotations
 
+import json
 import os
+import re
 from pathlib import Path
 from typing import Literal
 
@@ -38,7 +41,7 @@ class SourceSpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
     id: str
     tipo: DocTipo
-    loader: Literal["web", "pdf", "csv", "text", "taxonomia"]
+    loader: Literal["web", "html", "pdf", "csv", "text", "taxonomia"]
     path: str | None = None  # archivo o glob, relativo al YAML de fuentes
     urls: list[str] = Field(default_factory=list)
     fuente_tipo: str = "desconocido"  # alerta_oficial | banco | prensa | dataset | recolectado | sintetico | traducido
@@ -110,6 +113,17 @@ def _load_text(spec: SourceSpec, base_dir: Path) -> list[Document]:
     return docs
 
 
+def unir_palabras_sueltas(text: str) -> str:
+    """Algunos PDF (texto posicionado palabra por palabra) se extraen con una palabra por
+    línea. Si la mayoría de las líneas tiene una sola palabra, se unen con espacios y se
+    conservan solo los cortes de párrafo (líneas vacías)."""
+    lineas = [x for x in text.splitlines() if x.strip()]
+    if not lineas or sum(len(x.split()) == 1 for x in lineas) / len(lineas) < 0.6:
+        return text
+    parrafos = re.split(r"\n\s*\n", text)
+    return "\n\n".join(" ".join(p.split()) for p in parrafos if p.strip())
+
+
 def _load_pdf(spec: SourceSpec, base_dir: Path) -> list[Document]:
     from langchain_community.document_loaders import PyPDFLoader
 
@@ -118,10 +132,49 @@ def _load_pdf(spec: SourceSpec, base_dir: Path) -> list[Document]:
         for d in PyPDFLoader(str(f), mode="single").load():
             docs.append(
                 Document(
-                    page_content=d.page_content,
+                    page_content=unir_palabras_sueltas(d.page_content),
                     metadata={**_base_metadata(spec), "archivo": f.name},
                 )
             )
+    return docs
+
+
+_RUIDO_HTML = ("script", "style", "noscript", "nav", "header", "footer", "form", "aside", "svg", "iframe", "button")  # fmt: skip
+_MARCA_HTML = re.compile(r"^<!-- safefish-fuente: (\{.*?\}) -->")
+
+
+def html_to_text(html: str) -> tuple[str, str | None]:
+    """Texto visible del contenido principal (`<main>` / `<article>` / `<body>`) y título."""
+    from bs4 import BeautifulSoup
+
+    soup = BeautifulSoup(html, "html.parser")
+    titulo = soup.title.get_text(strip=True) if soup.title else None
+    for tag in soup(_RUIDO_HTML):
+        tag.decompose()
+    raiz = soup.find("main") or soup.find("article") or soup.body or soup
+    lineas = [x.strip() for x in raiz.get_text("\n").splitlines()]
+    return "\n".join(x for x in lineas if x), titulo
+
+
+def _load_html(spec: SourceSpec, base_dir: Path) -> list[Document]:
+    docs = []
+    for f in _resolve(spec, base_dir):
+        html = f.read_text(encoding="utf-8", errors="replace")
+        m = _MARCA_HTML.match(html)
+        proc = json.loads(m.group(1)) if m else {}
+        texto, titulo = html_to_text(html)
+        docs.append(
+            Document(
+                page_content=texto,
+                metadata={
+                    **_base_metadata(spec),
+                    "fuente_url": proc.get("url") or spec.fuente_url,
+                    "descargado": proc.get("descargado"),
+                    "titulo": titulo,
+                    "archivo": f.name,
+                },
+            )
+        )
     return docs
 
 
@@ -211,6 +264,8 @@ def load_source(spec: SourceSpec, base_dir: Path) -> list[Document]:
             return _load_pdf(spec, base_dir)
         case "web":
             return _load_web(spec)
+        case "html":
+            return _load_html(spec, base_dir)
         case "csv":
             return _load_csv(spec, base_dir)
         case "taxonomia":

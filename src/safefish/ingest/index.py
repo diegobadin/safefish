@@ -27,16 +27,40 @@ def build_index(
     collection: str,
     batch_size: int = 256,
 ) -> Chroma:
+    # HNSW persistido entero al terminar el build: con el `batch_size` por defecto (100) una
+    # colección chica nunca llega a volcarse al índice, queda sin `index_metadata.pickle` y
+    # Chroma 1.5 la completa en la primera lectura; según qué proceso lea primero, el segmento
+    # queda roto ("Nothing found on disk"). Con batch = sync = tamaño de la colección, el último
+    # lote del build vuelca y persiste todo. El snapshot es inmutable: no hay escrituras después.
+    n = max(2, len(chunks))
     store = Chroma(
         collection_name=collection,
         embedding_function=embeddings,
         persist_directory=str(persist_dir),
-        collection_configuration=COSINE,
+        collection_configuration={"hnsw": {**COSINE["hnsw"], "batch_size": n, "sync_threshold": n}},
     )
     for i in range(0, len(chunks), batch_size):
         batch = list(chunks[i : i + batch_size])
         store.add_documents(batch, ids=[d.id for d in batch])
     return store
+
+
+def verify_indexes(chroma_dir: Path, rondas: int = 2) -> None:
+    """Reabre el índice con un cliente nuevo y consulta cada colección `rondas` veces con un
+    vector propio. Chroma 1.5 escribe los segmentos HNSW de las colecciones chicas recién en la
+    primera lectura; un snapshot dañado (p. ej. reconstruido sobre restos de otro) anda en la
+    primera consulta y falla en la segunda. Mejor enterarse acá que en mitad de una corrida."""
+    import chromadb
+
+    client = chromadb.PersistentClient(path=str(chroma_dir))
+    for col in client.list_collections():
+        c = client.get_collection(col.name)
+        got = c.get(limit=1, include=["embeddings"])
+        if not got["ids"]:
+            continue
+        vec = got["embeddings"][0]
+        for _ in range(rondas):
+            c.query(query_embeddings=[vec], n_results=min(6, c.count()))
 
 
 def read_manifest(snapshot_dir: Path) -> dict:

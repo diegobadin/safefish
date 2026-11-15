@@ -23,6 +23,7 @@ make test          # unit + contrato + smoke, sin llamar a la API
 | `make kb CONFIG=configs/v1.yaml` | Construye el snapshot de KB del config (`data/kb_snapshots/<kb>/`) |
 | `make eval CONFIG=configs/v1.yaml SPLIT=dev` | Corre el pipeline sobre el golden y escribe `results/<run_id>/` |
 | `make compare A=results/<run_a> B=results/<run_b>` | Deltas, IC 95 % bootstrap y McNemar pareado |
+| `make report SPLIT=test` | Tabla de la ablación con la última corrida de cada versión → `docs/ablation_tabla_<split>.md` |
 | `make golden-check` | Valida el golden: esquema, ids, splits y leakage de `campaign_id` contra la KB |
 | `make demo-fixture` | KB + V0 + V1 de punta a punta sobre la mini-KB de fixtures (usa la API, centavos) |
 | `make demo-fixture-v3` | Igual para V2 y V3: KB normalizada en 4 colecciones, planner y verificador |
@@ -40,7 +41,10 @@ Con Poetry: `make eval RUN="poetry run"`.
 | F0 · Fundaciones | ✅ Contratos (`schemas.py`), taxonomías, configs YAML, guía de etiquetado, arnés, fixtures (mini-KB + 5 bundles), repo con pre-commit |
 | Fase 1 · V0 + V1 Naive RAG | ✅ Código: ingesta → snapshot, retriever denso top-6, razonador con salida estructurada, métricas de tarea y retrieval, `compare` (McNemar + bootstrap). Verificado de punta a punta contra la API sobre fixtures |
 | Fase 2 · V2 + V3 | ✅ Código (ADR 003): normalizador (plantilla + LLM mini) a `CaseDoc/MessageDoc/SignalDoc/GuideDoc`, 1 caso = 1 chunk, 4 colecciones con `top_n`, cobertura y auditoría de inyección en el manifest, muestra de revisión del 10 %; planner desde Guías; verificador R1–R5; extracción de capturas (visión + OCR + `align`) y captura anotada. Barrido V2a. Verificado sin API sobre fixtures |
-| Gate G0 / G1 / G2 | ⏳ Faltan los **datos**: fuentes reales en `data/sources.yaml` → `make kb`, y el golden real (`golden/dev.jsonl`, `golden/test.jsonl`) según la guía de etiquetado. Candidatas relevadas en [`docs/fuentes_candidatas.md`](docs/fuentes_candidatas.md) |
+| Datos | ✅ Fuentes públicas: `make data` las baja (manifiesto `data/descargas.yaml`) y `data/sources.yaml` ya las carga: 12 fuentes de casos, 9 de guías y 4.260 emails etiquetados (SpaPhish + SpearPhishMX). Qué se usa en cada fase y cómo dejar los mensajes propios: [`docs/datos.md`](docs/datos.md) |
+| Golden v1 | ✅ 125 casos (35 dev · 90 test): 35 SMS/WhatsApp/email recolectados, 60 emails de SpaPhish, 15 adversariales y 15 capturas; split por `campaign_id`, sin leakage contra la KB. **Pre-etiquetado con LLM: falta la revisión humana** ([`docs/datos.md`](docs/datos.md#golden-v1)) |
+| Fase 3 · V4–V6 | ✅ Multi-query + RRF (V4), híbrido denso + BM25 (V5), re-ranking listwise (V6) en [`retrieval/advanced.py`](src/safefish/retrieval/advanced.py); evidencia contrastiva lista como candidato de V7 |
+| Reporte y UI | ✅ `make report` (tabla de la ablación) y UI local: `python -m safefish.ui --config configs/v6.yaml` |
 
 ### Probar la Fase 1 sobre fixtures (≈ USD 0,08)
 
@@ -52,6 +56,7 @@ make compare A=results/<run_v0> B=results/<run_v1-fixture>
 ### Correr V0 y V1 con datos reales
 
 ```bash
+make data                                       # baja las fuentes públicas (idempotente)
 make kb CONFIG=configs/v1.yaml                 # KB desde data/sources.yaml → kb-v1
 make golden-check                               # esquema + leakage de campaign_id contra kb-v1
 make eval CONFIG=configs/v0.yaml SPLIT=dev
@@ -70,6 +75,20 @@ make eval CONFIG=configs/v2.yaml SPLIT=dev JUDGE=1
 make eval CONFIG=configs/v3.yaml SPLIT=dev JUDGE=1   # mismo snapshot kb-v2
 make compare A=results/<run_v2> B=results/<run_v3>
 ```
+
+### Correr V4–V7 (Fase 3 y Ej. 4) y armar la tabla
+
+```bash
+make eval CONFIG=configs/v4.yaml SPLIT=test JUDGE=1   # multi-query + RRF (mismo kb-v2)
+make eval CONFIG=configs/v5.yaml SPLIT=test JUDGE=1   # + híbrido BM25 (desde chunks.jsonl)
+make eval CONFIG=configs/v6.yaml SPLIT=test JUDGE=1   # + re-ranking listwise → Versión 1
+make eval CONFIG=configs/v7.yaml SPLIT=test JUDGE=1   # + evidencia contrastiva (error analysis)
+make report SPLIT=test                                 # → docs/ablation_tabla_test.md
+make compare A=results/<run_v6> B=results/<run_v7>     # IC bootstrap + McNemar
+```
+
+Análisis, decisiones y ficha de V7: [`docs/ablation.md`](docs/ablation.md). Demo:
+`python -m safefish.ui --config configs/v6.yaml` → http://127.0.0.1:8501.
 
 Para capturas, el OCR necesita el binario de Tesseract con el idioma `spa` (Windows: instalador
 de UB Mannheim; Debian/Ubuntu: `apt install tesseract-ocr tesseract-ocr-spa`). Sin Tesseract el

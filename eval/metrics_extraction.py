@@ -1,7 +1,10 @@
 """Métricas de extracción para el slice de capturas (§4.3, capa Extracción).
 
 - CER/WER de la transcripción contra el texto de referencia del golden (distancia de
-  Levenshtein sobre caracteres / palabras normalizadas, como `jiwer`).
+  Levenshtein sobre caracteres / palabras normalizadas, como `jiwer`). La referencia tiene la
+  PII redactada con placeholders y las zonas tachadas como `[TACHADO]`; la predicción se lee de
+  la imagen sin redactar. Para no contar eso como error de lectura, a la predicción se le
+  aplica la misma redacción a las dos y se quitan las marcas de tachado.
 - F1 de entidades (links, teléfonos, montos, CBU/alias, mails) extraídas del texto predicho
   vs. del texto de referencia.
 - Localización: % de citas de referencia (`citas_bbox` del golden) cubiertas por una señal
@@ -10,6 +13,8 @@
 """
 
 from __future__ import annotations
+
+import re
 
 import numpy as np
 
@@ -49,12 +54,25 @@ def _entity_set(texto: str) -> set[tuple[str, str]]:
     }
 
 
+_TACHADO = re.compile(r"\[TACHADO\]|█+")
+
+
+def comparable(texto: str) -> str:
+    """Pone predicción y referencia en el mismo plano: PII redactada (la redacción es
+    idempotente sobre un texto ya redactado) y sin marcas de tachado."""
+    from safefish.ingest.pii import redact_pii
+
+    texto = redact_pii(texto).text
+    return re.sub(r"[ \t]+", " ", _TACHADO.sub("", texto)).strip()
+
+
 def compute_extraction_metrics(rows: list[dict]) -> dict:
     caps = [r for r in rows if r.get("origen") == "captura" and r.get("texto_gold")]
     if not caps:
         return {}
-    cers = [cer(r["texto"], r["texto_gold"]) for r in caps]
-    wers = [wer(r["texto"], r["texto_gold"]) for r in caps]
+    pares = [(comparable(r["texto"]), comparable(r["texto_gold"])) for r in caps]
+    cers = [cer(p, g) for p, g in pares]
+    wers = [wer(p, g) for p, g in pares]
     tp = fp = fn = 0
     for r in caps:
         pred, gold = _entity_set(r["texto"]), _entity_set(r["texto_gold"])

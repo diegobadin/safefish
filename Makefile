@@ -5,15 +5,18 @@ SPLIT ?= dev
 LIMIT ?=
 GOLDEN ?= golden
 
-.PHONY: help install test lint format kb coverage eval compare golden-check demo-fixture demo-fixture-v3 hooks
+.PHONY: help install test lint format data kb coverage eval compare report golden-check demo-fixture demo-fixture-v3 hooks
 
 help:
 	@echo "make install                         Instala dependencias (uv sync)"
 	@echo "make test                            Tests unitarios, de contrato y smoke (sin API)"
 	@echo "make lint                            Ruff (lint + formato)"
+	@echo "make data                           Baja las fuentes públicas a data/raw/ y prepara los CSV de mensajes"
+	@echo "make data GRUPOS=es,en,ref          Suma datasets en inglés y material de referencia"
 	@echo "make kb CONFIG=configs/v1.yaml       Construye el snapshot de KB del config"
 	@echo "make eval CONFIG=... SPLIT=dev       Corre el arnés sobre el split del golden"
 	@echo "make compare A=results/<run> B=results/<run>   Deltas, IC bootstrap y McNemar"
+	@echo "make report SPLIT=test                Tabla de la ablación (última corrida por versión)"
 	@echo "make golden-check                    Valida el golden (esquema, duplicados, leakage)"
 	@echo "make demo-fixture                    KB + eval de punta a punta sobre fixtures (usa la API)"
 	@echo "make demo-fixture-v3                 Igual, para V2 y V3 (4 colecciones, planner, verificador)"
@@ -38,6 +41,10 @@ format:
 	$(RUN) ruff check --fix src eval tests
 	$(RUN) ruff format src eval tests
 
+GRUPOS ?= es
+data:
+	$(RUN) python -m safefish.ingest.fetch --grupos $(GRUPOS)
+
 kb:
 	$(RUN) python -m safefish.ingest.build_kb --config $(CONFIG)
 
@@ -49,6 +56,9 @@ coverage:
 
 compare:
 	$(RUN) python -m eval.compare --a $(A) --b $(B)
+
+report:
+	$(RUN) python -m eval.report --split $(SPLIT) --out docs/ablation_tabla_$(SPLIT).md
 
 golden-check:
 	$(RUN) python -m eval.golden --golden-dir $(GOLDEN) --kb-config $(CONFIG)
