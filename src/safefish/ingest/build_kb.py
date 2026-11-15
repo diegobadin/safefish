@@ -227,6 +227,22 @@ def review_sample(
     ]
 
 
+def _verificar_en_otro_proceso(chroma_dir) -> None:
+    """Abre el índice recién construido en un proceso nuevo (como lo va a usar el arnés) y
+    consulta cada colección dos veces. Si falla, el build falla y no se escribe el manifest."""
+    import subprocess
+
+    code = (
+        "import sys; from pathlib import Path; from safefish.ingest.index import verify_indexes;"
+        "verify_indexes(Path(sys.argv[1]))"
+    )
+    r = subprocess.run(
+        [sys.executable, "-c", code, str(chroma_dir)], capture_output=True, text=True
+    )
+    if r.returncode != 0:
+        raise RuntimeError(f"El índice de {chroma_dir} no se puede leer: {r.stderr[-500:]}")
+
+
 def build_snapshot(
     cfg: PipelineConfig,
     *,
@@ -330,6 +346,7 @@ def build_snapshot(
         "campaign_ids": campaigns,
         "uso": tracker.summary(),
     }  # fmt: skip
+    _verificar_en_otro_proceso(out_dir / "chroma")
     (out_dir / "manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
     )
