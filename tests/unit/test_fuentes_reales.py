@@ -97,13 +97,28 @@ def test_cliente_rechaza_hosts_fuera_de_la_allowlist_y_http():
 def test_cliente_sigue_redirecciones_https_y_corta_las_http(monkeypatch):
     monkeypatch.setattr(fetch, "PAUSA_S", 0)
     c = _cliente({
-        "https://ok.example/a": _Resp(302, location="https://cdn.example/a"),
-        "https://cdn.example/a": _Resp(200, b"hola", {"Content-Type": "text/plain"}),
-        "https://ok.example/b": _Resp(302, location="http://cdn.example/b"),
+        "https://ok.example/a": _Resp(302, location="https://cdn.ok.example/a"),
+        "https://cdn.ok.example/a": _Resp(200, b"hola", {"Content-Type": "text/plain"}),
+        "https://ok.example/b": _Resp(302, location="http://cdn.ok.example/b"),
+        "https://ok.example/c": _Resp(302, location="https://bucket.s3.amazonaws.com/c"),
+        "https://bucket.s3.amazonaws.com/c": _Resp(200, b"zip", {"Content-Type": "x"}),
     })  # fmt: skip
     assert c.get("https://ok.example/a")[0] == b"hola"
+    assert c.get("https://ok.example/c")[0] == b"zip"
     with pytest.raises(fetch.FetchError, match="HTTPS"):
         c.get("https://ok.example/b")
+
+
+def test_cliente_no_sigue_redirecciones_a_hosts_ajenos(monkeypatch):
+    monkeypatch.setattr(fetch, "PAUSA_S", 0)
+    c = _cliente({
+        "https://ok.example/a": _Resp(302, location="https://otro.example/a"),
+        "https://ok.example/b": _Resp(302, location="https://127.0.0.1/admin"),
+        "https://ok.example/c": _Resp(302, location="https://evilok.example/c"),
+    })  # fmt: skip
+    for p in "abc":
+        with pytest.raises(fetch.FetchError, match="allowlist"):
+            c.get(f"https://ok.example/{p}")
 
 
 def test_cliente_corta_archivos_demasiado_grandes(monkeypatch):
@@ -118,8 +133,8 @@ def test_token_de_hf_va_solo_a_huggingface(monkeypatch):
     monkeypatch.setenv("HF_TOKEN", "secreto")
     c = _cliente(
         {
-            "https://huggingface.co/f": _Resp(302, location="https://cdn.hf.example/f"),
-            "https://cdn.hf.example/f": _Resp(200, b"ok"),
+            "https://huggingface.co/f": _Resp(302, location="https://cdn-lfs.hf.co/f"),
+            "https://cdn-lfs.hf.co/f": _Resp(200, b"ok"),
         },
         hosts=("huggingface.co",),
     )

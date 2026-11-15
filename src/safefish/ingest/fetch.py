@@ -41,6 +41,8 @@ TIMEOUT_S = 60
 PAUSA_S = 1.0  # entre pedidos al mismo host
 REGISTRO = "_descargas.json"
 MARCA_HTML = "safefish-fuente"
+# CDN a los que redirigen Mendeley (S3) y Hugging Face al bajar archivos.
+CDN_SUFIJOS = ("amazonaws.com", "hf.co", "huggingface.co")
 
 
 class Descarga(BaseModel):
@@ -117,6 +119,19 @@ class Cliente:
         if u.scheme != "https" or (u.hostname or "") not in self.hosts:
             raise FetchError(f"URL fuera de la allowlist: {url}")
 
+    def _check_redireccion(self, url: str) -> None:
+        """Una redirección solo puede ir a un host permitido, a un subdominio de uno (por ejemplo
+        `www.` o el CDN propio del sitio) o a los CDN de Mendeley y Hugging Face. Nunca a una IP
+        ni a un host interno."""
+        u = urlparse(url)
+        host = (u.hostname or "").lower()
+        if u.scheme != "https":
+            raise FetchError(f"redirección fuera de HTTPS: {url}")
+        bases = {h.lower().removeprefix("www.") for h in self.hosts} | set(CDN_SUFIJOS)
+        if host in self.hosts or any(host == b or host.endswith("." + b) for b in bases):
+            return
+        raise FetchError(f"redirección a un host fuera de la allowlist: {url}")
+
     def get(self, url: str, max_bytes: int = MAX_BYTES) -> tuple[bytes, str]:
         self._check(url)
         host = urlparse(url).hostname or ""
@@ -135,8 +150,7 @@ class Cliente:
             if r.is_redirect:
                 url = requests.compat.urljoin(url, r.headers["Location"])
                 r.close()
-                if urlparse(url).scheme != "https":
-                    raise FetchError(f"redirección fuera de HTTPS: {url}")
+                self._check_redireccion(url)
                 continue
             break
         else:
