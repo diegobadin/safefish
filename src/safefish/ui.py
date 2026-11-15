@@ -1,102 +1,120 @@
-"""UI mínima (§2.6): pegar un mensaje o subir una captura → veredicto, señales, casos y plan.
+"""UI local (§2.6): front en Preact (src/safefish/web/) + API JSON sobre el pipeline.
 
-    python -m safefish.ui --config configs/v6.yaml [--port 8501]
+    python -m safefish.ui [--config configs/v8.yaml] [--port 8501]
 
-Servidor local con la biblioteca estándar (sin dependencias nuevas). Escucha solo en
-127.0.0.1: es una demo para el oral, no un servicio. Las capturas subidas se guardan en una
-carpeta temporal y se borran al terminar el análisis; la imagen anotada se devuelve en línea.
+Servidor con la biblioteca estándar (sin dependencias nuevas). Escucha solo en 127.0.0.1 y solo
+atiende pedidos dirigidos a sí mismo: es una demo para el oral, no un servicio. Las capturas se
+guardan en una carpeta temporal y se borran al terminar el análisis. No se registra el contenido
+de los mensajes. La captura se marca en el navegador (Tesseract.js), no en el servidor.
 """
 
 from __future__ import annotations
 
 import argparse
-import base64
 import contextlib
-import html
+import json
 import sys
 import tempfile
 import threading
+import time
 from email.parser import BytesParser
 from email.policy import default as email_policy
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 
 MAX_UPLOAD = 15 * 1024 * 1024
-COLOR = {
-    "estafa_confirmada": "#b42318", "muy_sospechoso": "#c4320a",
-    "levemente_sospechoso": "#b54708", "parece_legitimo": "#067647",
-}  # fmt: skip
+WEB = Path(__file__).with_name("web")
+ESTATICOS = {
+    "/": ("index.html", "text/html; charset=utf-8"),
+    "/app.js": ("app.js", "text/javascript; charset=utf-8"),
+    "/styles.css": ("styles.css", "text/css; charset=utf-8"),
+}
 
-PAGINA = """<!doctype html><html lang="es"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>SafeFish</title>
-<style>
-:root{{--bg:#f7f7f5;--fg:#1d1d1b;--muted:#5f5f5a;--card:#fff;--line:#e3e3df}}
-@media (prefers-color-scheme:dark){{:root{{--bg:#151514;--fg:#ececea;--muted:#a3a39e;--card:#1f1f1d;--line:#33332f}}}}
-body{{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif}}
-main{{max-width:860px;margin:0 auto;padding:24px 16px}}
-h1{{font-size:1.6rem;margin:0 0 4px}} p.sub{{color:var(--muted);margin:0 0 20px}}
-form,.card{{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}}
-textarea{{width:100%;box-sizing:border-box;min-height:140px;font:inherit;padding:8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}}
-label{{display:block;margin:10px 0 4px;color:var(--muted);font-size:.9rem}}
-button{{margin-top:12px;padding:10px 18px;border:0;border-radius:6px;background:#1d4ed8;color:#fff;font:inherit;cursor:pointer}}
-.ver{{display:inline-block;padding:4px 10px;border-radius:6px;color:#fff;font-weight:600}}
-li{{margin:6px 0}} q{{font-style:italic}} img{{max-width:100%;border-radius:8px}}
-details pre{{white-space:pre-wrap;word-break:break-word;font-size:.8rem}} .muted{{color:var(--muted)}}
-</style></head><body><main>
-<h1>SafeFish</h1><p class="sub">¿Te llegó un mensaje raro? Pegalo o subí la captura. Versión: {version}</p>
-<form method="post" action="/" enctype="multipart/form-data">
-<label for="t">Texto del mensaje</label><textarea id="t" name="texto">{texto}</textarea>
-<label for="i">o una captura (PNG/JPG)</label><input id="i" type="file" name="imagen" accept="image/*">
-<label for="s">¿Qué hiciste?</label><select id="s" name="situacion">
-<option value="no_respondio">No respondí</option><option value="respondio">Respondí</option>
-<option value="pago_transfirio">Pagué o transferí</option><option value="compartio_codigo">Compartí un código</option>
-<option value="compartio_clave_o_tarjeta">Compartí clave o tarjeta</option><option value="instalo_app_remota">Instalé una app que me pidieron</option>
-</select><br><button type="submit">Analizar</button></form>
-{resultado}
-</main></body></html>"""
+SITUACIONES = {
+    "no_respondio": "Todavía no respondí",
+    "respondio": "Respondí, pero no pagué ni pasé datos",
+    "pago_transfirio": "Pagué o transferí plata",
+    "compartio_codigo": "Pasé un código",
+    "compartio_clave_o_tarjeta": "Pasé claves o datos de tarjeta",
+    "instalo_app_remota": "Instalé una app que me pidieron",
+}
+VEREDICTOS = {
+    "estafa_confirmada": (
+        "Es una estafa",
+        "critico",
+        "Coincide con una modalidad documentada y tiene varias señales claras. No hagas lo que pide.",
+    ),  # fmt: skip
+    "muy_sospechoso": (
+        "Muy sospechoso",
+        "alto",
+        "Tiene señales típicas de estafa. No hagas lo que pide hasta verificarlo por otro canal.",
+    ),  # fmt: skip
+    "levemente_sospechoso": (
+        "Levemente sospechoso",
+        "medio",
+        "Hay algo que no cierra. Verificalo por un canal oficial antes de responder.",
+    ),  # fmt: skip
+    "parece_legitimo": (
+        "Parece legítimo",
+        "ok",
+        "No encontramos señales de estafa. Ante la duda, consultá por el canal oficial de la entidad.",
+    ),  # fmt: skip
+}
+SEVERIDAD = {"critica": "Crítica", "alta": "Alta", "media": "Media", "baja": "Baja"}
 
 
-def render_resultado(res, imagen_anotada: str | None) -> str:
+def respuesta(res, situacion: str, contexto: str | None, segundos: float, version: str,
+              aviso: str | None = None) -> dict:  # fmt: skip
+    """Lo que necesita el front, ya traducido a lenguaje de usuario."""
+    from safefish.taxonomia import load_taxonomia
+
     if res.error or res.output is None:
-        return f'<div class="card"><b>No se pudo analizar.</b> <span class="muted">{html.escape(res.error or "")}</span></div>'  # fmt: skip
-    o = res.output
-    v = o.veredicto.value
-    partes = [
-        f'<div class="card"><span class="ver" style="background:{COLOR.get(v, "#444")}">'
-        f"{v.replace('_', ' ')}</span> · modalidad: <b>{o.modalidad.value.replace('_', ' ')}</b>"
-    ]
-    if o.senales:
-        partes.append("<h3>Señales</h3><ul>")
-        partes += [
-            f"<li><b>{s.signal_id.value.replace('_', ' ')}</b>: <q>{html.escape(s.cita)}</q><br>"
-            f'<span class="muted">{html.escape(s.explicacion)}</span></li>'
-            for s in o.senales
-        ]
-        partes.append("</ul>")
-    if o.plan:
-        partes.append("<h3>Qué hacer</h3><ol>")
-        partes += [f"<li>{html.escape(p.paso)}</li>" for p in o.plan]
-        partes.append("</ol>")
-    if o.casos_similares:
-        partes.append("<h3>Casos documentados parecidos</h3><ul>")
-        for c in o.casos_similares:
-            fuente = (
-                f' · <span class="muted">{html.escape(c.fuente_url)}</span>' if c.fuente_url else ""
-            )
-            partes.append(f"<li>{html.escape(c.por_que)}{fuente}</li>")
-        partes.append("</ul>")
-    if imagen_anotada:
-        partes.append(f'<h3>Captura anotada</h3><img alt="captura con las señales marcadas" src="data:image/png;base64,{imagen_anotada}">')  # fmt: skip
-    if res.extracted is not None:
-        partes.append(f'<details><summary>Texto leído</summary><pre>{html.escape(res.extracted.texto)}</pre></details>')  # fmt: skip
-    partes.append(f"<details><summary>JSON completo</summary><pre>{html.escape(o.model_dump_json(indent=2))}</pre></details></div>")  # fmt: skip
-    return "".join(partes)
+        return {"error": res.error or "El análisis no devolvió resultado."}
+    tax, o = load_taxonomia(), res.output
+    titulo, nivel, frase = VEREDICTOS.get(o.veredicto.value, (o.veredicto.value, "medio", ""))
+    mod = o.modalidad.value
+    info = tax["modalidades"].get(mod, {})
+    senales = []
+    for n, s in enumerate(o.senales, 1):
+        sev = tax["senales"].get(s.signal_id.value, {}).get("severidad", "")
+        senales.append({
+            "n": n, "id": s.signal_id.value, "nombre": s.signal_id.value.replace("_", " ").capitalize(),
+            "severidad": sev, "severidad_texto": SEVERIDAD.get(sev, ""), "cita": s.cita,
+            "explicacion": s.explicacion,
+        })  # fmt: skip
+    casos = []
+    for c in o.casos_similares:
+        url = c.fuente_url if c.fuente_url and c.fuente_url.startswith("https://") else None
+        casos.append({"por_que": c.por_que, "url": url, "dominio": urlparse(url).hostname if url else None})  # fmt: skip
+    return {
+        "veredicto": {"id": o.veredicto.value, "titulo": titulo, "nivel": nivel, "frase": frase},
+        "modalidad": None
+        if mod == "no_determinada"
+        else {
+            "id": mod,
+            "nombre": info.get("nombre", mod),
+            "descripcion": info.get("descripcion", ""),
+        },  # fmt: skip
+        "senales": senales,
+        "texto": res.extracted.texto if res.extracted is not None else "",
+        "plan": [p.paso for p in o.plan],
+        "situacion": SITUACIONES.get(situacion, situacion),
+        "casos": casos,
+        "contexto": contexto,
+        "aviso": aviso,
+        "meta": {
+            "version": version,
+            "segundos": round(segundos, 1),
+            "costo": (res.usage or {}).get("costo_usd"),
+        },  # fmt: skip
+        "json": json.loads(o.model_dump_json()),
+    }
 
 
 def make_handler(pipeline, version: str, port: int = 8501):
-    from safefish.postprocess.annotate import annotate
     from safefish.schemas import RawInput
 
     lock = threading.Lock()  # una consulta por vez: es una demo
@@ -107,13 +125,20 @@ def make_handler(pipeline, version: str, port: int = 8501):
     origins = {f"http://{h}" for h in hosts}
 
     class Handler(BaseHTTPRequestHandler):
-        def _send(self, body: str, code: int = 200):
-            data = body.encode("utf-8")
+        def _send(
+            self, body: bytes | str, code: int = 200, tipo: str = "text/plain; charset=utf-8"
+        ):
+            data = body.encode("utf-8") if isinstance(body, str) else body
             self.send_response(code)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Type", tipo)
             self.send_header("Content-Length", str(len(data)))
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Cache-Control", "no-store")
             self.end_headers()
             self.wfile.write(data)
+
+        def _json(self, obj: dict, code: int = 200):
+            self._send(json.dumps(obj, ensure_ascii=False), code, "application/json; charset=utf-8")
 
         def _host_ok(self) -> bool:
             return (self.headers.get("Host") or "").lower() in hosts
@@ -121,48 +146,59 @@ def make_handler(pipeline, version: str, port: int = 8501):
         def do_GET(self):
             if not self._host_ok():
                 return self._send("Host no permitido", 403)
-            self._send(PAGINA.format(version=html.escape(version), texto="", resultado=""))
+            estatico = ESTATICOS.get(self.path.split("?", 1)[0])
+            if estatico is None:
+                return self._send("No encontrado", 404)
+            nombre, tipo = estatico
+            self._send((WEB / nombre).read_bytes(), 200, tipo)
 
         def do_POST(self):
             origin = (self.headers.get("Origin") or "").lower()
             if not self._host_ok() or (origin and origin not in origins):
-                return self._send("Origen no permitido", 403)
+                return self._json({"error": "Origen no permitido"}, 403)
+            if self.path != "/api/analizar":
+                return self._json({"error": "No encontrado"}, 404)
             n = int(self.headers.get("Content-Length") or 0)
             if n > MAX_UPLOAD:
-                return self._send("Archivo demasiado grande", 413)
+                return self._json({"error": "La imagen supera los 15 MB"}, 413)
             body = self.rfile.read(n)
-            msg = BytesParser(policy=email_policy).parsebytes(
-                b"Content-Type: " + self.headers["Content-Type"].encode() + b"\r\n\r\n" + body
-            )
+            tipo = (self.headers.get("Content-Type") or "").encode()
+            msg = BytesParser(policy=email_policy).parsebytes(b"Content-Type: " + tipo + b"\r\n\r\n" + body)  # fmt: skip
             campos: dict[str, bytes | str] = {}
-            for part in msg.iter_parts():
-                name = part.get_param("name", header="content-disposition")
-                if part.get_filename():
-                    campos[name] = part.get_payload(decode=True) or b""
-                else:
-                    campos[name] = (part.get_payload(decode=True) or b"").decode("utf-8", "replace")
+            if msg.is_multipart():
+                for part in msg.iter_parts():
+                    name = part.get_param("name", header="content-disposition")
+                    if part.get_filename():
+                        campos[name] = part.get_payload(decode=True) or b""
+                    else:
+                        campos[name] = (part.get_payload(decode=True) or b"").decode(
+                            "utf-8", "replace"
+                        )
             texto = str(campos.get("texto") or "").strip()
+            contexto = str(campos.get("contexto") or "").strip()[:1000]
             img = campos.get("imagen") or b""
             situacion = str(campos.get("situacion") or "no_respondio")
+            situacion = situacion if situacion in SITUACIONES else "no_respondio"
+            if not texto and not img:
+                return self._json({"error": "Pegá el texto del mensaje o subí una captura"}, 400)
+            aviso = None
+            if img and texto:  # manda la captura; lo pegado se usa como contexto
+                contexto = f"{contexto}\n{texto}".strip() if contexto else texto
+                aviso = "Analizamos la captura. El texto que pegaste lo usamos como contexto."
             with tempfile.TemporaryDirectory() as tmp, lock:
                 img_path = None
                 if img:
                     img_path = str(Path(tmp) / "captura.png")
                     Path(img_path).write_bytes(img)
-                if not texto and not img_path:
-                    return self._send(PAGINA.format(version=version, texto="", resultado='<div class="card">Pegá un texto o subí una captura.</div>'))  # fmt: skip
-                raw = RawInput(texto=texto or None, imagen_path=img_path, situacion=situacion)
+                raw = RawInput(
+                    texto=None if img_path else texto, imagen_path=img_path,
+                    situacion=situacion, contexto=contexto or None,
+                )  # fmt: skip
+                t0 = time.perf_counter()
                 res = pipeline.run(raw)
-                anotada = None
-                if img_path and res.output is not None:
-                    try:
-                        out_png = Path(tmp) / "anotada.png"
-                        annotate(img_path, res.output, out_png)
-                        anotada = base64.b64encode(out_png.read_bytes()).decode()
-                    except Exception:
-                        anotada = None
-            self._send(PAGINA.format(version=html.escape(version), texto=html.escape(texto),
-                                     resultado=render_resultado(res, anotada)))  # fmt: skip
+                segundos = time.perf_counter() - t0
+            r = respuesta(res, situacion, contexto or None, segundos, version, aviso)
+            self._json(r, 200 if "error" not in r else 502)
 
         def log_message(self, fmt, *args):  # sin logs con contenido de mensajes
             pass
@@ -174,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
     load_dotenv()
     sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--config", default="configs/v6.yaml")
+    ap.add_argument("--config", default="configs/v8.yaml")
     ap.add_argument("--port", type=int, default=8501)
     args = ap.parse_args(argv)
 
