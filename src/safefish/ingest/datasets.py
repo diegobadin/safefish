@@ -125,28 +125,10 @@ def spamshield(d: Path) -> Iterator[Fila]:
         )
 
 
-def uci_sms(d: Path) -> Iterator[Fila]:
-    for line in _read_text(d / "SMSSpamCollection").splitlines():
-        lab, _, texto = line.partition("\t")
-        if not texto:
-            continue
-        yield Fila(
-            id=f"uci-{_hash_id(texto)}",
-            texto=_texto(texto),
-            label={"ham": "legitimo"}.get(lab.strip(), ""),  # "spam" no es necesariamente estafa
-            label_origen=lab.strip(),
-            canal="sms",
-            idioma="en",
-            fuente_pais="UK",
-            dataset="uci-sms-spam",
-        )
-
-
 CONVERSORES: dict[str, tuple[str, Callable[[Path], Iterator[Fila]]]] = {
     "spaphish": ("datasets/spaphish", spaphish),
     "spearphishmx": ("datasets/spearphishmx", spearphishmx),
     "spamshield-es": ("datasets/spamshield", spamshield),
-    "uci-sms-spam": ("datasets/uci-sms-spam", uci_sms),
 }
 CON_GOLDEN = {"spaphish"}
 

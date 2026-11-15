@@ -270,11 +270,14 @@ def test_spaphish_y_golden_disjunto(tmp_path):
 
 
 def test_spam_generico_no_se_etiqueta_como_estafa(tmp_path):
-    _write(tmp_path / "raw/datasets/uci-sms-spam/SMSSpamCollection", "ham\tok\nspam\tWIN £100\n")
-    datasets.prepare("uci-sms-spam", tmp_path / "raw", tmp_path / "i")
-    u = {r["texto"]: r for r in _leer(tmp_path / "i/mensajes/uci-sms-spam.csv")}
+    _write(
+        tmp_path / "raw/datasets/spamshield/Spanish__clean-00001.jsonl",
+        '{"text": "ok", "label": "ham"}\n{"text": "GANÁ $100", "label": "spam"}\n',
+    )
+    datasets.prepare("spamshield-es", tmp_path / "raw", tmp_path / "i")
+    u = {r["texto"]: r for r in _leer(tmp_path / "i/mensajes/spamshield-es.csv")}
     assert u["ok"]["label"] == "legitimo"
-    assert u["WIN £100"]["label"] == "" and u["WIN £100"]["label_origen"] == "spam"
+    assert u["GANÁ $100"]["label"] == "" and u["GANÁ $100"]["label_origen"] == "spam"
 
 
 def test_spearphishmx_separado_por_punto_y_coma(tmp_path):
@@ -319,3 +322,22 @@ def test_registro_descarta_fuentes_que_salieron_del_manifiesto(tmp_path):
     reg, _ = fetch.run(m, tmp_path / "raw", {"es"}, dry_run=True)
     assert set(reg) == {"x"}
     assert urlparse("https://ok.example/").hostname in fetch.hosts_de(fetch.load_manifest(m))
+
+
+def test_html_se_guarda_sin_contenido_activo_y_con_el_mismo_texto():
+    from safefish.ingest.loaders import html_to_text
+
+    html = (
+        "<html><head><title>T</title><meta http-equiv='refresh' content='0;url=https://x'>"
+        "<script>alert(1)</script><!--[if IE]><script src='a.js'></script><![endif]--></head>"
+        "<body onload='x()'><main><p>Hola<!-- -->mundo</p><a href='javascript:x()'>link</a>"
+        "<iframe src='https://ads'></iframe><button onclick='y()'>Ok</button></main></body></html>"
+    )
+    limpio = fetch.sanitizar_html(html)
+    for activo in ("<script", "<iframe", "onload", "onclick", "javascript:", "refresh", "[if IE]"):
+        assert activo not in limpio.lower()
+    assert html_to_text(limpio) == html_to_text(html)
+    guardado = fetch.html_con_procedencia(
+        html.encode(), "https://ok.example/p", "2026-11-15"
+    ).decode()
+    assert guardado.startswith("<!-- safefish-fuente:") and "<script" not in guardado

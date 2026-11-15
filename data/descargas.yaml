@@ -48,15 +48,6 @@ descargas:
     licencia: CC BY 4.0
     grupo: es
 
-  - id: uci-sms-spam
-    tipo: http
-    url: https://archive.ics.uci.edu/static/public/228/sms+spam+collection.zip
-    archivo: sms_spam_collection.zip
-    extraer: [SMSSpamCollection, readme]
-    destino: datasets/uci-sms-spam
-    licencia: CC BY 4.0
-    grupo: en
-
   # --- Alertas oficiales y notas (colección casos) ------------------------------------------
   - {id: bcra-prevencion, tipo: web, url: "https://www.bcra.gob.ar/como-prevenir-estafas-virtuales/", licencia: no visible, grupo: es}
   - {id: bcra-recomendaciones, tipo: web, url: "https://www.bcra.gob.ar/noticias/recomendaciones-del-bcra-para-evitar-estafas-virtuales/", licencia: no visible, grupo: es}

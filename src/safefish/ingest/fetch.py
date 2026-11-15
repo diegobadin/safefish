@@ -1,6 +1,6 @@
 """Descarga de las fuentes públicas a `data/raw/` (no se versiona).
 
-    python -m safefish.ingest.fetch [--grupos es,en] [--solo id1,id2] [--force] [--dry-run]
+    python -m safefish.ingest.fetch [--grupos es,ref] [--solo id1,id2] [--force] [--dry-run]
 
 Lee `data/descargas.yaml`, baja cada fuente y deja un registro en `data/raw/_descargas.json`
 (URL, SHA-256, bytes, fecha, licencia). Después convierte los datasets de mensajes a un CSV
@@ -12,6 +12,7 @@ Controles (los archivos bajados son datos no confiables):
 - tamaño máximo por archivo y escritura atómica (`.part` → rename);
 - SHA-256 verificado cuando la fuente lo publica (Mendeley) o el manifiesto lo fija;
 - de un ZIP se extraen solo los miembros pedidos, aplanados, sin rutas absolutas ni `..`;
+- las páginas HTML se guardan sin contenido activo (scripts, iframes, eventos);
 - nunca se ejecuta ni se importa nada de lo bajado.
 """
 
@@ -23,6 +24,7 @@ import io
 import ipaddress
 import json
 import os
+import re
 import sys
 import time
 import zipfile
@@ -252,10 +254,44 @@ def extract_zip(data: bytes, dest: Path, quiero: list[str]) -> list[str]:
     return out
 
 
+# Elementos que ejecutan código o cargan contenido de terceros al abrir la página en un navegador.
+_ACTIVOS_HTML = ("script", "noscript", "iframe", "frame", "frameset", "object", "embed", "applet")
+_ESQUEMAS_ACTIVOS = ("javascript:", "vbscript:")
+
+
+def sanitizar_html(html: str) -> str:
+    """Saca el contenido activo de una página guardada: scripts, iframes y objetos embebidos,
+    atributos de eventos (`onclick`, `onload`…), links `javascript:` y redirecciones por
+    `<meta refresh>`. El texto visible no cambia: el loader `html` ya descarta esos elementos
+    antes de extraerlo."""
+    from bs4 import BeautifulSoup, Comment
+
+    soup = BeautifulSoup(html, "html.parser")
+    for tag in soup(_ACTIVOS_HTML):
+        tag.decompose()
+    # Comentarios condicionales de IE (`<!--[if IE]><script …>`): ese navegador los ejecuta.
+    # Los demás comentarios se dejan: algunos sitios los usan para separar palabras y sacarlos
+    # cambiaría el texto extraído.
+    for c in soup.find_all(string=lambda s: isinstance(s, Comment)):
+        if re.search(r"\[if\b|<script|<iframe|<object|<embed", c, re.I):
+            c.extract()
+    for tag in soup.find_all("meta"):
+        if str(tag.get("http-equiv", "")).lower() == "refresh":
+            tag.decompose()
+    for tag in soup.find_all(True):
+        for attr in list(tag.attrs):
+            valor = str(tag.attrs[attr]).strip().lower()
+            if attr.lower().startswith("on") or valor.startswith(_ESQUEMAS_ACTIVOS):
+                del tag.attrs[attr]
+    return str(soup)
+
+
 def html_con_procedencia(data: bytes, url: str, cuando: str) -> bytes:
-    """Antepone un comentario con la URL y la fecha: el loader `html` lo usa como `fuente_url`."""
+    """Antepone un comentario con la URL y la fecha (el loader `html` lo usa como `fuente_url`)
+    y guarda la página sin contenido activo. El `sha256` es el de los bytes descargados."""
     marca = json.dumps({"url": url, "descargado": cuando, "sha256": sha256(data)})
-    return f"<!-- {MARCA_HTML}: {marca} -->\n".encode() + data
+    limpio = sanitizar_html(data.decode("utf-8", errors="replace"))
+    return f"<!-- {MARCA_HTML}: {marca} -->\n{limpio}".encode()
 
 
 # ---------------------------------------------------------------------------
@@ -378,7 +414,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--manifest", default="data/descargas.yaml")
     ap.add_argument("--raw", default="data/raw")
     ap.add_argument("--interim", default="data/interim")
-    ap.add_argument("--grupos", default="es", help="grupos a bajar, separados por coma (es,en,ref)")
+    ap.add_argument("--grupos", default="es", help="grupos a bajar, separados por coma (es,ref)")
     ap.add_argument("--solo", default="", help="ids a bajar, separados por coma")
     ap.add_argument("--force", action="store_true", help="vuelve a bajar aunque ya esté")
     ap.add_argument("--dry-run", action="store_true", help="lista qué bajaría")

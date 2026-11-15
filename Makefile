@@ -12,7 +12,7 @@ help:
 	@echo "make test                            Tests unitarios, de contrato y smoke (sin API)"
 	@echo "make lint                            Ruff (lint + formato)"
 	@echo "make data                           Baja las fuentes públicas a data/raw/ y prepara los CSV de mensajes"
-	@echo "make data GRUPOS=es,en,ref          Suma datasets en inglés y material de referencia"
+	@echo "make data GRUPOS=es,ref             Suma material de referencia (informes en PDF)"
 	@echo "make kb CONFIG=configs/v1.yaml       Construye el snapshot de KB del config"
 	@echo "make eval CONFIG=... SPLIT=dev       Corre el arnés sobre el split del golden"
 	@echo "make compare A=results/<run> B=results/<run>   Deltas, IC bootstrap y McNemar"
