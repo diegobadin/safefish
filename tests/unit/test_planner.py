@@ -39,14 +39,23 @@ def test_seleccion_exacta_luego_modalidad_luego_general():
     assert _ids(sel) == [("G-wa-cod", "exacta"), ("G-wa", "modalidad"), ("G-gen", "general")]
 
 
-def test_modalidad_no_determinada_usa_guias_generales():
-    sel = STORE.select(Modalidad.NO_DETERMINADA, Situacion.NO_RESPONDIO, 2)
-    assert _ids(sel) == [("G-gen-nr", "general_situacion"), ("G-gen", "general")]
+def test_sin_dano_usa_solo_guias_de_prevencion():
+    # "No respondí" / "Respondí": nada de protocolos para víctimas (G-gen) ni guías de otra
+    # situación (G-phish es para quien entregó la clave).
+    for sit in (Situacion.NO_RESPONDIO, Situacion.RESPONDIO):
+        assert _ids(STORE.select(Modalidad.NO_DETERMINADA, sit, 2)) == [("G-gen-nr", "general_situacion")]  # fmt: skip
+        assert _ids(STORE.select(Modalidad.PHISHING_BANCARIO, sit, 3)) == [("G-gen-nr", "general_situacion")]  # fmt: skip
 
 
-def test_modalidad_con_guia_de_otra_situacion_queda_al_final():
-    sel = STORE.select(Modalidad.PHISHING_BANCARIO, Situacion.NO_RESPONDIO, 3)
-    assert _ids(sel)[-1] == ("G-phish", "modalidad_otra_situacion")
+def test_con_dano_la_guia_de_otra_situacion_queda_al_final():
+    sel = STORE.select(Modalidad.PHISHING_BANCARIO, Situacion.PAGO_TRANSFIRIO, 3)
+    assert _ids(sel) == [("G-gen", "general"), ("G-phish", "modalidad_otra_situacion")]
+
+
+def test_sin_dano_y_sin_guias_de_prevencion_no_deja_el_plan_vacio():
+    store = GuideStore([_g("G-inv", "inversion_falsa", "pago_transfirio"), _g("G-gen", "general", "general")])  # fmt: skip
+    sel = store.select(Modalidad.INVERSION_FALSA, Situacion.RESPONDIO, 2)
+    assert _ids(sel) == [("G-inv", "modalidad_otra_situacion"), ("G-gen", "general")]
 
 
 def test_fallback_denso_si_no_hay_guias_por_metadata():
@@ -113,3 +122,22 @@ def test_render_guias_no_permite_cerrar_delimitadores():
     out = render_guias([(g, "exacta")])
     assert out.count("<guia") == 1 and out.count("</guia>") == 1
     assert "id=\"G-'x'\"" in out
+
+
+def test_sin_dano_prefiere_prevencion_pura_y_fuentes_argentinas():
+    def g(gid, sits, url):
+        r = _g(gid, "falso_familiar_cambio_numero", sits)
+        r.metadata["fuente_url"] = url
+        return r
+
+    store = GuideStore([
+        g("G-es-mixta", "respondio,pago_transfirio", "https://www.incibe.es/x"),
+        g("G-es-resp", "respondio", "https://www.incibe.es/y"),
+        g("G-ar-resp", "respondio", "https://www.lanacion.com.ar/z"),
+        g("G-ar-gral", "general", "https://www.c5n.com/w"),
+    ])  # fmt: skip
+    sel = store.select(Modalidad.FALSO_FAMILIAR_CAMBIO_NUMERO, Situacion.RESPONDIO, 3)
+    assert [x for x, _ in _ids(sel)] == ["G-ar-resp", "G-es-resp", "G-ar-gral"]
+    # Con pago, la guía mixta es exacta y entra primero.
+    sel = store.select(Modalidad.FALSO_FAMILIAR_CAMBIO_NUMERO, Situacion.PAGO_TRANSFIRIO, 1)
+    assert _ids(sel) == [("G-es-mixta", "exacta")]

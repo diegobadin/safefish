@@ -20,6 +20,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlparse
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -38,6 +39,14 @@ from safefish.textutils import escape_attr, escape_tags
 PROMPTS_DIR = Path(__file__).with_name("prompts")
 GENERALES = {"general", "no_determinada", ""}
 SITUACION_POR_DEFECTO = Situacion.NO_RESPONDIO
+SIN_DANO = {Situacion.NO_RESPONDIO.value, Situacion.RESPONDIO.value}  # no pagó ni entregó datos
+
+
+def es_extranjera(g: GuideRecord) -> bool:
+    pais = str(g.metadata.get("fuente_pais") or "").upper()
+    host = urlparse(str(g.metadata.get("fuente_url") or "")).hostname or ""
+    return (bool(pais) and pais != "AR") or host.endswith(".es")
+
 
 Via = Literal["exacta", "modalidad", "general_situacion", "general", "modalidad_otra_situacion", "densa"]  # fmt: skip
 
@@ -128,27 +137,74 @@ class GuideStore:
         mod, sit = modalidad.value, situacion.value
         especifica = mod not in GENERALES
         tiers: list[tuple[Via, Callable[[GuideRecord], bool]]] = []
-        if especifica:
+        if especifica and sit in SIN_DANO:
+            # Primero las guías solo de prevención; las que mezclan "respondió" con "pagó" traen
+            # pasos para víctimas (cancelar la operación, denunciar) y van después.
+            tiers += [
+                (
+                    "exacta",
+                    lambda g: (
+                        mod in g.modalidades and sit in g.situaciones and g.situaciones <= SIN_DANO
+                    ),
+                ),  # fmt: skip
+                ("modalidad", lambda g: mod in g.modalidades and not g.situaciones),
+                ("exacta", lambda g: mod in g.modalidades and sit in g.situaciones),
+            ]
+        elif especifica:
             tiers += [
                 ("exacta", lambda g: mod in g.modalidades and sit in g.situaciones),
                 ("modalidad", lambda g: mod in g.modalidades and not g.situaciones),
             ]
-        tiers += [
-            ("general_situacion", lambda g: g.es_general and sit in g.situaciones),
-            ("general", lambda g: g.es_general and not g.situaciones),
-        ]
-        if especifica:
-            tiers.append(("modalidad_otra_situacion", lambda g: mod in g.modalidades))
+        if sit in SIN_DANO:
+            # Sin pago ni datos entregados, el plan es de prevención: nunca los protocolos para
+            # víctimas (bloquear cuentas, denuncia penal), que son las guías generales sin
+            # situación y las de otras situaciones de la misma modalidad.
+            tiers.append(
+                ("general_situacion", lambda g: g.es_general and bool(g.situaciones & SIN_DANO))
+            )
+            if especifica:
+                tiers.append(
+                    (
+                        "modalidad_otra_situacion",
+                        lambda g: mod in g.modalidades and bool(g.situaciones & SIN_DANO),
+                    )  # fmt: skip
+                )
+        else:
+            tiers += [
+                ("general_situacion", lambda g: g.es_general and sit in g.situaciones),
+                ("general", lambda g: g.es_general and not g.situaciones),
+            ]
+            if especifica:
+                tiers.append(("modalidad_otra_situacion", lambda g: mod in g.modalidades))
 
         out: list[tuple[GuideRecord, Via]] = []
         seen: set[str] = set()
-        for via, pred in tiers:
-            for g in self.guides:
-                if len(out) >= k:
-                    return out
-                if g.id not in seen and pred(g):
-                    out.append((g, via))
-                    seen.add(g.id)
+
+        # Dentro de cada nivel, las guías de fuentes argentinas antes que las extranjeras
+        # (INCIBE es de España: sus pasos nombran organismos y medios de pago de allá).
+        guias = sorted(self.guides, key=es_extranjera)
+
+        def recorrer(niveles) -> None:
+            for via, pred in niveles:
+                for g in guias:
+                    if len(out) >= k:
+                        return
+                    if g.id not in seen and pred(g):
+                        out.append((g, via))
+                        seen.add(g.id)
+
+        recorrer(tiers)
+        if not out and sit in SIN_DANO:
+            # Sin ninguna guía de prevención: antes que un plan vacío, las de la modalidad en
+            # otra situación y las generales.
+            recorrer(
+                [
+                    ("modalidad_otra_situacion", lambda g: especifica and mod in g.modalidades),
+                    ("general", lambda g: g.es_general and not g.situaciones),
+                ]  # fmt: skip
+            )
+        if len(out) >= k:
+            return out
         if not out and self.dense is not None:
             nombre = load_taxonomia()["modalidades"].get(mod, {}).get("nombre", mod)
             for gid in self.dense(f"Qué hacer: {nombre}. Situación: {sit.replace('_', ' ')}", k):
