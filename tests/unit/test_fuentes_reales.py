@@ -96,29 +96,54 @@ def test_cliente_rechaza_hosts_fuera_de_la_allowlist_y_http():
 
 def test_cliente_sigue_redirecciones_https_y_corta_las_http(monkeypatch):
     monkeypatch.setattr(fetch, "PAUSA_S", 0)
+    s3 = "https://prod-dcd-datasets-public-files-eu-west-1.s3.eu-west-1.amazonaws.com/f"
     c = _cliente({
-        "https://ok.example/a": _Resp(302, location="https://cdn.ok.example/a"),
-        "https://cdn.ok.example/a": _Resp(200, b"hola", {"Content-Type": "text/plain"}),
-        "https://ok.example/b": _Resp(302, location="http://cdn.ok.example/b"),
-        "https://ok.example/c": _Resp(302, location="https://bucket.s3.amazonaws.com/c"),
-        "https://bucket.s3.amazonaws.com/c": _Resp(200, b"zip", {"Content-Type": "x"}),
-    })  # fmt: skip
+        "https://ok.example/a": _Resp(302, location="https://www.ok.example/a"),
+        "https://www.ok.example/a": _Resp(200, b"hola", {"Content-Type": "text/plain"}),
+        "https://ok.example/b": _Resp(302, location="http://ok.example/b"),
+        "https://data.mendeley.com/f": _Resp(302, location=s3),
+        s3: _Resp(200, b"zip", {"Content-Type": "x"}),
+    }, hosts=("ok.example", "data.mendeley.com"))  # fmt: skip
     assert c.get("https://ok.example/a")[0] == b"hola"
-    assert c.get("https://ok.example/c")[0] == b"zip"
+    assert c.get("https://data.mendeley.com/f")[0] == b"zip"
     with pytest.raises(fetch.FetchError, match="HTTPS"):
         c.get("https://ok.example/b")
 
 
 def test_cliente_no_sigue_redirecciones_a_hosts_ajenos(monkeypatch):
     monkeypatch.setattr(fetch, "PAUSA_S", 0)
+    s3 = "https://prod-dcd-datasets-public-files-eu-west-1.s3.eu-west-1.amazonaws.com/f"
     c = _cliente({
         "https://ok.example/a": _Resp(302, location="https://otro.example/a"),
-        "https://ok.example/b": _Resp(302, location="https://127.0.0.1/admin"),
+        "https://ok.example/b": _Resp(302, location="https://cdn.ok.example/b"),
         "https://ok.example/c": _Resp(302, location="https://evilok.example/c"),
+        "https://ok.example/d": _Resp(302, location=s3),  # S3 solo desde Mendeley
+        "https://ok.example/e": _Resp(302, location="https://otro.s3.amazonaws.com/e"),
     })  # fmt: skip
-    for p in "abc":
+    for p in "abcde":
         with pytest.raises(fetch.FetchError, match="allowlist"):
             c.get(f"https://ok.example/{p}")
+
+
+@pytest.mark.parametrize(
+    "destino",
+    [
+        "https://127.0.0.1/admin",  # IP en lugar de dominio
+        "https://[::1]/admin",
+        "https://evil.example\\@huggingface.co/f",  # barra invertida: los parsers difieren
+        "https://user@huggingface.co/f",  # credenciales en la URL
+        "https://huggingface.co /f",  # espacio
+    ],
+)
+def test_cliente_rechaza_urls_ambiguas_en_redirecciones(monkeypatch, destino):
+    monkeypatch.setattr(fetch, "PAUSA_S", 0)
+    monkeypatch.setenv("HF_TOKEN", "secreto")
+    c = _cliente(
+        {"https://huggingface.co/f": _Resp(302, location=destino)}, hosts=("huggingface.co",)
+    )
+    with pytest.raises(fetch.FetchError):
+        c.get("https://huggingface.co/f")
+    assert len(c.s.pedidos) == 1  # nunca se pidió el destino (ni con ni sin token)
 
 
 def test_cliente_corta_archivos_demasiado_grandes(monkeypatch):

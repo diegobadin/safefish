@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import io
+import ipaddress
 import json
 import os
 import sys
@@ -33,6 +34,8 @@ from urllib.parse import quote, urlparse
 import requests
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from urllib3.exceptions import LocationParseError
+from urllib3.util import parse_url
 
 USER_AGENT = "safefish-fetch/0.1 (proyecto academico)"
 MAX_BYTES = 60 * 1024 * 1024
@@ -41,8 +44,15 @@ TIMEOUT_S = 60
 PAUSA_S = 1.0  # entre pedidos al mismo host
 REGISTRO = "_descargas.json"
 MARCA_HTML = "safefish-fuente"
-# CDN a los que redirigen Mendeley (S3) y Hugging Face al bajar archivos.
-CDN_SUFIJOS = ("amazonaws.com", "hf.co", "huggingface.co")
+# CDN exactos a los que se puede redirigir, según el host de la URL pedida. Mendeley: bucket
+# observado en las descargas reales (2026-11). Hugging Face: CDN de archivos LFS/Xet.
+CDN_POR_ORIGEN: dict[str, frozenset[str]] = {
+    "data.mendeley.com": frozenset({
+        "prod-dcd-datasets-public-files-eu-west-1.s3.eu-west-1.amazonaws.com",
+        "prod-dcd-datasets-cache-zipfiles.s3.eu-west-1.amazonaws.com",
+    }),
+    "huggingface.co": frozenset({"cdn-lfs.hf.co", "cdn-lfs-us-1.hf.co", "cas-bridge.xethub.hf.co"}),
+}  # fmt: skip
 
 
 class Descarga(BaseModel):
@@ -114,43 +124,65 @@ class Cliente:
         self.s.headers["User-Agent"] = USER_AGENT
         self._ultimo: dict[str, float] = {}
 
-    def _check(self, url: str) -> None:
-        u = urlparse(url)
-        if u.scheme != "https" or (u.hostname or "") not in self.hosts:
-            raise FetchError(f"URL fuera de la allowlist: {url}")
-
-    def _check_redireccion(self, url: str) -> None:
-        """Una redirección solo puede ir a un host permitido, a un subdominio de uno (por ejemplo
-        `www.` o el CDN propio del sitio) o a los CDN de Mendeley y Hugging Face. Nunca a una IP
-        ni a un host interno."""
-        u = urlparse(url)
-        host = (u.hostname or "").lower()
+    @staticmethod
+    def _host(url: str) -> str:
+        """Host de la URL tal como lo va a usar `requests` (urllib3), no `urlparse`: así la
+        allowlist y el envío del token deciden sobre el mismo host. Rechaza las formas que los
+        parsers interpretan distinto: credenciales (`user@`), barras invertidas, espacios y
+        caracteres de control, y hosts que son una IP."""
+        if "\\" in url or any(ord(ch) <= 0x20 or ord(ch) == 0x7F for ch in url):
+            raise FetchError(f"URL con caracteres no permitidos: {url!r}")
+        try:
+            u = parse_url(url)
+        except LocationParseError as e:
+            raise FetchError(f"URL inválida: {url!r}") from e
+        host = (u.host or "").lower().rstrip(".")
         if u.scheme != "https":
-            raise FetchError(f"redirección fuera de HTTPS: {url}")
-        bases = {h.lower().removeprefix("www.") for h in self.hosts} | set(CDN_SUFIJOS)
-        if host in self.hosts or any(host == b or host.endswith("." + b) for b in bases):
-            return
+            raise FetchError(f"solo HTTPS: {url}")
+        if u.auth or not host:
+            raise FetchError(f"URL con credenciales o sin host: {url}")
+        try:
+            ipaddress.ip_address(host.strip("[]"))
+        except ValueError:
+            return host
+        raise FetchError(f"URL con IP en lugar de dominio: {url}")
+
+    def _check(self, url: str) -> str:
+        host = self._host(url)
+        if host not in self.hosts:
+            raise FetchError(f"URL fuera de la allowlist: {url}")
+        return host
+
+    @staticmethod
+    def _check_redireccion(url: str, origen: str) -> str:
+        """Una redirección solo puede ir al mismo host de la URL pedida, a su variante con o
+        sin `www.`, o a los CDN exactos de ese origen (S3 solo desde Mendeley, hf.co solo
+        desde Hugging Face)."""
+        host = Cliente._host(url)
+        variantes = {origen, origen.removeprefix("www."), "www." + origen.removeprefix("www.")}
+        if host in variantes or host in CDN_POR_ORIGEN.get(origen, frozenset()):
+            return host
         raise FetchError(f"redirección a un host fuera de la allowlist: {url}")
 
     def get(self, url: str, max_bytes: int = MAX_BYTES) -> tuple[bytes, str]:
-        self._check(url)
-        host = urlparse(url).hostname or ""
-        espera = PAUSA_S - (time.monotonic() - self._ultimo.get(host, 0.0))
+        origen = host = self._check(url)
+        espera = PAUSA_S - (time.monotonic() - self._ultimo.get(origen, 0.0))
         if espera > 0:
             time.sleep(espera)
-        # La URL pedida tiene que estar en la allowlist; las redirecciones de esos hosts (los
-        # CDN de Mendeley y Hugging Face) se siguen a mano y solo por HTTPS.
+        # La URL pedida tiene que estar en la allowlist; las redirecciones se siguen a mano y
+        # cada destino se valida contra el host de origen.
         for _ in range(5):
             headers = {}
-            # Datasets "gated" de HF: el token va solo a huggingface.co, nunca al CDN.
-            if urlparse(url).hostname == "huggingface.co" and os.getenv("HF_TOKEN"):
+            # Datasets "gated" de HF: el token va solo a huggingface.co, nunca al CDN. Se decide
+            # con el mismo host validado que usa la allowlist.
+            if host == "huggingface.co" and os.getenv("HF_TOKEN"):
                 headers["Authorization"] = f"Bearer {os.environ['HF_TOKEN']}"
             r = self.s.get(url, headers=headers, timeout=TIMEOUT_S, stream=True, allow_redirects=False)  # fmt: skip
-            self._ultimo[host] = time.monotonic()
+            self._ultimo[origen] = time.monotonic()
             if r.is_redirect:
                 url = requests.compat.urljoin(url, r.headers["Location"])
                 r.close()
-                self._check_redireccion(url)
+                host = self._check_redireccion(url, origen)
                 continue
             break
         else:
