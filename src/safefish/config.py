@@ -87,6 +87,9 @@ class EmbeddingsCfg(_Cfg):
 class QueryCfg(_Cfg):
     strategy: Literal["raw", "multi_query"] = "raw"
     facets: list[str] = Field(default_factory=list)
+    model: str = "gpt-4.1-mini-2025-04-14"  # multi_query (V4)
+    prompt: str = "query_rewrite_v1"
+    max_queries: int = 4  # texto crudo + hasta 3 focalizadas
 
 
 class HybridCfg(_Cfg):
@@ -96,8 +99,10 @@ class HybridCfg(_Cfg):
 
 class RerankCfg(_Cfg):
     enabled: bool = False
-    model: str | None = None
-    top_in: int = 20
+    model: str | None = None  # LLM listwise (V6): p. ej. gpt-4.1-mini-2025-04-14
+    prompt: str = "rerank_v1"
+    top_in: int = 20  # candidatos fusionados por colección que entran al rerank
+    max_chars: int = 600  # por candidato, para acotar tokens
 
 
 class RetrievalCfg(_Cfg):
@@ -106,6 +111,9 @@ class RetrievalCfg(_Cfg):
     filter_canal: Literal["off", "hard", "soft"] = "off"
     hybrid: HybridCfg = Field(default_factory=HybridCfg)
     rerank: RerankCfg = Field(default_factory=RerankCfg)
+    # V7 candidato (evidencia contrastiva): mitad de los vecinos de `mensajes` con label=estafa
+    # y mitad con label=legitimo. Solo con el retriever avanzado (layout per_tipo).
+    mensajes_contrastivo: bool = False
     top_k: int = 6  # layout single: top-k total
     top_n: dict[str, int] = Field(default_factory=dict)  # layout per_tipo: por colección
 
@@ -151,7 +159,7 @@ class ExtractionCfg(_Cfg):
     """M-EXT para capturas: LLM con visión (transcripción estructurada) + OCR con cajas."""
 
     vision_model: str = "gpt-4.1-2025-04-14"
-    vision_prompt: str = "vision_v1"
+    vision_prompt: str = "vision_v2"
     ocr: Literal["tesseract", "none"] = "tesseract"
     ocr_lang: str = "spa"
     ocr_min_conf: float = 30.0
