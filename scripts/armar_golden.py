@@ -29,6 +29,9 @@ ROOT = Path(__file__).resolve().parents[1]
 REC = ROOT / "data/raw/recolectados"
 SPA = ROOT / "data/interim/golden_candidatos/spaphish.csv"
 TMP = ROOT / "data/interim/golden"
+# Revisión humana de las dudas del pre-etiquetado (2026-11-15); las decisiones caso por caso
+# están en golden/decisiones_revision.csv.
+REVISOR = "DB+DR"
 GOLDEN = ROOT / "golden"
 
 # Campañas de recolectados que van al golden (el resto va a la KB). Elegidas a mano para que
@@ -177,7 +180,7 @@ def _caso(c: dict, e: dict, avisos: list[str]) -> dict:
         "campaign_id": _campana(c),
         "fuente": c["fuente"],
         "anotador": "pre-etiquetado-llm",
-        "revisor": None,
+        "revisor": REVISOR,
         "_origen_id": c["id"],
         "_captura": c.get("captura"),
         "_dudas": e.get("dudas", ""),

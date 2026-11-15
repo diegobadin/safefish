@@ -51,10 +51,10 @@ hay SMS ni WhatsApp en español en ningún dataset público. Esos mensajes salen
 | Dataset | Por qué está apagado | Para prenderlo |
 |---|---|---|
 | SpamShield (ES) | Acceso restringido en Hugging Face | Aceptar los términos en la página del dataset, poner `HF_TOKEN` en `.env` y correr `make data` |
-| UCI SMS Spam (`GRUPOS=es,en`) | Inglés: el filtro de idioma de la KB lo descarta | Traducción al español (no implementada) |
 
 **Descartados:** tanaos (sintético: su "spam" mezcla publicidad y contenido adulto con estafas y
-sus legítimos son charla genérica, no negativos difíciles) y Mishra & Soni (SMS en inglés).
+sus legítimos son charla genérica, no negativos difíciles), Mishra & Soni y UCI SMS Spam (SMS en
+inglés; además, el "spam" de UCI es publicidad, no necesariamente estafa).
 
 **Regla de etiquetas:** `label = estafa` solo cuando el dataset marca phishing, smishing o
 fraude. El "spam" genérico queda sin etiqueta y el build lo descarta. La etiqueta original queda
@@ -87,9 +87,13 @@ Total **125 casos**: 35 en dev y 90 en test, partidos **por `campaign_id`** y es
 (fuente, etiqueta). Ningún `campaign_id` del golden está en la KB: los otros 38 recolectados
 van a la KB (`raw/recolectados/mensajes_kb.csv`) y los 140 de SpaPhish no entran.
 
-**Estado de las etiquetas:** pre-etiquetadas con LLM (`anotador: pre-etiquetado-llm`,
-`revisor: null`). La guía exige revisión humana de cada caso antes de congelar: las dudas de
-cada caso están en la columna `dudas_preetiquetado` de `golden/procedencia.csv`.
+**Estado de las etiquetas:** pre-etiquetadas con LLM (`anotador: pre-etiquetado-llm`) y revisadas
+(`revisor: DB+DR`). El pre-etiquetado dejó dudas en 69 casos de origen (columna
+`dudas_preetiquetado` de `golden/procedencia.csv`). El equipo las revisó y fijó los criterios;
+la decisión de cada caso, con la ayuda de un segundo pase con LLM, está en
+`golden/decisiones_revision.csv`. Cambiaron 23 casos: ningún label estafa/legítimo; 1 modalidad;
+18 listas de veredictos aceptables; 9 casos con señales sacadas o agregadas (acortadores oficiales,
+artefactos de la anonimización). R-E-009 pasó a canal WhatsApp.
 
 ## Recolectados: dónde y cómo dejarlos
 
