@@ -104,29 +104,41 @@ def content_hash(text: str) -> str:
     return hashlib.sha256(normalize_for_match(text).encode()).hexdigest()
 
 
-def dedupe_exact(docs: Sequence[Document]) -> tuple[list[Document], list[Document]]:
-    seen: set[str] = set()
+def dedupe_exact(
+    docs: Sequence[Document], group_key: str = "doc_tipo"
+) -> tuple[list[Document], list[Document]]:
+    """Descarta duplicados exactos dentro de cada `group_key` (como `dedupe_near`): una misma
+    página puede ser fuente de un caso y de una guía."""
+    seen: set[tuple[str, str]] = set()
     keep, drop = [], []
     for d in docs:
-        h = content_hash(d.page_content)
-        (drop if h in seen else keep).append(d)
-        seen.add(h)
+        key = (str(d.metadata.get(group_key)), content_hash(d.page_content))
+        (drop if key in seen else keep).append(d)
+        seen.add(key)
     return keep, drop
 
 
-def tfidf_vectors(texts: Sequence[str]) -> np.ndarray:
+def tfidf_vectors(texts: Sequence[str]):
+    """Matriz TF-IDF **sparse** (filas con norma L2): con miles de mensajes y n-gramas de
+    caracteres, la versión densa no entra en memoria."""
     from sklearn.feature_extraction.text import TfidfVectorizer
 
     vec = TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5), preprocessor=normalize_for_match)
-    return vec.fit_transform(texts).toarray()
+    return vec.fit_transform(texts)
 
 
-def near_duplicate_pairs(vectors: np.ndarray, threshold: float) -> list[tuple[int, int, float]]:
-    """Pares (i, j, coseno) con i < j y coseno ≥ threshold."""
-    if len(vectors) < 2:
+def near_duplicate_pairs(vectors, threshold: float) -> list[tuple[int, int, float]]:
+    """Pares (i, j, coseno) con i < j y coseno ≥ threshold. Acepta matrices densas o sparse."""
+    if vectors.shape[0] < 2:
         return []
-    v = vectors / np.clip(np.linalg.norm(vectors, axis=1, keepdims=True), 1e-12, None)
-    sims = v @ v.T
+    if hasattr(vectors, "toarray"):  # sparse: normalizar por fila sin densificar
+        from sklearn.preprocessing import normalize
+
+        v = normalize(vectors)
+        sims = (v @ v.T).toarray()
+    else:
+        v = vectors / np.clip(np.linalg.norm(vectors, axis=1, keepdims=True), 1e-12, None)
+        sims = v @ v.T
     i, j = np.where(np.triu(sims, k=1) >= threshold)
     return [(int(a), int(b), float(sims[a, b])) for a, b in zip(i, j, strict=True)]
 

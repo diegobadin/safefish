@@ -2,39 +2,206 @@
 # Cada documento hereda la metadata de su fuente; sumar `campaign_id` siempre que se pueda
 # (controla el leakage contra el golden, §4.5). Formato completo: src/safefish/ingest/loaders.py
 #
-# Los archivos van en data/raw/ (no se versiona). Las rutas son relativas a este YAML.
-# Ejemplos de cada loader (descomentar y completar):
+# Los archivos van en data/raw/ (no se versiona) y los baja `make data` (data/descargas.yaml).
+# Las rutas son relativas a este YAML. Qué fuente alimenta qué y en qué fase: docs/datos.md.
 #
-#  - id: alertas-oficiales            # una página por alerta; metadata en común
-#    tipo: caso
-#    loader: web
-#    urls: ["https://<organismo>/alerta-1", "https://<organismo>/alerta-2"]
-#    fuente_tipo: alerta_oficial
-#    metadata: {modalidad: phishing_bancario, canal: [sms, email], entidad_suplantada: banco}
-#
-#  - id: casos-curados                # un .md por caso con front matter (id, modalidad, canal,
-#    tipo: caso                       # entidad_suplantada, campaign_id, fuente_url)
-#    loader: text
-#    path: raw/casos/*.md
-#    fuente_tipo: alerta_oficial
-#
-#  - id: guias-pdf
-#    tipo: guia
-#    loader: pdf
-#    path: raw/guias/*.pdf
-#    fuente_tipo: organismo
-#    metadata: {situacion: no_respondio}
-#
-#  - id: mensajes-recolectados        # PII se redacta por defecto en mensajes y casos
-#    tipo: mensaje
-#    loader: csv
-#    path: raw/mensajes.csv
-#    fuente_tipo: recolectado
-#    csv: {content_column: texto, id_column: id,
-#          metadata_columns: [label, modalidad, canal, entidad, campaign_id]}
+# Metadata curada: manda sobre la del normalizador LLM (V2+). Se fija solo cuando la fuente
+# entera es de UNA modalidad o situación; las páginas que cubren varias quedan sin fijar y el
+# LLM separa los casos/guías.
 
 sources:
-  - id: senales-taxonomia             # definiciones de señales desde taxonomias.yaml
+  # =========================================================================================
+  # senales — definiciones curadas (taxonomias.yaml)
+  # =========================================================================================
+  - id: senales-taxonomia
     tipo: senal
     loader: taxonomia
     fuente_tipo: taxonomia
+
+  # =========================================================================================
+  # casos — alertas oficiales, bancos y notas (una página puede dar varios casos)
+  # =========================================================================================
+  - {id: caso-bcra-prevencion, tipo: caso, loader: html, path: raw/web/bcra-prevencion.html, fuente_tipo: alerta_oficial}
+  - {id: caso-bcra-recomendaciones, tipo: caso, loader: html, path: raw/web/bcra-recomendaciones.html, fuente_tipo: alerta_oficial}
+  - {id: caso-bna-seguridad, tipo: caso, loader: html, path: raw/web/bna-seguridad.html, fuente_tipo: banco}
+  - {id: caso-argentina-cibercuidados, tipo: caso, loader: pdf, path: raw/pdf/cibercuidados_fraudes_y_estafas.pdf, fuente_tipo: alerta_oficial}
+  - {id: caso-eset-mercadolibre, tipo: caso, loader: html, path: raw/web/eset-mercadolibre.html, fuente_tipo: prensa}
+  - {id: caso-incibe-smishing, tipo: caso, loader: html, path: raw/web/incibe-smishing.html, fuente_tipo: alerta_oficial, metadata: {fuente_pais: ES}}
+
+  - id: caso-arca-alerta-correo
+    tipo: caso
+    loader: html
+    path: raw/web/arca-alerta-correo.html
+    fuente_tipo: alerta_oficial
+    metadata: {modalidad: deuda_multa_falsa, canal: [email], entidad_suplantada: ARCA}
+
+  - id: caso-cnv-ponzi
+    tipo: caso
+    loader: html
+    path: raw/web/cnv-ponzi.html
+    fuente_tipo: alerta_oficial
+    metadata: {modalidad: inversion_falsa}
+
+  - id: caso-whatsapp-ministerio
+    tipo: caso
+    loader: pdf
+    path: raw/pdf/recomendaciones_evitar_fraudes_whatsapp.pdf
+    fuente_tipo: alerta_oficial
+    metadata: {canal: [whatsapp]}
+
+  - id: caso-bapro-accesos-remotos
+    tipo: caso
+    loader: html
+    path: raw/web/bapro-accesos-remotos.html
+    fuente_tipo: banco
+    metadata: {modalidad: falso_soporte_acceso_remoto}
+
+  - id: caso-paquete-retenido-chequeado
+    tipo: caso
+    loader: html
+    path: raw/web/chequeado-paquete-retenido.html
+    fuente_tipo: prensa
+    metadata: {modalidad: encomienda_retenida}
+
+  - id: caso-paquete-retenido-eset
+    tipo: caso
+    loader: html
+    path: raw/web/eset-correo-argentino.html
+    fuente_tipo: prensa
+    metadata: {modalidad: encomienda_retenida, entidad_suplantada: Correo Argentino}
+
+  # Casos por modalidad (una sola modalidad por página: se fija en metadata)
+  - {id: caso-incibe-hijo-numero-nuevo, tipo: caso, loader: html, path: raw/web/incibe-hijo-numero-nuevo.html, fuente_tipo: alerta_oficial, metadata: {modalidad: falso_familiar_cambio_numero, fuente_pais: ES}}
+  - {id: caso-lanacion-papa-cambie-telefono, tipo: caso, loader: html, path: raw/web/lanacion-papa-cambie-telefono.html, fuente_tipo: prensa, metadata: {modalidad: falso_familiar_cambio_numero}}
+  - {id: caso-c5n-falsos-familiares, tipo: caso, loader: html, path: raw/web/c5n-falsos-familiares.html, fuente_tipo: prensa, metadata: {modalidad: falso_familiar_cambio_numero}}
+  - {id: caso-eset-falso-soporte-whatsapp, tipo: caso, loader: html, path: raw/web/eset-falso-soporte-whatsapp.html, fuente_tipo: prensa, metadata: {modalidad: robo_cuenta_whatsapp}}
+  - {id: caso-incibe-robo-whatsapp-cadena, tipo: caso, loader: html, path: raw/web/incibe-robo-whatsapp-cadena.html, fuente_tipo: alerta_oficial, metadata: {modalidad: robo_cuenta_whatsapp, fuente_pais: ES}}
+  - {id: caso-lanacion-whatsapp-vacunacion, tipo: caso, loader: html, path: raw/web/lanacion-whatsapp-vacunacion.html, fuente_tipo: prensa, metadata: {modalidad: robo_cuenta_whatsapp}}
+  - {id: caso-eset-cripto-whatsapp, tipo: caso, loader: html, path: raw/web/eset-cripto-whatsapp.html, fuente_tipo: prensa, metadata: {modalidad: inversion_falsa}}
+  - {id: caso-infobae-ponzi-recomendaciones, tipo: caso, loader: html, path: raw/web/infobae-ponzi-recomendaciones.html, fuente_tipo: prensa, metadata: {modalidad: inversion_falsa}}
+  - {id: caso-incibe-inversiones-falsas, tipo: caso, loader: html, path: raw/web/incibe-inversiones-falsas.html, fuente_tipo: alerta_oficial, metadata: {modalidad: inversion_falsa, fuente_pais: ES}}
+  - {id: caso-lanacion-ofertas-laborales-whatsapp, tipo: caso, loader: html, path: raw/web/lanacion-ofertas-laborales-whatsapp.html, fuente_tipo: prensa, metadata: {modalidad: falso_empleo_tareas}}
+  - {id: caso-eset-trabajo-tiktok, tipo: caso, loader: html, path: raw/web/eset-trabajo-tiktok.html, fuente_tipo: prensa, metadata: {modalidad: falso_empleo_tareas}}
+  - {id: caso-lacapital-ufeci-ofertas-laborales, tipo: caso, loader: html, path: raw/web/lacapital-ufeci-ofertas-laborales.html, fuente_tipo: prensa, metadata: {modalidad: falso_empleo_tareas}}
+  - {id: caso-iprofesional-correo-argentino, tipo: caso, loader: html, path: raw/web/iprofesional-correo-argentino.html, fuente_tipo: prensa, metadata: {modalidad: encomienda_retenida}}
+  - {id: caso-incibe-paquete-aduanas, tipo: caso, loader: html, path: raw/web/incibe-paquete-aduanas.html, fuente_tipo: alerta_oficial, metadata: {modalidad: encomienda_retenida, fuente_pais: ES}}
+  - {id: caso-lmneuquen-arca-encomiendas, tipo: caso, loader: html, path: raw/web/lmneuquen-arca-encomiendas.html, fuente_tipo: prensa, metadata: {modalidad: encomienda_retenida}}
+  - {id: caso-chequeado-arca-multas, tipo: caso, loader: html, path: raw/web/chequeado-arca-multas.html, fuente_tipo: prensa, metadata: {modalidad: deuda_multa_falsa}}
+  - {id: caso-unidiversidad-falsa-citacion, tipo: caso, loader: html, path: raw/web/unidiversidad-falsa-citacion.html, fuente_tipo: prensa, metadata: {modalidad: deuda_multa_falsa}}
+  - {id: caso-chequeado-multas-qr, tipo: caso, loader: html, path: raw/web/chequeado-multas-qr.html, fuente_tipo: prensa, metadata: {modalidad: deuda_multa_falsa}}
+  - {id: caso-incibe-iphone-gratis, tipo: caso, loader: html, path: raw/web/incibe-iphone-gratis.html, fuente_tipo: alerta_oficial, metadata: {modalidad: premio_sorteo_falso, fuente_pais: ES}}
+  - {id: caso-diariojudicial-falsos-sorteos, tipo: caso, loader: html, path: raw/web/diariojudicial-falsos-sorteos.html, fuente_tipo: prensa, metadata: {modalidad: premio_sorteo_falso}}
+  - {id: caso-incibe-instagram-ganador, tipo: caso, loader: html, path: raw/web/incibe-instagram-ganador.html, fuente_tipo: alerta_oficial, metadata: {modalidad: premio_sorteo_falso, fuente_pais: ES}}
+  - {id: caso-eset-falso-banco-supremo, tipo: caso, loader: html, path: raw/web/eset-falso-banco-supremo.html, fuente_tipo: prensa, metadata: {modalidad: falso_soporte_acceso_remoto}}
+  - {id: caso-lanacion-falsos-agentes-ciberseguridad, tipo: caso, loader: html, path: raw/web/lanacion-falsos-agentes-ciberseguridad.html, fuente_tipo: prensa, metadata: {modalidad: falso_soporte_acceso_remoto}}
+  - {id: caso-mpba-operativo-hermes, tipo: caso, loader: html, path: raw/web/mpba-operativo-hermes.html, fuente_tipo: alerta_oficial, metadata: {modalidad: falso_soporte_acceso_remoto}}
+
+  # =========================================================================================
+  # guias — qué hacer según la situación (el normalizador separa una guía por situación)
+  # =========================================================================================
+  - id: guia-bcra-reclamo
+    tipo: guia
+    loader: html
+    path: raw/web/bcra-reclamo.html
+    fuente_tipo: organismo
+    metadata: {situacion: [pago_transfirio, compartio_clave_o_tarjeta], organismo: BCRA}
+
+  - {id: guia-ufeci, tipo: guia, loader: html, path: raw/web/ufeci.html, fuente_tipo: organismo, metadata: {organismo: UFECI}}
+  - {id: guia-denunciar-delito, tipo: guia, loader: html, path: raw/web/argentina-denunciar-delito.html, fuente_tipo: organismo}
+  - {id: guia-bna-seguridad, tipo: guia, loader: html, path: raw/web/bna-seguridad.html, fuente_tipo: banco, metadata: {organismo: Banco Nación}}
+  - {id: guia-defensoria-ba-protocolo, tipo: guia, loader: pdf, path: raw/pdf/protocolo_ciberestafa_2025.pdf, fuente_tipo: organismo, metadata: {organismo: Defensoría del Pueblo de la Provincia de Buenos Aires}}
+  - {id: guia-whatsapp-ministerio, tipo: guia, loader: pdf, path: raw/pdf/recomendaciones_evitar_fraudes_whatsapp.pdf, fuente_tipo: organismo, metadata: {modalidad: [robo_cuenta_whatsapp, falso_familiar_cambio_numero]}}
+
+  - id: guia-arca-phishing
+    tipo: guia
+    loader: html
+    path: raw/web/arca-alerta-correo.html
+    fuente_tipo: organismo
+    metadata: {modalidad: [deuda_multa_falsa], organismo: ARCA}
+
+  - id: guia-cnv-inversor
+    tipo: guia
+    loader: html
+    path: raw/web/cnv-ponzi.html
+    fuente_tipo: organismo
+    metadata: {modalidad: [inversion_falsa], organismo: CNV}
+
+  - id: guia-bapro-accesos-remotos
+    tipo: guia
+    loader: html
+    path: raw/web/bapro-accesos-remotos.html
+    fuente_tipo: banco
+    metadata: {situacion: [instalo_app_remota], organismo: Banco Provincia}
+
+  # Guías por modalidad: las mismas páginas de casos, cuando traen "qué hacer" (el normalizador
+  # descarta las que no describen un procedimiento). Sin esto el planner solo tenía guías generales.
+  - {id: guia-incibe-hijo-numero-nuevo, tipo: guia, loader: html, path: raw/web/incibe-hijo-numero-nuevo.html, fuente_tipo: alerta_oficial, metadata: {modalidad: [falso_familiar_cambio_numero]}}
+  - {id: guia-lanacion-papa-cambie-telefono, tipo: guia, loader: html, path: raw/web/lanacion-papa-cambie-telefono.html, fuente_tipo: prensa, metadata: {modalidad: [falso_familiar_cambio_numero]}}
+  - {id: guia-c5n-falsos-familiares, tipo: guia, loader: html, path: raw/web/c5n-falsos-familiares.html, fuente_tipo: prensa, metadata: {modalidad: [falso_familiar_cambio_numero]}}
+  - {id: guia-eset-falso-soporte-whatsapp, tipo: guia, loader: html, path: raw/web/eset-falso-soporte-whatsapp.html, fuente_tipo: prensa, metadata: {modalidad: [robo_cuenta_whatsapp]}}
+  - {id: guia-incibe-robo-whatsapp-cadena, tipo: guia, loader: html, path: raw/web/incibe-robo-whatsapp-cadena.html, fuente_tipo: alerta_oficial, metadata: {modalidad: [robo_cuenta_whatsapp]}}
+  - {id: guia-lanacion-whatsapp-vacunacion, tipo: guia, loader: html, path: raw/web/lanacion-whatsapp-vacunacion.html, fuente_tipo: prensa, metadata: {modalidad: [robo_cuenta_whatsapp]}}
+  - {id: guia-eset-cripto-whatsapp, tipo: guia, loader: html, path: raw/web/eset-cripto-whatsapp.html, fuente_tipo: prensa, metadata: {modalidad: [inversion_falsa]}}
+  - {id: guia-infobae-ponzi-recomendaciones, tipo: guia, loader: html, path: raw/web/infobae-ponzi-recomendaciones.html, fuente_tipo: prensa, metadata: {modalidad: [inversion_falsa]}}
+  - {id: guia-incibe-inversiones-falsas, tipo: guia, loader: html, path: raw/web/incibe-inversiones-falsas.html, fuente_tipo: alerta_oficial, metadata: {modalidad: [inversion_falsa]}}
+  - {id: guia-lanacion-ofertas-laborales-whatsapp, tipo: guia, loader: html, path: raw/web/lanacion-ofertas-laborales-whatsapp.html, fuente_tipo: prensa, metadata: {modalidad: [falso_empleo_tareas]}}
+  - {id: guia-eset-trabajo-tiktok, tipo: guia, loader: html, path: raw/web/eset-trabajo-tiktok.html, fuente_tipo: prensa, metadata: {modalidad: [falso_empleo_tareas]}}
+  - {id: guia-lacapital-ufeci-ofertas-laborales, tipo: guia, loader: html, path: raw/web/lacapital-ufeci-ofertas-laborales.html, fuente_tipo: prensa, metadata: {modalidad: [falso_empleo_tareas]}}
+  - {id: guia-iprofesional-correo-argentino, tipo: guia, loader: html, path: raw/web/iprofesional-correo-argentino.html, fuente_tipo: prensa, metadata: {modalidad: [encomienda_retenida]}}
+  - {id: guia-incibe-paquete-aduanas, tipo: guia, loader: html, path: raw/web/incibe-paquete-aduanas.html, fuente_tipo: alerta_oficial, metadata: {modalidad: [encomienda_retenida]}}
+  - {id: guia-lmneuquen-arca-encomiendas, tipo: guia, loader: html, path: raw/web/lmneuquen-arca-encomiendas.html, fuente_tipo: prensa, metadata: {modalidad: [encomienda_retenida]}}
+  - {id: guia-chequeado-arca-multas, tipo: guia, loader: html, path: raw/web/chequeado-arca-multas.html, fuente_tipo: prensa, metadata: {modalidad: [deuda_multa_falsa]}}
+  - {id: guia-unidiversidad-falsa-citacion, tipo: guia, loader: html, path: raw/web/unidiversidad-falsa-citacion.html, fuente_tipo: prensa, metadata: {modalidad: [deuda_multa_falsa]}}
+  - {id: guia-chequeado-multas-qr, tipo: guia, loader: html, path: raw/web/chequeado-multas-qr.html, fuente_tipo: prensa, metadata: {modalidad: [deuda_multa_falsa]}}
+  - {id: guia-incibe-iphone-gratis, tipo: guia, loader: html, path: raw/web/incibe-iphone-gratis.html, fuente_tipo: alerta_oficial, metadata: {modalidad: [premio_sorteo_falso]}}
+  - {id: guia-diariojudicial-falsos-sorteos, tipo: guia, loader: html, path: raw/web/diariojudicial-falsos-sorteos.html, fuente_tipo: prensa, metadata: {modalidad: [premio_sorteo_falso]}}
+  - {id: guia-incibe-instagram-ganador, tipo: guia, loader: html, path: raw/web/incibe-instagram-ganador.html, fuente_tipo: alerta_oficial, metadata: {modalidad: [premio_sorteo_falso]}}
+  - {id: guia-eset-falso-banco-supremo, tipo: guia, loader: html, path: raw/web/eset-falso-banco-supremo.html, fuente_tipo: prensa, metadata: {modalidad: [falso_soporte_acceso_remoto]}}
+  - {id: guia-lanacion-falsos-agentes-ciberseguridad, tipo: guia, loader: html, path: raw/web/lanacion-falsos-agentes-ciberseguridad.html, fuente_tipo: prensa, metadata: {modalidad: [falso_soporte_acceso_remoto]}}
+  - {id: guia-mpba-operativo-hermes, tipo: guia, loader: html, path: raw/web/mpba-operativo-hermes.html, fuente_tipo: alerta_oficial, metadata: {modalidad: [falso_soporte_acceso_remoto]}}
+
+  - id: guia-defensa-consumidor     # solo reclamos contra un proveedor real, no contra un estafador
+    tipo: guia
+    loader: html
+    path: raw/web/defensa-consumidor.html
+    fuente_tipo: organismo
+    enabled: false
+
+  # =========================================================================================
+  # mensajes — CSV común que genera `make data` (safefish.ingest.datasets)
+  # Un mensaje sin `label` se descarta: el "spam" genérico no es una estafa (docs/datos.md).
+  # =========================================================================================
+  - id: msg-spaphish                # emails reales, ES nativo; 1 de cada 10 queda para el golden
+    tipo: mensaje
+    loader: csv
+    path: interim/mensajes/spaphish.csv
+    fuente_tipo: dataset
+    csv: &csv_comun
+      content_column: texto
+      id_column: id
+      metadata_columns: [label, label_origen, canal, fuente_pais, fecha, dataset]
+
+  - id: msg-spearphishmx            # México, PII con marcadores (<EMAIL>, <TELEFONO>), URLs hxxp
+    tipo: mensaje
+    loader: csv
+    path: interim/mensajes/spearphishmx.csv
+    fuente_tipo: dataset
+    csv: *csv_comun
+
+  - id: msg-spamshield              # requiere HF_TOKEN (dataset con acceso restringido)
+    tipo: mensaje
+    loader: csv
+    path: interim/mensajes/spamshield-es.csv
+    fuente_tipo: dataset
+    csv: *csv_comun
+    enabled: false
+
+  - id: msg-recolectados            # SMS/WhatsApp/email propios (docs/datos.md → "Recolectados")
+    tipo: mensaje                   # solo la parte de la KB: el resto está en el golden
+    loader: csv                     # (la separa scripts/armar_golden.py por campaign_id)
+    path: raw/recolectados/mensajes_kb.csv
+    fuente_tipo: recolectado
+    csv:
+      content_column: texto
+      id_column: id
+      metadata_columns: [label, modalidad, parecido_a, canal, entidad, campaign_id, pais, fecha]

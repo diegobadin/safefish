@@ -1,0 +1,135 @@
+# Fuentes públicas que baja `make data` (python -m safefish.ingest.fetch) a data/raw/ (no se
+# versiona). Qué fuente alimenta cada colección y cada fase: docs/datos.md.
+#
+# Tipos:
+#   mendeley  dataset + versión; el SHA-256 de cada archivo lo publica la API de Mendeley
+#   hf        repo de Hugging Face con revisión fijada (commit)
+#   http      un archivo (PDF, ZIP); `sha256` opcional para fijar el contenido
+#   web       una página HTML: se guarda una copia con su URL y fecha (el loader `html` la lee)
+#
+# Seguridad: solo HTTPS, solo los hosts de este archivo, tamaño máximo por archivo, de los ZIP
+# se extraen solo los archivos de `extraer` (sin rutas relativas) y nunca se ejecuta nada. No se
+# bajan los .py que traen algunos datasets ni el reporte HTML de SpaPhish (carga recursos remotos).
+#
+# No están: las FAQ de WhatsApp (la página se arma con JavaScript: no trae texto; si se quieren,
+# guardarlas como PDF desde el navegador en data/raw/manual/) y la novedad 4671 de AFIP (es la
+# misma alerta que `arca-alerta-correo`). Tampoco tanaos (sintético; su "spam" mezcla publicidad
+# con estafas) ni Mishra & Soni (inglés): ver docs/datos.md.
+#
+# `grupo`: es (default de `make data`) · en (solo con GRUPOS=es,en; la KB filtra por idioma
+# hasta que exista la traducción) · ref (material de referencia, no entra a la KB).
+
+descargas:
+  # --- Datasets de mensajes -----------------------------------------------------------------
+  - id: spaphish
+    tipo: mendeley
+    dataset: hz2d6gz7pc
+    version: 5
+    archivos: ["Spaphish dataset - DiB.csv", README.txt, dataset_schema.json]
+    destino: datasets/spaphish
+    licencia: CC BY 4.0
+    grupo: es
+
+  - id: spearphishmx
+    tipo: mendeley
+    dataset: h4bxjk84jb
+    version: 1
+    archivos: [SpearPhishMX_dataset_publico.csv, SpearPhishMX_README.txt, SpearPhishMX_schema_es.json]
+    destino: datasets/spearphishmx
+    licencia: CC BY 4.0
+    grupo: es
+
+  - id: spamshield-es                 # acceso restringido: aceptar términos en HF + HF_TOKEN en .env
+    tipo: hf
+    repo: M-Arjun/SpamShield-Datasets
+    revision: ccf3cdd831235a47361eca4995b82ef221ff3406
+    archivos: [Spanish/clean-00001.jsonl, README.md]
+    destino: datasets/spamshield
+    licencia: CC BY 4.0
+    grupo: es
+
+  - id: uci-sms-spam
+    tipo: http
+    url: https://archive.ics.uci.edu/static/public/228/sms+spam+collection.zip
+    archivo: sms_spam_collection.zip
+    extraer: [SMSSpamCollection, readme]
+    destino: datasets/uci-sms-spam
+    licencia: CC BY 4.0
+    grupo: en
+
+  # --- Alertas oficiales y notas (colección casos) ------------------------------------------
+  - {id: bcra-prevencion, tipo: web, url: "https://www.bcra.gob.ar/como-prevenir-estafas-virtuales/", licencia: no visible, grupo: es}
+  - {id: bcra-recomendaciones, tipo: web, url: "https://www.bcra.gob.ar/noticias/recomendaciones-del-bcra-para-evitar-estafas-virtuales/", licencia: no visible, grupo: es}
+  - {id: arca-alerta-correo, tipo: web, url: "https://www.argentina.gob.ar/noticias/alerta-estafas-por-correo-electronico", licencia: CC BY 4.0, grupo: es}
+  - {id: cnv-ponzi, tipo: web, url: "https://www.argentina.gob.ar/node/298036", licencia: CC BY 4.0, grupo: es}
+  - {id: bna-seguridad, tipo: web, url: "https://www.bna.com.ar/Home/home/InformacionDeSeguridad", licencia: no visible, grupo: es}
+  - {id: eset-mercadolibre, tipo: web, url: "https://www.welivesecurity.com/es/estafas-enganos/estafas-comunes-mercado-libre-mercado-pago/", licencia: © ESET (parafrasear), grupo: es}
+  - {id: eset-correo-argentino, tipo: web, url: "https://www.welivesecurity.com/es/estafas-enganos/correos-falsos-correo-argentino-anuncios-gmail/", licencia: © ESET (parafrasear), grupo: es}
+  - {id: chequeado-paquete-retenido, tipo: web, url: "https://chequeado.com/nota/cuidado-con-los-mensajes-que-aseguran-que-un-paquete-del-correo-no-pudo-ser-entregado-o-esta-retenido-en-la-aduana-como-reconocer-y-evitar-caer-en-este-tipo-de-est", licencia: © Chequeado (parafrasear), grupo: es}
+  - {id: incibe-smishing, tipo: web, url: "https://www.incibe.es/ciudadania/tematicas/ingenieria-social-fraudes-online/smishing", licencia: ambigua (España), grupo: es}
+  - {id: bapro-accesos-remotos, tipo: web, url: "https://www.bancoprovincia.com.ar/web/cs_accesos_remotos", licencia: no visible, grupo: es}
+
+  # Una página por modalidad con poca cobertura (relevamiento del 2026-11-14, verificadas con texto en el HTML)
+  - {id: incibe-hijo-numero-nuevo, tipo: web, url: "https://www.incibe.es/node/560349", licencia: ambigua (España), grupo: es}  # falso_familiar_cambio_numero
+  - {id: lanacion-papa-cambie-telefono, tipo: web, url: "https://www.lanacion.com.ar/tecnologia/papa-cambie-de-telefono-una-nueva-estafa-de-whatsapp-a-la-que-estar-atentos-nid01122023/", licencia: © La Nación (parafrasear), grupo: es}  # falso_familiar_cambio_numero
+  - {id: c5n-falsos-familiares, tipo: web, url: "https://www.c5n.com/sociedad/alertan-una-estafa-whatsapp-aparentan-ser-familiares-pedir-dinero-n12164", licencia: © C5N (parafrasear), grupo: es}  # falso_familiar_cambio_numero
+  - {id: eset-falso-soporte-whatsapp, tipo: web, url: "https://www.welivesecurity.com/la-es/2022/11/15/engano-mensaje-soporte-tecnico-whatsapp-robar-cuentas/", licencia: © ESET (parafrasear), grupo: es}  # robo_cuenta_whatsapp
+  - {id: incibe-robo-whatsapp-cadena, tipo: web, url: "https://www.incibe.es/linea-de-ayuda-en-ciberseguridad/casos-reales/senior-pierde-el-acceso-su-whatsapp-debido-un-robo-de-cuentas-en-cadena", licencia: ambigua (España), grupo: es}  # robo_cuenta_whatsapp
+  - {id: lanacion-whatsapp-vacunacion, tipo: web, url: "https://www.lanacion.com.ar/tecnologia/estafas-que-hacer-si-me-llega-un-whatsapp-de-vacunacion-nid09022024/", licencia: © La Nación (parafrasear), grupo: es}  # robo_cuenta_whatsapp
+  - {id: eset-cripto-whatsapp, tipo: web, url: "https://www.welivesecurity.com/es/estafas-enganos/cuidado-estafa-criptomonedas-circula-whatsapp/", licencia: © ESET (parafrasear), grupo: es}  # inversion_falsa
+  - {id: infobae-ponzi-recomendaciones, tipo: web, url: "https://www.infobae.com/economia/2024/10/11/esquemas-ponzi-diez-recomendaciones-para-evitar-estafas-a-la-hora-de-invertir/", licencia: © Infobae (parafrasear), grupo: es}  # inversion_falsa
+  - {id: incibe-inversiones-falsas, tipo: web, url: "https://www.incibe.es/ciudadania/blog/ten-cuidado-con-las-inversiones-falsas", licencia: ambigua (España), grupo: es}  # inversion_falsa
+  - {id: lanacion-ofertas-laborales-whatsapp, tipo: web, url: "https://www.lanacion.com.ar/sociedad/no-pense-que-yo-pudiera-caer-el-auge-de-las-falsas-ofertas-laborales-que-se-difunden-por-whatsapp-y-nid04082026/", licencia: © La Nación (parafrasear), grupo: es}  # falso_empleo_tareas
+  - {id: eset-trabajo-tiktok, tipo: web, url: "https://www.welivesecurity.com/es/estafas-enganos/ofertas-falsas-trabajo-tiktok-por-whatsapp-telegram/", licencia: © ESET (parafrasear), grupo: es}  # falso_empleo_tareas
+  - {id: lacapital-ufeci-ofertas-laborales, tipo: web, url: "https://www.lacapital.com.ar/informacion-general/alertan-maniobras-fraude-plataformas-que-ofrecen-supuestas-ofertas-laborales-n10085552.html", licencia: © La Capital (parafrasear), grupo: es}  # falso_empleo_tareas
+  - {id: iprofesional-correo-argentino, tipo: web, url: "https://www.iprofesional.com/tecnologia/365719-estafas-virtuales-con-falsos-envios-a-traves-del-correo-argentino", licencia: © iProfesional (parafrasear), grupo: es}  # encomienda_retenida
+  - {id: incibe-paquete-aduanas, tipo: web, url: "https://www.incibe.es/ciudadania/avisos/te-informan-traves-de-un-correo-electronico-de-que-tu-paquete-esta", licencia: ambigua (España), grupo: es}  # encomienda_retenida
+  - {id: lmneuquen-arca-encomiendas, tipo: web, url: "https://www.lmneuquen.com/pais/arca-advirtio-una-nueva-estafa-vinculada-encomiendas-como-funciona-la-maniobra-n1243444", licencia: © LM Neuquén (parafrasear), grupo: es}  # encomienda_retenida
+  - {id: chequeado-arca-multas, tipo: web, url: "https://chequeado.com/ultimas-noticias/no-arca-no-esta-enviando-mails-con-presuntas-multas-a-contribuyentes-se-trata-de-una-modalidad-de-estafa-conocida-como-phishing/", licencia: © Chequeado (parafrasear), grupo: es}  # deuda_multa_falsa
+  - {id: unidiversidad-falsa-citacion, tipo: web, url: "https://www.unidiversidad.com.ar/alertan-sobre-estafas-por-correos-electronicos-falsamente-atribuidos-a-interpol-y-la-policia-federal", licencia: © Unidiversidad (parafrasear), grupo: es}  # deuda_multa_falsa
+  - {id: chequeado-multas-qr, tipo: web, url: "https://chequeado.com/el-explicador/falsas-multas-de-estacionamiento-advierten-por-posibles-estafas-a-traves-de-codigos-qr-en-infracciones-de-transito/", licencia: © Chequeado (parafrasear), grupo: es}  # deuda_multa_falsa
+  - {id: incibe-iphone-gratis, tipo: web, url: "https://www.incibe.es/ciudadania/avisos/no-te-fies-si-un-correo-te-dice-que-has-ganado-un-iphone-13", licencia: ambigua (España), grupo: es}  # premio_sorteo_falso
+  - {id: diariojudicial-falsos-sorteos, tipo: web, url: "https://www.diariojudicial.com/news-92346-cuidado-con-los-falsos-sorteos-en-instagram", licencia: © Diario Judicial (parafrasear), grupo: es}  # premio_sorteo_falso
+  - {id: incibe-instagram-ganador, tipo: web, url: "https://www.incibe.es/ciudadania/avisos/detectado-intento-de-fraude-en-instagram-comunicando-ser-ganador-de-un", licencia: ambigua (España), grupo: es}  # premio_sorteo_falso
+  - {id: eset-falso-banco-supremo, tipo: web, url: "https://www.welivesecurity.com/es/estafas-enganos/ingenieria-social-suplantan-banco-redes-sociales-control-celular-app-legitima/", licencia: © ESET (parafrasear), grupo: es}  # falso_soporte_acceso_remoto
+  - {id: lanacion-falsos-agentes-ciberseguridad, tipo: web, url: "https://www.lanacion.com.ar/seguridad/la-nueva-estafa-digital-llamados-de-falsos-agentes-de-ciberseguridad-para-desvalijar-cuentas-nid28062025/", licencia: © La Nación (parafrasear), grupo: es}  # falso_soporte_acceso_remoto
+  - {id: mpba-operativo-hermes, tipo: web, url: "https://mpba.gov.ar/novedad/2204", licencia: no visible, grupo: es}  # falso_soporte_acceso_remoto
+
+  - id: argentina-cibercuidados
+    tipo: http
+    url: https://www.argentina.gob.ar/sites/default/files/manual_talleres_ti_cibercuidados_fraudes_y_estafas.pdf
+    archivo: cibercuidados_fraudes_y_estafas.pdf
+    destino: pdf
+    licencia: CC BY 4.0
+    grupo: es
+
+  - id: argentina-whatsapp
+    tipo: http
+    url: https://www.argentina.gob.ar/sites/default/files/2022/07/recomendaciones_evitar_fraudes_whatsapp.pdf
+    archivo: recomendaciones_evitar_fraudes_whatsapp.pdf
+    destino: pdf
+    licencia: CC BY 4.0
+    grupo: es
+
+  # --- Guías (colección guias) --------------------------------------------------------------
+  - {id: bcra-reclamo, tipo: web, url: "https://www.bcra.gob.ar/realizar-un-reclamo-ante-el-banco-central-por-fraude-o-estafa/", licencia: no visible, grupo: es}
+  - {id: ufeci, tipo: web, url: "https://www.mpf.gob.ar/ufeci/", licencia: no visible, grupo: es}
+  - {id: argentina-denunciar-delito, tipo: web, url: "https://www.argentina.gob.ar/denunciar-un-delito-informatico", licencia: CC BY 4.0, grupo: es}
+  - {id: defensa-consumidor, tipo: web, url: "https://www.argentina.gob.ar/servicio/iniciar-un-reclamo-ante-defensa-del-consumidor", licencia: CC BY 4.0, grupo: es}
+
+  - id: defensoria-ba-protocolo
+    tipo: http
+    url: https://www.defensorba.org.ar/pdfs/protocolo-ciberestafa-2025.pdf
+    archivo: protocolo_ciberestafa_2025.pdf
+    destino: pdf
+    licencia: no visible
+    grupo: es
+
+  # --- Referencia (no entra a la KB) ----------------------------------------------------------
+  - id: ufeci-informe-2024
+    tipo: http
+    url: https://www.mpf.gob.ar/ufeci/files/2025/06/UFECI_informe_anual_2024-1.pdf
+    archivo: ufeci_informe_anual_2024.pdf
+    destino: referencia
+    licencia: no visible
+    grupo: ref
