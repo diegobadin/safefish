@@ -5,7 +5,7 @@ kb_snapshot: null
 retrieval:
   enabled: false
 generation:
-  reasoner: gpt-4.1-2025-04-14
+  reasoner: claude-sonnet-5-5
   temperature: 0
   seed: 7
   prompt: reasoner_v1

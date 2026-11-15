@@ -87,7 +87,7 @@ class EmbeddingsCfg(_Cfg):
 class QueryCfg(_Cfg):
     strategy: Literal["raw", "multi_query"] = "raw"
     facets: list[str] = Field(default_factory=list)
-    model: str = "gpt-4.1-mini-2025-04-14"  # multi_query (V4)
+    model: str = "claude-haiku-5-5"  # multi_query (V4)
     prompt: str = "query_rewrite_v1"
     max_queries: int = 4  # texto crudo + hasta 3 focalizadas
 
@@ -134,14 +134,14 @@ class RetrievalCfg(_Cfg):
 
 
 class GenerationCfg(_Cfg):
-    reasoner: str = "gpt-4.1-2025-04-14"
+    reasoner: str = "claude-sonnet-5-5"
     temperature: float = 0.0
     seed: int | None = 7
     prompt: str = "reasoner_v1"
     max_retries: int = 1  # reintentos ante JSON inválido (§2.2)
     planner: bool = False  # V2+: plan desde Guías (M-GEN.2)
     planner_mode: Literal["llm", "extractivo"] = "llm"  # extractivo = pasos literales, sin LLM
-    planner_model: str = "gpt-4.1-mini-2025-04-14"
+    planner_model: str = "claude-haiku-5-5"
     planner_prompt: str = "planner_v1"
     planner_top_guias: int = 2
     planner_max_pasos: int = 5
@@ -162,7 +162,7 @@ class PostprocessCfg(_Cfg):
 class ExtractionCfg(_Cfg):
     """M-EXT para capturas: LLM con visión (transcripción estructurada) + OCR con cajas."""
 
-    vision_model: str = "gpt-4.1-2025-04-14"
+    vision_model: str = "claude-sonnet-5-5"
     vision_prompt: str = "vision_v2"
     ocr: Literal["tesseract", "none"] = "tesseract"
     ocr_lang: str = "spa"

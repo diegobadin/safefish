@@ -302,7 +302,7 @@ class SafeFishPipeline:
                 eventos += [e.to_dict() for e in ev]
             if self.planner is not None:
                 with tracker.stage("plan"):
-                    pr = self.planner.plan(out, raw.situacion)
+                    pr = self.planner.plan(out, raw.situacion, m)
                 b = _merge_guias(b, pr.guias)
                 plan_info = pr.info
                 out = out.model_copy(update={"plan": pr.plan})

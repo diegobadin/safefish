@@ -69,9 +69,14 @@ def make_embeddings(cfg: EmbeddingsCfg, *, fake: bool = False) -> Embeddings:
         inner: Embeddings = DeterministicFakeEmbedding(size=256)
         model = "fake-256"
     else:
+        import os
+
         from langchain_openai import OpenAIEmbeddings
 
-        inner = OpenAIEmbeddings(model=cfg.model)
+        # La clave de OpenAI para embeddings va aparte (OPENAI_EMBEDDINGS_API_KEY): así se puede
+        # dar una clave que sirva solo para esto, sin que los clientes de chat la tomen del entorno.
+        clave = os.environ.get("OPENAI_EMBEDDINGS_API_KEY") or os.environ.get("OPENAI_API_KEY")
+        inner = OpenAIEmbeddings(model=cfg.model, api_key=clave)
         model = cfg.model
     kv = KVCache(CACHE_DIR / "embeddings.sqlite") if cache_enabled() and not fake else None
     return CachedEmbeddings(inner, model, kv)

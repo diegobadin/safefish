@@ -172,6 +172,10 @@ class RuleVerifier:
         orgs = {_doc_id(g): find_organismos(str(g.metadata.get("organismo") or "")) for g in b.guias}  # fmt: skip
         todas = "\n".join(guias.values())
         todos_orgs = set().union(*orgs.values()) if orgs else set()
+        # El planner adapta los pasos a la entidad que nombra el mensaje ("comunicate con ANSES
+        # por sus canales oficiales"): ese nombre está respaldado por el mensaje. Sus contactos
+        # no: los contactos se siguen verificando solo contra la guía.
+        orgs_mensaje = find_organismos(m.texto) if m is not None else set()
         plan: list[PasoPlan] = []
         for i, p in enumerate(out.plan):
             guide_id = p.guide_id
@@ -180,7 +184,7 @@ class RuleVerifier:
                 guide_id = None
             fuente = guias[guide_id] if guide_id else todas
 
-            orgs_fuente = find_organismos(fuente) | (orgs[guide_id] if guide_id else todos_orgs)
+            orgs_fuente = find_organismos(fuente) | (orgs[guide_id] if guide_id else todos_orgs) | orgs_mensaje  # fmt: skip
             inventados = find_organismos(p.paso) - orgs_fuente
             if inventados:
                 ev.append(Evento("R5", "paso_con_organismo_inventado", {"paso": i, "organismos": sorted(inventados), "texto": p.paso[:200]}))  # fmt: skip

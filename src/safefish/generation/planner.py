@@ -7,9 +7,16 @@
    referencia su `guide_id`. Los `guide_id` que no son de las guías seleccionadas se descartan.
    Si el LLM falla o no deja pasos válidos, se usa el plan **extractivo** (pasos literales).
 
-El planner ve solo campos estructurados (veredicto, modalidad, situación, ids de señales),
-nunca el texto del mensaje: así una inyección en el mensaje no llega a esta etapa.
-La regla R5 del verificador controla después contactos y organismos inventados.
+`planner_v1` ve solo campos estructurados (veredicto, modalidad, situación, ids de señales).
+`planner_v2` ve además el mensaje, como dato, para adaptar los pasos: las guías dan la
+estructura de cómo proceder y, si una guía es de otra entidad, su nombre y sus contactos se
+reemplazan por "la entidad oficial" del mensaje.
+
+3. **Adaptación determinística** (todas las versiones con guías, con o sin verificador): en cada
+   paso se reemplazan los contactos que no están en las guías seleccionadas y los contactos y
+   nombres de una entidad suplantable (bancos, ARCA, ANSES, Correo Argentino) que el mensaje
+   no nombra. Así un contacto de ARCA no aparece en el plan de un mail de otra empresa.
+   La regla R5 del verificador controla después contactos y organismos inventados.
 """
 
 from __future__ import annotations
@@ -28,18 +35,27 @@ from safefish.llm import LLMResult
 from safefish.prompting import load_prompt_file
 from safefish.schemas import (
     EvidenceItem,
+    ExtractedMessage,
     Modalidad,
     PasoPlan,
     SafeFishOutput,
     Situacion,
 )
 from safefish.taxonomia import load_taxonomia
-from safefish.textutils import escape_attr, escape_tags
+from safefish.textutils import (
+    contacto_respaldado,
+    escape_attr,
+    escape_tags,
+    normalize_for_match,
+    redact_contacts,
+    strip_accents,
+)
 
 PROMPTS_DIR = Path(__file__).with_name("prompts")
 GENERALES = {"general", "no_determinada", ""}
 SITUACION_POR_DEFECTO = Situacion.NO_RESPONDIO
 SIN_DANO = {Situacion.NO_RESPONDIO.value, Situacion.RESPONDIO.value}  # no pagó ni entregó datos
+MAX_CHARS_MENSAJE = 2000  # planner_v2: alcanza para un mail largo sin inflar el costo
 
 
 def es_extranjera(g: GuideRecord) -> bool:
@@ -250,6 +266,105 @@ def render_guias(sel: list[tuple[GuideRecord, str]]) -> str:
     return "\n\n".join(blocks)
 
 
+# ---------------------------------------------------------------------------
+# Adaptación a la entidad del mensaje
+# ---------------------------------------------------------------------------
+
+# Entidades que las estafas suplantan y que aparecen en las guías con nombre o contacto propio.
+# Solo organizaciones a las que la persona contactaría; no plataformas que usa (WhatsApp) ni
+# organismos de denuncia generales (BCRA, UFECI, Defensa del Consumidor), que valen siempre.
+ENTIDADES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
+    # clave: (alias en texto, dominios)
+    "banco_nacion": (("banco nacion", "banco de la nacion argentina", "bna"), ("bna.com.ar",)),
+    "banco_provincia": (("banco provincia", "banco de la provincia", "bapro"), ("bancoprovincia.com.ar",)),  # fmt: skip
+    "credicoop": (("credicoop", "banco credicoop"), ("bancocredicoop.coop",)),
+    "arca": (("arca", "afip", "domicilio fiscal electronico"), ("arca.gob.ar", "afip.gob.ar")),
+    "anses": (("anses",), ("anses.gob.ar",)),
+    "correo_argentino": (("correo argentino",), ("correoargentino.com.ar",)),
+}
+ENTIDAD_GENERICA = "la entidad oficial"
+CANALES_GENERICOS = "los canales oficiales de la entidad (su app o la web que ya conocés)"
+CONTACTO_SIN_GUIA = "[contacto eliminado: usá el canal oficial que ya conozcas]"
+
+
+def _palabras(texto: str) -> str:
+    """Minúsculas, sin tildes y sin puntuación: 'AFIP: multa' -> 'afip multa'."""
+    return " ".join(re.sub(r"[^\w]+", " ", normalize_for_match(texto)).split())
+
+
+def _menciona(texto_norm: str, alias: str) -> bool:
+    return f" {_palabras(alias)} " in f" {texto_norm} "
+
+
+def entidades_mencionadas(texto: str) -> set[str]:
+    t = _palabras(texto)
+    return {k for k, (alias, _) in ENTIDADES.items() if any(_menciona(t, a) for a in alias)}
+
+
+def _host(contacto: str) -> str:
+    c = contacto.lower()
+    if "@" in c:
+        return c.rsplit("@", 1)[1]
+    c = re.sub(r"^[a-z]+://", "", c)
+    return c.split("/", 1)[0].split(":", 1)[0]
+
+
+def _entidad_de_contacto(contacto: str) -> str | None:
+    h = _host(contacto)
+    for k, (_, dominios) in ENTIDADES.items():
+        if any(h == d or h.endswith("." + d) for d in dominios):
+            return k
+    return None
+
+
+def _reemplazar_nombre(texto: str, alias: str) -> str:
+    """Cambia el nombre de una entidad por "la entidad oficial", con el artículo que corresponda."""
+    patron = r"\b(?:(del|al|el|de la|la)\s+)?" + r"\s+".join(map(re.escape, alias.split())) + r"\b"
+
+    def sub(m: re.Match) -> str:
+        art = (m.group(1) or "").lower()
+        nuevo = {"del": "de ", "al": "a ", "de la": "de "}.get(art, "") + ENTIDAD_GENERICA
+        return nuevo[0].upper() + nuevo[1:] if m.start() == 0 else nuevo
+
+    # El alias se busca sin tildes y se reemplaza sobre el original en las mismas posiciones
+    # (en NFC, quitar tildes no cambia el largo; si cambiara, se busca sobre el original).
+    plano = strip_accents(texto)
+    if len(plano) != len(texto):
+        return re.sub(patron, sub, texto, flags=re.I)
+    out, ultimo = [], 0
+    for m in re.finditer(patron, plano, flags=re.I):
+        out += [texto[ultimo : m.start()], sub(m)]
+        ultimo = m.end()
+    return "".join(out + [texto[ultimo:]])
+
+
+def adaptar_paso(paso: str, fuente_guias: str, mencionadas: set[str]) -> tuple[str, list[dict]]:
+    """Deja un paso apto para este mensaje. Devuelve (paso, cambios):
+
+    - contacto de una entidad que el mensaje no nombra → canales oficiales genéricos;
+    - contacto que no está en las guías seleccionadas → aviso de contacto eliminado;
+    - nombre de una entidad que el mensaje no nombra → "la entidad oficial"."""
+    cambios: list[dict] = []
+
+    def ok_entidad(c: str) -> bool:
+        e = _entidad_de_contacto(c)
+        return e is None or e in mencionadas
+
+    paso, otros = redact_contacts(paso, ok_entidad, CANALES_GENERICOS)
+    cambios += [{"accion": "contacto_de_otra_entidad", "contacto": c} for c in otros]
+    paso, sin_guia = redact_contacts(paso, lambda c: contacto_respaldado(c, fuente_guias), CONTACTO_SIN_GUIA)  # fmt: skip
+    cambios += [{"accion": "contacto_sin_guia", "contacto": c} for c in sin_guia]
+    for k, (alias, _) in ENTIDADES.items():
+        if k in mencionadas:
+            continue
+        for a in sorted(alias, key=len, reverse=True):
+            nuevo = _reemplazar_nombre(paso, a)
+            if nuevo != paso:
+                cambios.append({"accion": "nombre_de_otra_entidad", "entidad": k})
+                paso = nuevo
+    return paso, cambios
+
+
 def extractive_plan(sel: list[tuple[GuideRecord, str]], max_pasos: int) -> list[PasoPlan]:
     """Pasos literales de las guías, en orden, intercalando guías si hay más de una."""
     plan: list[PasoPlan] = []
@@ -283,7 +398,28 @@ class GuidePlanner:
     def prompt_hash(self) -> str | None:
         return load_prompt_file(PROMPTS_DIR / f"{self.prompt}.md")[1] if self.mode == "llm" else None  # fmt: skip
 
-    def plan(self, out: SafeFishOutput, situacion: Situacion | None) -> PlanResult:
+    def plan(
+        self,
+        out: SafeFishOutput,
+        situacion: Situacion | None,
+        m: ExtractedMessage | None = None,
+    ) -> PlanResult:
+        res = self._plan(out, situacion, m)
+        # Adaptación determinística a la entidad del mensaje (también para el plan extractivo).
+        fuente = "\n".join(g.texto for g in res.guias)
+        mencionadas = entidades_mencionadas(m.texto) if m is not None else set()
+        plan, cambios = [], []
+        for i, p in enumerate(res.plan):
+            texto, c = adaptar_paso(p.paso, fuente, mencionadas)
+            cambios += [{**x, "paso": i} for x in c]
+            plan.append(p.model_copy(update={"paso": texto}))
+        res.info["entidades_mensaje"] = sorted(mencionadas)
+        res.info["adaptaciones"] = cambios
+        return PlanResult(plan, res.guias, res.info)
+
+    def _plan(
+        self, out: SafeFishOutput, situacion: Situacion | None, m: ExtractedMessage | None
+    ) -> PlanResult:
         sit = situacion or SITUACION_POR_DEFECTO
         sel = self.store.select(out.modalidad, sit, self.top_guias)
         info: dict = {
@@ -301,14 +437,19 @@ class GuidePlanner:
             return PlanResult(extractive_plan(sel, self.max_pasos), guias, info)
 
         template, _ = load_prompt_file(PROMPTS_DIR / f"{self.prompt}.md")
-        messages = template.format_messages(
-            veredicto=out.veredicto.value,
-            modalidad=out.modalidad.value,
-            situacion=sit.value,
-            senales=", ".join(sorted({s.signal_id.value for s in out.senales})) or "ninguna",
-            max_pasos=self.max_pasos,
-            guias=render_guias(sel),
-        )
+        campos = {
+            "veredicto": out.veredicto.value,
+            "modalidad": out.modalidad.value,
+            "situacion": sit.value,
+            "senales": ", ".join(sorted({s.signal_id.value for s in out.senales})) or "ninguna",
+            "max_pasos": self.max_pasos,
+            "guias": render_guias(sel),
+        }
+        if "mensaje" in template.input_variables:  # planner_v2: el mensaje, como dato
+            texto = m.texto if m is not None else ""
+            campos["mensaje"] = escape_tags(texto[:MAX_CHARS_MENSAJE]) or "(sin texto)"
+            campos["canal"] = escape_attr(m.canal.value if m is not None and m.canal else "desconocido")  # fmt: skip
+        messages = template.format_messages(**campos)
         r: LLMResult = self.llm.invoke(messages, PlanLLMOutput, stage="plan")
         ids = {g.id for g, _ in sel}
         plan: list[PasoPlan] = []

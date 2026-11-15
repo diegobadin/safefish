@@ -11,7 +11,7 @@ respaldan la decisión y un plan de acción. El plan completo está en
 
 ```bash
 uv sync            # o: poetry install   (Poetry >= 2.2)
-cp .env.example .env   # completar OPENAI_API_KEY
+cp .env.example .env   # completar OPENAI_EMBEDDINGS_API_KEY y CLAUDE_API_KEY
 make hooks         # pre-commit con detección de secretos
 make test          # unit + contrato + smoke, sin llamar a la API
 ```
@@ -43,8 +43,24 @@ Con Poetry: `make eval RUN="poetry run"`.
 | Fase 2 · V2 + V3 | ✅ Código (ADR 003): normalizador (plantilla + LLM mini) a `CaseDoc/MessageDoc/SignalDoc/GuideDoc`, 1 caso = 1 chunk, 4 colecciones con `top_n`, cobertura y auditoría de inyección en el manifest, muestra de revisión del 10 %; planner desde Guías; verificador R1–R5; extracción de capturas (visión + OCR + `align`) y captura anotada. Barrido V2a. Verificado sin API sobre fixtures |
 | Datos | ✅ Fuentes públicas: `make data` las baja (manifiesto `data/descargas.yaml`) y `data/sources.yaml` ya las carga: 12 fuentes de casos, 9 de guías y 4.260 emails etiquetados (SpaPhish + SpearPhishMX). Qué se usa en cada fase y cómo dejar los mensajes propios: [`docs/datos.md`](docs/datos.md) |
 | Golden v1 | ✅ 125 casos (35 dev · 90 test): 35 SMS/WhatsApp/email recolectados, 60 emails de SpaPhish, 15 adversariales y 15 capturas; split por `campaign_id`, sin leakage contra la KB. Pre-etiquetado con LLM y revisado (`golden/decisiones_revision.csv`) ([`docs/datos.md`](docs/datos.md#golden-v1)) |
-| Fase 3 · V4–V8 | ✅ Multi-query + RRF (V4), híbrido denso + BM25 (V5), re-ranking listwise (V6, Versión 1), evidencia contrastiva (V7) y respaldo dirigido para R2 (V8, Versión 2). Resultados y análisis: [`docs/ablation.md`](docs/ablation.md) |
-| Reporte y UI | ✅ `make report` (tabla de la ablación) y UI local: `python -m safefish.ui` (usa `configs/v8.yaml`) |
+| Fase 3 · V4–V6 | ✅ Multi-query + RRF (V4), híbrido denso + BM25 (V5) y reranking listwise (V6, **Versión 1**). Resultados y análisis: [`docs/ablation.md`](docs/ablation.md) |
+| Ej. 4 · V7–V9 | ✅ Análisis de errores de la Versión 1 y un cambio por modo de falla: mensajes de contraste (V7), respaldo dirigido para R2 (V8) y plan adaptado a la entidad del mensaje (V9, **Versión 2**) ([`docs/ablation.md` §3](docs/ablation.md)) |
+| Reporte y UI | ✅ `make report` (tabla de la ablación) y UI local: `python -m safefish.ui` (usa `configs/v9.yaml`) |
+
+### Modelos
+
+| Etapa | Modelo |
+|---|---|
+| Razonador | Claude Sonnet 5.5 (`claude-sonnet-5-5`, esfuerzo `low`) |
+| Lectura de capturas | Claude Sonnet 5.5 |
+| Multi-query, reranking, planner | Claude Haiku 5.5 (`claude-haiku-5-5`) |
+| Embeddings | `text-embedding-3-small` (OpenAI; Anthropic no tiene embeddings) |
+| Juez de la cobertura del plan (evaluación) | Claude Sonnet 5.5 (`--judge-model`; `python -m eval.rejuzgar` re-juzga corridas viejas) |
+| Normalización de la base (ingesta, una vez) | GPT-4.1-mini; la base es un snapshot fijo |
+
+La clave de OpenAI va en `OPENAI_EMBEDDINGS_API_KEY` y solo la usan los embeddings. Los clientes
+de chat de OpenAI leen `OPENAI_API_KEY`, que no hace falta salvo para reconstruir la base o
+re-correr las corridas viejas con GPT-4.1. El cliente LLM elige el proveedor según el modelo.
 
 ### Probar la Fase 1 sobre fixtures (≈ USD 0,08)
 
@@ -76,20 +92,21 @@ make eval CONFIG=configs/v3.yaml SPLIT=dev JUDGE=1   # mismo snapshot kb-v2
 make compare A=results/<run_v2> B=results/<run_v3>
 ```
 
-### Correr V4–V7 (Fase 3 y Ej. 4) y armar la tabla
+### Correr V4–V9 (Fase 3 y Ej. 4) y armar la tabla
 
 ```bash
 make eval CONFIG=configs/v4.yaml SPLIT=test JUDGE=1   # multi-query + RRF (mismo kb-v2)
 make eval CONFIG=configs/v5.yaml SPLIT=test JUDGE=1   # + híbrido BM25 (desde chunks.jsonl)
-make eval CONFIG=configs/v6.yaml SPLIT=test JUDGE=1   # + re-ranking listwise → Versión 1
-make eval CONFIG=configs/v7.yaml SPLIT=test JUDGE=1   # + evidencia contrastiva (error analysis)
+make eval CONFIG=configs/v6.yaml SPLIT=test JUDGE=1   # + reranking listwise → Versión 1
+make eval CONFIG=configs/v7.yaml SPLIT=test JUDGE=1   # + mensajes de contraste (análisis de errores)
 make eval CONFIG=configs/v8.yaml SPLIT=test JUDGE=1   # + respaldo dirigido para R2
+make eval CONFIG=configs/v9.yaml SPLIT=test JUDGE=1   # + plan adaptado a la entidad → Versión 2
 make report SPLIT=test                                 # → docs/ablation_tabla_test.md
-make compare A=results/<run_v6> B=results/<run_v7>     # IC bootstrap + McNemar
+make compare A=results/<run_v6> B=results/<run_v9>     # IC bootstrap + McNemar
 ```
 
-Análisis, decisiones y ficha de V7: [`docs/ablation.md`](docs/ablation.md). Demo:
-`python -m safefish.ui` → http://127.0.0.1:8501. Por defecto usa V8 (V7 + respaldo dirigido para R2);
+Análisis, decisiones y fichas de V7–V9: [`docs/ablation.md`](docs/ablation.md). Demo:
+`python -m safefish.ui` → http://127.0.0.1:8501. Por defecto usa `configs/v9.yaml`, la Versión 2;
 acepta texto o captura, un contexto opcional ("es de un amigo, me pide plata") y la situación del
 usuario, que define qué guías arma el plan. El front ([`src/safefish/web/`](src/safefish/web/)) es
 Preact + htm sin paso de build; marca las citas sobre la captura en el navegador con Tesseract.js

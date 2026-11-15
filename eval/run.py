@@ -280,7 +280,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--out-dir", default=str(REPO_ROOT / "results"))
     ap.add_argument("--judge-plan", action="store_true", help="cobertura del plan con juez LLM")
-    ap.add_argument("--judge-model", default="gpt-4.1-mini-2025-04-14")
+    ap.add_argument("--judge-model", default="claude-sonnet-5-5")
     ap.add_argument(
         "--retrieval-only",
         action="store_true",

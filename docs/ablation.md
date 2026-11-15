@@ -1,8 +1,11 @@
-# Ablación V0 → V8: resultados, análisis y decisiones
+# Ablación V0 → V9: resultados, análisis y decisiones
 
 > Golden v1 revisado: 125 casos (35 dev · 90 test). Todas las versiones se corrieron el
-> 2026-11-15 sobre el mismo golden y la misma KB (kb-v2 con 59 casos y 42 guías; kb-v1
-> reconstruida desde las mismas fuentes).
+> 2026-11-15 sobre el mismo golden y la misma base (kb-v2: 59 casos, 3.412 mensajes, 15 señales,
+> 42 guías; kb-v1 para V1). **Modelos:** Claude Sonnet 5.5 (razonador, lectura de capturas y juez
+> del plan) y Claude Haiku 5.5 (multi-query, reranking y planner); OpenAI solo para los embeddings
+> (`text-embedding-3-small`). La normalización de la base se hizo una vez, al construirla, con
+> GPT-4.1-mini; la base es un snapshot fijo (hash en el manifest).
 >
 > Tablas generadas con `make report`: [`ablation_tabla_test.md`](ablation_tabla_test.md) y
 > [`ablation_tabla_dev.md`](ablation_tabla_dev.md). Comparaciones pareadas en
@@ -10,146 +13,161 @@
 
 ## 1. Tabla principal (test, n = 90)
 
-| Versión | Cambio (única variable) | F1 | FPR neg. dif. | Acc. modalidad | F1 señales | Grounding | Cobertura plan | Hit-mod@k | MRR casos | USD/análisis |
-|---|---|---|---|---|---|---|---|---|---|---|
-| V0 | LLM sin RAG | 0.920 | 0.120 | **0.863** | 0.525 | 0.991 | **0.936** | — | — | 0.004 |
-| V1 | Naive RAG: chunks de 800, 1 colección, top-6 | 0.898 | 0.120 | 0.804 | 0.516 | 0.995 | 0.874 | 0.086 | 0.086 | 0.007 |
-| V2 | Normalización, 1 caso = 1 chunk, 4 colecciones, planner desde guías | **0.929** | **0.080** | 0.804 | 0.587 | 0.988 | 0.436 | 0.867 | 0.780 | 0.012 |
-| V3 | + verificador R1–R5 | **0.929** | **0.080** | 0.784 | **0.591** | **1.000** | 0.428 | 0.867 | 0.780 | 0.012 |
-| V4 | + multi-query + RRF | 0.900 | 0.120 | 0.784 | 0.562 | 1.000 | 0.413 | 0.911 | 0.811 | 0.013 |
-| V5 | + híbrido denso + BM25 | 0.907 | **0.080** | 0.765 | 0.565 | 1.000 | 0.426 | 0.956 | 0.696 | 0.013 |
-| V6 | + re-ranking listwise → **Versión 1** | 0.920 | 0.120 | 0.765 | 0.587 | 1.000 | 0.420 | **0.978** | **0.876** | 0.016 |
-| V7 | + evidencia contrastiva | 0.920 | 0.120 | 0.745 | 0.579 | 1.000 | 0.423 | 0.978 | 0.876 | 0.018 |
-| V8 | + respaldo dirigido para R2 → **Versión 2** | 0.920 | 0.120 | 0.745 | 0.579 | 1.000 | 0.423 | 0.978 | 0.876 | 0.018 |
+| Etapa | Versión | Cambio (única variable) | F1 | FPR neg. dif. | Acc. modalidad | F1 señales | Soporte | Cobertura plan | Hit-mod@k | MRR | nDCG@k | USD |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Base | V0 | LLM sin RAG | 0.905 | **0.040** | 0.784 | 0.587 | 0.00 | **0.923** | — | — | — | 0.007 |
+| Pipeline RAG | V1 | Naive RAG: Recursive 800/120, 1 colección, top-6 | 0.887 | 0.120 | 0.804 | 0.633 | 0.08 | 0.897 | 0.086 | 0.086 | 0.034 | 0.011 |
+| | V2 | Normalización, 1 caso = 1 chunk, 4 colecciones, plan desde guías | 0.896 | 0.080 | 0.824 | 0.672 | 0.95 | 0.436 | 0.844 | 0.774 | 0.579 | 0.019 |
+| | V3 | + verificador R1–R5 | 0.896 | 0.080 | 0.784 | 0.672 | 1.00 | 0.420 | 0.844 | 0.774 | 0.579 | 0.019 |
+| Advanced RAG | V4 | + query rewriting (multi-query) + RRF | **0.929** | 0.080 | 0.843 | 0.669 | 1.00 | 0.454 | 0.933 | 0.828 | 0.644 | 0.019 |
+| | V5 | + híbrido denso + BM25 | 0.907 | 0.080 | 0.784 | 0.664 | 1.00 | 0.423 | 0.956 | 0.757 | 0.528 | 0.019 |
+| | V6 | + reranking listwise con LLM → **Versión 1** | 0.920 | 0.120 | **0.863** | **0.672** | 1.00 | 0.469 | **0.978** | **0.878** | **0.764** | 0.020 |
+| Iteración Ej. 4 | V7 | + mensajes de contraste (filtro por metadata) | **0.929** | 0.080 | 0.824 | 0.671 | 1.00 | 0.495 | 0.978 | 0.878 | 0.764 | 0.021 |
+| | V8 | + respaldo dirigido para R2 | 0.929 | 0.080 | 0.824 | 0.671 | 1.00 | 0.495 | 0.978 | 0.878 | 0.764 | 0.021 |
+| | V9 | + plan adaptado a la entidad → **Versión 2** | **0.929** | 0.080 | 0.824 | 0.671 | 1.00 | 0.846 | 0.978 | 0.878 | 0.764 | 0.022 |
 
-V2a (barrido de solo retrieval: 1 caso = 1 chunk en **una** colección): Hit-mod@k 0.000 en test
-y 0.067 en dev.
+V2a (barrido de solo recuperación: 1 caso = 1 chunk en **una** colección): Hit-mod@k 0.000 en
+test y 0.067 en dev.
 
-Otras métricas, constantes o casi constantes en todas las versiones:
+Constantes o casi constantes en todas las versiones:
 
-- **ASR de inyección = 0.** Las variantes adversariales se clasifican igual que su original.
-- **CER de capturas = 0.133** (WER 0.12) con `vision_v2`. Con `vision_v1` era 0.67 (ver §4).
-- **Soporte de modalidad: 1.0 desde V3** (V0: 0 por construcción; V1: 0.07).
-- **Contactos no respaldados en el plan: 2 en V0 y V1, 0 desde V3** (R5).
-- **Kappa ponderado del veredicto: 0.74–0.76.**
-
-Las latencias de `metrics.json` no se reportan: la mayoría de las llamadas salieron de caché.
+- **Grounding de citas = 1.000** (R1 descarta las citas que no están literales en el mensaje).
+- **ASR de inyección = 0**: las 15 variantes adversariales se clasifican igual que su original.
+- **Contactos inventados en el plan: 1 en V0 y V1, 0 desde V2.**
+- **CER de capturas = 0.111** (WER 0.098) en test con Claude Sonnet 5.5 (`vision_v2`).
+- Kappa ponderado del veredicto 0.78–0.82; recall de estafas 0.84–0.90.
 
 ### Significancia (bootstrap pareado, IC 95 %, y McNemar)
 
 Con 90 casos, cada error mueve el F1 alrededor de 1 punto.
 
-- **F1:** ninguna diferencia es significativa. V1→V2 da +0.031 [−0.023, 0.093] (McNemar p = 0.45);
-  V0→V6, 0.000 [−0.046, 0.048].
-- **Acc. modalidad:** la única diferencia significativa es la caída entre V0 y V6, −0.098
-  [−0.189, −0.021]: 5 casos que V0 acertaba y V6 no, ninguno al revés.
-- **Retrieval:** V1→V2 sube Hit-mod@k +0.78 y MRR +0.69; V5→V6 sube MRR +0.18.
+- **F1:** ninguna diferencia es significativa (V0 → V6: +0.015 [−0.029, +0.063]; V0 → V9: +0.024
+  [−0.023, +0.075]).
+- **RAG vs sin RAG (V0 → V6):** recall +0.059 [0.0, +0.131], acc. modalidad +0.078 [0.0, +0.175]
+  (McNemar 5 a favor, 1 en contra, p = 0.22). Tendencia a favor, sin significancia estricta.
+- **Cobertura del plan:** V0 → V6 −0.454 [−0.541, −0.364] y V6 → V9 **+0.377 [+0.287, +0.464]**,
+  ambas significativas. V9 queda −0.077 [−0.138, −0.021] por debajo de V0, que escribe el plan
+  libre y sin fuente.
+- **Retrieval:** V1 → V2 sube Hit-mod@k +0.76 y MRR +0.69; V5 → V6 sube MRR +0.12 y nDCG +0.24.
 
 ## 2. Qué se aprendió en cada paso
 
-- **V0 es una cota inferior muy alta: F1 0.92.** Un LLM grande, con un prompt cuidadoso y salida
-  estructurada, ya reconoce la mayoría de las estafas. El valor del RAG no aparece en el F1
-  binario sino en lo que el veredicto puede **justificar**: casos documentados que lo respaldan
-  (soporte 0 → 1.0), señales citadas (F1 señales 0.52 → 0.59) y citas siempre literales.
-- **V1 no aporta.** Los chunks de 800 caracteres casi nunca traen un caso de la modalidad
-  correcta (Hit-mod@k 0.09): en una sola colección, los miles de chunks de mensajes tapan a los
-  de casos.
-- **V2 es el salto de retrieval: Hit-mod@k 0.09 → 0.87 y MRR 0.09 → 0.78.**
-  - V2a (chunk por caso en **una** colección) da Hit-mod@k 0.0 en test. Lo que mejora el
-    retrieval son las **4 colecciones con `top_n` por colección**, no solo el chunking.
-- **V3 lleva el grounding de citas a 1.000, el soporte de modalidad a 1.0 y los contactos
-  inventados a 0.** Cuesta acc. modalidad −0.02: R2 baja a `no_determinada` una modalidad sin
-  respaldo en la evidencia.
-- **V4 (multi-query) sube Hit-mod@k a 0.91 y MRR a 0.81, pero no mejora la tarea.**
-- **V5 (híbrido) lleva Hit-mod@k a 0.956 pero baja el MRR a 0.70:** BM25 sube casos con términos
-  exactos en común que no son de la modalidad correcta.
-- **V6 (re-ranking) tiene el mejor retrieval: Hit-mod@k 0.978 y MRR 0.876** (+0.18 sobre V5).
-  Es la **Versión 1** (tag `v1-ej2`). Cuesta un 25 % más que V5 por las llamadas del reranker.
+**Pipeline RAG completo (V0 → V3).**
+
+- **V0 es una cota alta: F1 0.905.** Un LLM grande con salida estructurada ya reconoce la mayoría
+  de las estafas. El valor del RAG no aparece en el F1 sino en lo que el veredicto puede
+  **justificar**: soporte de modalidad 0 → 1.0, F1 de señales 0.59 → 0.67 y 0 contactos inventados.
+- **V1 (naive RAG) casi no recupera:** Hit-mod@k 0.086. En una sola colección, los chunks de
+  mensajes tapan a los de casos.
+- **V2 es el salto de recuperación: Hit-mod@k 0.09 → 0.84, MRR 0.09 → 0.77.** V2a (chunk por caso
+  en una colección) da 0.0: lo que destraba la recuperación son las **4 colecciones con `top_n`
+  por colección**, no el chunking solo.
+- **V3 lleva el soporte de modalidad a 1.0** (faithfulness). Cuesta acc. modalidad 0.824 → 0.784:
+  R2 baja a `no_determinada` las modalidades sin un caso que las respalde.
+
+**Advanced RAG (V4 → V6).**
+
+- **V4 (query rewriting):** Hit-mod@k 0.84 → 0.93 y MRR 0.77 → 0.83. Es la versión con mejor F1
+  junto con las de la iteración.
+- **V5 (híbrido BM25):** Hit-mod@k 0.96, pero MRR 0.83 → 0.76 y nDCG 0.64 → 0.53: BM25 sube
+  casos con términos en común que no son de la modalidad correcta.
+- **V6 (reranking listwise):** el mejor retrieval, Hit-mod@k 0.978, MRR 0.878 y nDCG 0.764; acc.
+  modalidad 0.863, la más alta de la ablación. **Versión 1** (tag `v1-ej2`).
 
 ### Resultados negativos
 
-**La modalidad empeora con RAG (V0 0.86 → V6 0.76).** Es la única diferencia significativa. El
-RAG empuja hacia la modalidad de los casos recuperados, y los errores se concentran en el borde
-entre `phishing_bancario`, `no_determinada` y `premio_sorteo_falso`: phishing de servicios no
-financieros (Netflix, iCloud) y estafas sin modalidad propia en el enum (419, románticas). Es
-sobre todo un problema de **definición del enum**: una modalidad `phishing_credenciales_servicio`
-lo atacaría mejor que cualquier cambio de retrieval.
+- **Noise robustness:** con RAG suben los falsos positivos en negativos difíciles (V0 0.04 → V6
+  0.12, 3 de 25): el contexto trae estafas parecidas y el razonador marca como estafa un
+  legítimo similar. V7 lo baja a 0.08.
+- **Faithfulness vs acierto:** el verificador (V3) baja la modalidad 0.04 porque prefiere "no
+  determinada" antes que afirmar sin respaldo.
+- **BM25 desordena** hasta que entra el reranking (V5).
+- **La cobertura del plan cae de 0.92 (V0) a 0.42–0.47 (V2–V6):** el plan sale de guías
+  oficiales, mayormente de prevención general, y el planner no veía el mensaje. Se resolvió en la
+  iteración (V9).
 
-**La cobertura del plan cae de 0.94 (V0) a 0.42 (V2+).** En V0 y V1 el plan lo escribe el
-razonador libremente: cubre los pasos esperados, pero inventa contactos (2 en test). Desde V2 el
-plan sale solo de las guías oficiales: no inventa nada (0 contactos), pero las guías son
-mayormente de prevención general ("verificá la identidad", "no compartas claves") y no traen los
-pasos específicos que espera el golden ("no pagues la tarifa de envío", "no entres al link"). En
-test, 20 de 65 planes se arman con una sola guía general, con cobertura 0.33. Es un **trade-off
-entre grounding y cobertura**; mejorarlo requiere guías por modalidad y situación más
-específicas, o permitir que el planner complete pasos genéricos marcados como sugerencia.
+## 3. Iteración del Ejercicio 4: análisis de errores de la Versión 1
 
-## 3. Análisis de errores de la Versión 1 (V6, dev) y elección de V7
+Errores de V6 (dev y test):
 
-Errores de V6 en dev (9 de 35), con su causa raíz según §2.5. El análisis se hizo con el golden previo a la revisión; los modos de falla siguen presentes con el revisado (FPR en negativos difíciles 0.23 en dev):
-
-| Modo de falla | Casos | Causa |
+| Modo de falla | Evidencia | Causa |
 |---|---|---|
-| Falsos positivos en negativos difíciles: alerta real de Mercado Libre; promo de DiDi/Spotify (texto y captura) | 3 | (b) El retrieval trae vecinos estafa parecidos y ningún legítimo parecido; el razonador decide sin contraste |
-| `falso_familiar_cambio_numero` reportado como `no_determinada` | 3 | (a)/(d) Solo 3 casos de esa modalidad en la KB |
-| Estafas fuera del enum (419, falso "informe de riesgo") como `levemente_sospechoso` | 2 | (d) Sin cobertura |
-| Veredicto canónico distinto, con el binario correcto | 1 | — |
+| Falsos positivos en negativos difíciles | 3 de 25 en test (T-0018, T-0054, T-0059), 1 de 13 en dev | El retrieval trae vecinos estafa parecidos y ningún legítimo parecido: el razonador decide sin contraste |
+| Modalidad bajada a `no_determinada` | 4 de los 7 errores de modalidad en test (falso soporte, phishing, deuda) | R2 exige un caso recuperado de esa modalidad |
+| Plan genérico o con contactos de otra entidad | Cobertura 0.47; 23 de 65 planes con cobertura ≤ 0.33. Ejemplo: un mail de ARCA en el plan de una deuda de otra empresa | El planner no veía el mensaje y copiaba pasos de las dos guías generales del Banco Nación |
 
-Se eligió el modo con mayor impacto según el costo asimétrico declarado: los **falsos positivos
-en negativos difíciles** (FPR 0.23 en dev). Es el candidato que el plan tenía preparado.
+Se probó un cambio por modo de falla, de a uno.
 
-### Ficha V7 · evidencia contrastiva
+### Ficha V7 · mensajes de contraste
 
 | | |
 |---|---|
-| **Hipótesis** | Si el contexto trae mensajes legítimos parecidos además de estafas parecidas, el razonador distingue un aviso real de una imitación por contraste y baja el FPR en negativos difíciles |
-| **Cambio (única variable)** | `retrieval.mensajes_contrastivo: true`: la colección `mensajes` devuelve la mitad de los vecinos con `label=estafa` y la mitad con `label=legitimo` (filtro de metadata en las dos ramas, densa y BM25), intercalados |
-| **Métrica objetivo** | FPR en negativos difíciles sin perder recall |
-| **Resultado en test** | FPR igual (0.12); F1 igual (0.920); acc. modalidad −0.02 (1 caso); costo +13 %. En la corrida con el golden anterior el FPR había bajado a 0.08 por un solo caso, que con el golden revisado no se repite |
-| **Resultado en dev** | Sin cambios respecto de V6 |
-| **Decisión** | **Sin efecto medible.** El contraste no cambia las decisiones del razonador en este golden. Se mantiene en la línea porque no empeora el binario y deja la evidencia más equilibrada para la UI; la Versión 2 es V8 |
+| **Hipótesis** | Si el contexto trae mensajes legítimos parecidos además de estafas parecidas, el razonador distingue un aviso real de una imitación por contraste |
+| **Cambio** | `retrieval.mensajes_contrastivo: true`: la colección `mensajes` devuelve la mitad de los vecinos con `label=estafa` y la mitad con `label=legitimo` (filtro de metadata en las ramas densa y BM25), intercalados |
+| **Resultado** | Test: FPR 0.12 → 0.08, F1 0.920 → 0.929, acc. modalidad −0.039 (2 casos, no significativo). Dev: F1 0.865 → 0.923, recall 0.80 → 0.90 |
+| **Decisión** | Se adopta |
 
 ### Ficha V8 · respaldo dirigido para R2
 
 | | |
 |---|---|
-| **Problema** | R2 baja a `no_determinada` modalidades correctas cuando ningún caso recuperado es de esa modalidad. Pasa con falso familiar, la modalidad con menos casos (3): D-0023 y D-0029 en V6, y una captura real de un contacto que pide plata para pagarle a un "vendedor", donde el retrieval trajo casos de compraventa |
-| **Cambio (única variable)** | `postprocess.soporte_dirigido_margen: 0.06`. Si la modalidad del razonador no está entre los casos recuperados, antes de R2 se busca el caso más parecido de esa modalidad. Se acepta como respaldo, y se cita, si su similitud queda a ≤ 0.06 del mejor caso de toda la colección |
-| **Calibración** | Sobre las 60 estafas con modalidad del golden: con margen 0.05 entra el 92 % de las modalidades correctas y el 15 % de las incorrectas; con 0.07, el 100 % y el 28 %. Una modalidad incorrecta solo podría entrar si además el razonador la propuso |
-| **Resultado** | Actuó en 1 de 125 casos (D-0029, modalidad correcta): acc. modalidad en dev 0.80 → 0.85; en test, idéntico a V7. Resuelve además el caso real que lo motivó (captura de un contacto que pide plata: de `no_determinada` a `falso_familiar_cambio_numero`) |
-| **Decisión** | **Versión 2** (tag `v2-ej4`) y configuración de la UI. Mejora un modo de falla concreto sin costo de API extra (el embedding del mensaje ya está en caché) y sin cambiar ningún otro resultado |
+| **Cambio** | `postprocess.soporte_dirigido_margen: 0.06`: si la modalidad del razonador no está entre los casos recuperados, se busca el caso más parecido de esa modalidad y se acepta como respaldo si su similitud queda a ≤ 0.06 del mejor caso de toda la colección. Calibrado sobre las 60 estafas con modalidad del golden: con 0.05 entra el 92 % de las modalidades correctas y el 15 % de las incorrectas; con 0.07, el 100 % y el 28 % |
+| **Resultado** | **Sin efecto**: no actuó en ningún caso de dev ni de test. Con Claude, cuando R2 baja una modalidad, la del razonador tampoco queda cerca de un caso de esa modalidad. Con GPT-4.1 había actuado en 1 de 125 casos |
+| **Decisión** | Se mantiene (no cambia ningún resultado y cubre el caso real que lo motivó), documentado como resultado nulo |
 
-En la misma iteración se corrigió el **planner**, que afecta a todas las versiones con planner. Con
-situación "no respondí" o "respondí" (sin pago ni datos entregados), el plan usa solo guías de
-prevención: antes caía en los protocolos generales para víctimas (bloquear cuentas, denuncia
-penal). Dentro de cada nivel, las guías de fuentes argentinas van antes que las de INCIBE (España).
+### Ficha V9 · plan adaptado a la entidad del mensaje → Versión 2
+
+| | |
+|---|---|
+| **Cambio** | `generation.planner_prompt: planner_v2`. El planner ve el mensaje como dato y usa las guías como estructura de cómo proceder. Si una guía es de otra entidad, su nombre y sus contactos pasan a "la entidad oficial" / "los canales oficiales de la entidad". Una adaptación determinística en el planner lo garantiza para todas las versiones con guías (quita contactos de entidades que el mensaje no nombra y contactos que no están en la guía); R5 acepta el nombre de un organismo que nombra el mensaje, nunca un contacto sacado de él |
+| **Resultado** | Cobertura del plan 0.495 → 0.846 en test (dev 0.433 → 0.820); frente a la Versión 1, +0.377 [+0.287, +0.464]. Ningún otro cambio: mismas métricas de clasificación y retrieval, 0 contactos inventados. Costo +0.001 USD por análisis |
+| **Decisión** | **Versión 2** (tag `v2-ej4`) y configuración de la UI |
+
+**Versión 1 → Versión 2 (test):** F1 0.920 → 0.929, FPR 0.12 → 0.08, F1 señales igual, cobertura
+del plan 0.47 → 0.85, acc. modalidad 0.863 → 0.824 (−2 casos, no significativo).
 
 ## 4. Problemas encontrados y cómo se resolvieron
 
 | Problema | Diagnóstico | Arreglo |
 |---|---|---|
-| CER 0.67 en capturas | El extractor transcribía avisos del sistema ("Esta empresa usa un servicio seguro de Meta…", "Leer más") como texto del remitente. La referencia tenía la PII redactada y la predicción no | `vision_v2` omite los avisos de la app. El CER se mide con las dos partes redactadas igual. Del slice `capturas` se excluyen las capturas con repeticiones. Resultado: CER 0.133 |
+| CER 0.67 en capturas | El extractor transcribía avisos del sistema ("Esta empresa usa un servicio seguro de Meta…", "Leer más") como texto del remitente. La referencia tenía la PII redactada y la predicción no | `vision_v2` omite los avisos de la app. El CER se mide con las dos partes redactadas igual. Del slice `capturas` se excluyen las capturas con repeticiones. Resultado: CER 0.133 con GPT-4.1 y 0.111 con Claude |
 | V2–V6 con 0 de F1 en la primera corrida | Chroma 1.5 no persiste el HNSW de las colecciones con menos de 100 vectores (`batch_size` por defecto) y lo completa en la primera lectura; según qué proceso lea primero, el segmento queda roto ("Nothing found on disk") | `batch_size = sync_threshold = tamaño de la colección` en el build, y verificación del índice en un proceso aparte antes de escribir el manifest |
-| Cobertura del plan 0.33 desde V2 (V0/V1: 0.87–0.94) | Había solo 13 guías, casi todas generales del Banco Nación | 13 → 42 guías en kb-v2 (las 24 páginas por modalidad). Subió a 0.42–0.44; el resto es el trade-off de §2 |
+| Cobertura del plan baja desde V2 | Había solo 13 guías, casi todas generales; el planner no veía el mensaje | 13 → 42 guías en kb-v2 (24 páginas por modalidad) y planner adaptado a la entidad (V9) |
 | Cobertura de casos: 8 modalidades con menos de 5 casos | Las fuentes iniciales eran generales | 24 páginas nuevas, 3 por modalidad. Quedan 3 modalidades con 3–4 casos |
+| Presupuesto de API | La primera ablación con GPT-4.1 y una re-corrida con GPT-5 superaron el crédito de la cátedra | Ablación final con Claude; OpenAI solo para embeddings. Costo de la ablación completa (10 versiones, test y dev, con juez): unos USD 13 |
 
-## 5. Trabajo futuro
+## 5. Comentario: el modelo generador
 
-1. Modalidad `phishing_credenciales_servicio` en el enum y casos para ella (ataca la caída de
-   acc. modalidad).
-2. Guías por modalidad y situación más específicas, para subir la cobertura del plan sin perder
-   grounding.
+La primera ablación se hizo con GPT-4.1 (razonador y capturas) y GPT-4.1-mini (multi-query,
+rerank, planner y juez); después se probó GPT-5 con razonamiento mínimo y se pasó a Claude. Las
+corridas siguen en `results/` (fechas 14 y 15/11 antes de las 19 h UTC).
+
+- Con GPT-4.1, el RAG **bajaba** el acierto de modalidad (V0 0.863 → V6 0.765, significativo); con
+  Claude sube (0.784 → 0.863). Con el mismo pipeline (V6), Claude acierta la modalidad 0.86 contra
+  0.77 de GPT-4.1 y el F1 de señales 0.67 contra 0.59.
+- GPT-5 con razonamiento mínimo rindió peor que GPT-4.1 en modalidad y señales y, sin RAG, inventó
+  22–23 contactos en los planes de test (GPT-4.1: 2; Claude: 1).
+- La arquitectura no cambió: el cliente LLM elige el proveedor según el modelo. La elección se hizo
+  midiendo en el golden, no por benchmarks.
+
+## 6. Trabajo futuro
+
+1. Más mensajes legítimos de contraste en la base (los falsos positivos en negativos difíciles son
+   el modo de falla que queda).
+2. Modalidad `phishing_credenciales_servicio` en el enum y casos para ella.
 3. Más casos de las modalidades con menos cobertura (falso familiar: 3; inversión y empleo: 4).
 4. Barrido de solo retrieval de los pesos de RRF y de `top_n`, que no cuesta generación.
+5. Batch API para las corridas de evaluación (50 % menos de costo) y observabilidad con LangSmith.
 
-## 6. Notas de diseño
+## 7. Notas de diseño
 
-- **Re-ranking con LLM y no con cross-encoder.** El plan proponía un cross-encoder. El entorno no
-  tiene `torch` ni `onnxruntime`, y sumarlos rompe la reproducibilidad del `uv.lock` sin aportar
-  un modelo multilingüe confiable para español rioplatense. El reranker es un LLM mini *listwise*
-  (`rerank_v1`), que puntúa 0–3 cada candidato contra el mensaje, con T = 0 y caché. Cuesta unos
-  0.3 centavos por análisis.
-- **BM25 desde `chunks.jsonl`.** No requiere reconstruir la KB y usa exactamente los mismos
+- **Reranking con LLM y no con cross-encoder.** El entorno no tiene `torch` ni `onnxruntime`, y
+  sumarlos rompe la reproducibilidad del `uv.lock` sin aportar un modelo multilingüe confiable
+  para español rioplatense. El reranker es un LLM chico *listwise* (`rerank_v1`, Claude Haiku 5.5)
+  que puntúa 0–3 cada candidato contra el mensaje, con caché.
+- **BM25 desde `chunks.jsonl`.** No requiere reconstruir la base y usa exactamente los mismos
   chunks que el índice denso.
-- **RRF con k = 60.** En V5 los pesos son denso 1 y BM25 1; no se barrieron por costo, y el
-  barrido de solo retrieval queda como extensión barata.
+- **RRF con k = 60.** En V5 los pesos son denso 1 y BM25 1; no se barrieron, y el barrido de solo
+  retrieval queda como extensión barata.
+- **Claude no acepta temperatura 0.** La reproducibilidad queda a cargo de la caché de respuestas
+  (clave: modelo, esfuerzo, esquema y mensajes) y del snapshot de la base.

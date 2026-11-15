@@ -1,6 +1,6 @@
 """UI local (§2.6): front en Preact (src/safefish/web/) + API JSON sobre el pipeline.
 
-    python -m safefish.ui [--config configs/v8.yaml] [--port 8501]
+    python -m safefish.ui [--config configs/v9.yaml] [--port 8501]
 
 Servidor con la biblioteca estándar (sin dependencias nuevas). Escucha solo en 127.0.0.1 y solo
 atiende pedidos dirigidos a sí mismo: es una demo para el oral, no un servicio. Las capturas se
@@ -214,7 +214,7 @@ def main(argv: list[str] | None = None) -> int:
     load_dotenv()
     sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--config", default="configs/v8.yaml")
+    ap.add_argument("--config", default="configs/v9.yaml")
     ap.add_argument("--port", type=int, default=8501)
     args = ap.parse_args(argv)
 
