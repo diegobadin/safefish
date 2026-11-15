@@ -11,7 +11,9 @@
 | kb-v2 | — | — | — | — | — |
 | kb-v2a | — | — | — | — | — |
 
-- **Fuentes y licencias:** <por fuente: URL, organismo, licencia o términos de uso, fecha de captura>
+- **Fuentes y licencias:** cada descarga con URL, licencia, SHA-256 y fecha de captura en
+  `data/raw/_descargas.json` (lo genera `make data` desde `data/descargas.yaml`). Qué entra a
+  cada colección: [`datos.md`](datos.md).
 - **Filtros aplicados:** idioma (es), deduplicación exacta y cercana (coseno TF-IDF ≥ 0.95), boilerplate.
 - **PII:** redacción con placeholders tipados (`<TEL>`, `<CBU>`, `<ALIAS>`, `<EMAIL>`, `<DNI>`,
   `<TARJETA>`, `<CODIGO>`, `<NOMBRE>`, `<LINK_ACORTADO>`, rutas de URL → `<RUTA>`). La detección de
