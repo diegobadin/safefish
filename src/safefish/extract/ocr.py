@@ -69,6 +69,25 @@ def preprocess(image, enabled: bool = True) -> Preprocessed:
     return Preprocessed(Image.fromarray(binary), scale)
 
 
+RUTAS_WINDOWS = (
+    r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+    r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+)
+
+
+def ubicar_tesseract() -> str | None:
+    """`TESSERACT_CMD`, el PATH o la ruta de instalación estándar de Windows (el instalador de
+    UB Mannheim no agrega Tesseract al PATH)."""
+    import os
+    import shutil
+
+    if (cmd := os.getenv("TESSERACT_CMD")) and os.path.exists(cmd):
+        return cmd
+    if cmd := shutil.which("tesseract"):
+        return cmd
+    return next((r for r in RUTAS_WINDOWS if os.path.exists(r)), None)
+
+
 class TesseractOCR:
     def __init__(self, lang: str = "spa", min_conf: float = 30.0, preprocess: bool = True):
         self.lang, self.min_conf, self.do_preprocess = lang, min_conf, preprocess
@@ -79,6 +98,8 @@ class TesseractOCR:
             from PIL import Image
         except ImportError as e:  # pragma: no cover - dependencias del proyecto
             raise OCRUnavailable(str(e)) from e
+        if cmd := ubicar_tesseract():
+            pytesseract.pytesseract.tesseract_cmd = cmd
         with Image.open(image_path) as im:
             pre = preprocess(im, self.do_preprocess)
         try:
