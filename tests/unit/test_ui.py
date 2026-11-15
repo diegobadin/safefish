@@ -57,4 +57,5 @@ def test_sirve_solo_los_archivos_del_front(servidor):
     h = {"Host": f"localhost:{servidor}"}
     assert _pedido(servidor, "GET", h, ruta="/app.js") == 200
     assert _pedido(servidor, "GET", h, ruta="/styles.css") == 200
+    assert _pedido(servidor, "GET", h, ruta="/vendor/preact-htm.js") == 200
     assert _pedido(servidor, "GET", h, ruta="/../pyproject.toml") == 404

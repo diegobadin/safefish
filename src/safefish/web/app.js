@@ -1,7 +1,10 @@
 // SafeFish · front mínimo: Preact + htm (sin build) y Tesseract.js para marcar la captura.
-import { html, render, useState, useEffect, useRef } from "https://unpkg.com/htm@3.1.1/preact/standalone.module.js";
+// Preact + htm va en el repo (vendor/, 13 KB). Tesseract.js se carga del CDN con versión fija y
+// hash de integridad (SRI); su worker, el núcleo WASM y el idioma los baja la propia librería.
+import { html, render, useState, useEffect, useRef } from "/vendor/preact-htm.js";
 
 const TESSERACT_URL = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";
+const TESSERACT_SRI = "sha384-GJqSu7vueQ9qN0E9yLPb3Wtpd7OrgK8KmYzC8T1IysG1bcvxvIO4qtYR/D3A991F";
 
 const SITUACIONES = [
   ["no_respondio", "Todavía no respondí", "Solo lo recibí."],
@@ -67,7 +70,7 @@ function cargarTesseract() {
   if (window.Tesseract) return Promise.resolve(window.Tesseract);
   tesseractCarga ??= new Promise((ok, mal) => {
     const s = document.createElement("script");
-    s.src = TESSERACT_URL; s.onload = () => ok(window.Tesseract); s.onerror = () => mal(new Error("No se pudo cargar Tesseract.js"));
+    s.src = TESSERACT_URL; s.integrity = TESSERACT_SRI; s.crossOrigin = "anonymous"; s.onload = () => ok(window.Tesseract); s.onerror = () => mal(new Error("No se pudo cargar Tesseract.js"));
     document.head.append(s);
   });
   return tesseractCarga;
