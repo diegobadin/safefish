@@ -153,6 +153,10 @@ class PostprocessCfg(_Cfg):
     rules: list[Literal["R1", "R2", "R3", "R4", "R5"]] = Field(default_factory=list)
     cita_threshold: float = 0.9  # R1: tolerancia fuzzy de la cita literal
     bbox_threshold: float = 0.8  # alineación cita → palabras OCR (captura)
+    # V8: si la modalidad del razonador no está entre los casos recuperados, antes de R2 se
+    # busca el caso más parecido de esa modalidad; se acepta como respaldo si su similitud está
+    # a lo sumo `margen` por debajo del mejor caso de toda la colección. None = apagado.
+    soporte_dirigido_margen: float | None = None
 
 
 class ExtractionCfg(_Cfg):

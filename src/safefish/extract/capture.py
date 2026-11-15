@@ -73,4 +73,5 @@ class MultimodalExtractor:
             entidades=extract_entities(texto),
             ocr_words=ocr_words,
             origen="captura",
+            contexto=normalize_unicode(raw.contexto) if raw.contexto else None,
         )

@@ -237,9 +237,12 @@ class QueryRewriter:
         )
         return r.parsed
 
-    def queries(self, texto: str) -> list[str]:
-        """Texto crudo + queries focalizadas (sin repetidos). Si el LLM falla, queda el crudo."""
-        f = self.facets(texto)
+    def queries(self, texto: str, contexto: str | None = None) -> list[str]:
+        """Texto crudo + queries focalizadas (sin repetidos). Si el LLM falla, queda el crudo.
+        El contexto del usuario, si lo hay, solo orienta las facetas; la primera query sigue
+        siendo el mensaje tal cual."""
+        entrada = f"{texto}\n\n(Contexto de quien lo recibió: {contexto})" if contexto else texto
+        f = self.facets(entrada)
         out = [texto]
         if f is not None:
             ent = f"{f.entidad}: " if f.entidad else ""
@@ -337,7 +340,7 @@ class AdvancedRetriever:
     def retrieve(self, m: ExtractedMessage) -> RetrievalBundle:
         timings: dict[str, float] = {}
         t0 = time.perf_counter()
-        queries = self.rewriter.queries(m.texto) if self.rewriter else [m.texto]
+        queries = self.rewriter.queries(m.texto, m.contexto) if self.rewriter else [m.texto]
         timings["query_rewrite"] = round((time.perf_counter() - t0) * 1000, 1)
         t0 = time.perf_counter()
         vecs = [self.embeddings.embed_query(q) for q in queries]

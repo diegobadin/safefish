@@ -121,6 +121,9 @@ class RawInput(_Strict):
     imagen_path: str | None = None
     canal: Canal | None = None
     situacion: Situacion | None = None
+    # Lo que cuenta quien recibió el mensaje ("es de un amigo, me pide plata"). No es parte del
+    # mensaje: orienta el análisis pero nunca se cita como señal.
+    contexto: str | None = Field(default=None, max_length=1000)
 
     @model_validator(mode="after")
     def _texto_o_imagen(self) -> RawInput:
@@ -156,6 +159,7 @@ class ExtractedMessage(_Strict):
     entidades: Entidades = Field(default_factory=Entidades)
     ocr_words: list[OcrWord] | None = None
     origen: Literal["texto", "captura"] = "texto"
+    contexto: str | None = None  # de RawInput.contexto; no es fuente de citas
 
 
 # ---------------------------------------------------------------------------

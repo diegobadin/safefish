@@ -23,8 +23,10 @@ from safefish.generation.reasoner import LLMClient, LLMReasoner
 from safefish.observability import UsageTracker, reset_tracker, set_tracker
 from safefish.postprocess.verifier import REGLAS, RuleVerifier
 from safefish.schemas import (
+    CasoRef,
     ExtractedMessage,
     Extractor,
+    Modalidad,
     RawInput,
     Reasoner,
     RetrievalBundle,
@@ -71,6 +73,50 @@ def _advanced_retriever(cfg: PipelineConfig, stores, emb, names, seed):
         rewriter=rewriter, bm25=bm25, weights=weights, reranker=reranker, top_in=r.rerank.top_in,
         contrastivo=r.mensajes_contrastivo,
     )  # fmt: skip
+
+
+def soporte_dirigido(
+    retriever, m: ExtractedMessage, b: RetrievalBundle, out: SafeFishOutput, margen: float
+) -> tuple[RetrievalBundle, SafeFishOutput, dict | None]:
+    """Respaldo dirigido para R2 (V8). Si la modalidad propuesta no aparece entre los casos
+    recuperados, busca el caso más parecido **de esa modalidad** y lo suma a la evidencia si su
+    similitud queda a lo sumo `margen` por debajo del mejor caso de toda la colección. Sin
+    respaldo así, R2 baja la modalidad a `no_determinada` como siempre."""
+    from safefish.retrieval.multi import to_item
+
+    mod = out.modalidad.value
+    if out.modalidad is Modalidad.NO_DETERMINADA or any(
+        str(c.metadata.get("modalidad")) == mod for c in b.casos
+    ):
+        return b, out, None
+    stores = getattr(retriever, "stores", None) or {}
+    store, emb = stores.get("casos"), getattr(retriever, "embeddings", None)
+    if store is None or emb is None:
+        return b, out, None
+    vec = emb.embed_query(m.texto)
+    with CHROMA_LOCK:
+        mejor = store.similarity_search_by_vector_with_relevance_scores(vec, k=1)
+        propio = store.similarity_search_by_vector_with_relevance_scores(
+            vec, k=1, filter={"modalidad": mod}
+        )
+    if not mejor or not propio:
+        return b, out, None
+    (doc, sim), sim_mejor = propio[0], mejor[0][1]
+    detalle = {"modalidad": mod, "case_id": doc.metadata.get("doc_id"),
+               "similitud": round(sim, 4), "mejor_similitud": round(sim_mejor, 4)}  # fmt: skip
+    if sim_mejor - sim > margen:
+        return b, out, {**detalle, "aceptado": False}
+    name = getattr(retriever, "names", {}).get("casos", "casos")
+    item = to_item(doc, 1.0 - sim, name)
+    item.metadata["via"] = "soporte_dirigido"
+    ref = CasoRef(
+        case_id=str(doc.metadata.get("doc_id", item.id)),
+        fuente_url=doc.metadata.get("fuente_url"),
+        por_que="Caso documentado de la misma modalidad, encontrado con una búsqueda dirigida.",
+    )
+    b = b.model_copy(update={"casos": [*b.casos, item]})
+    out = out.model_copy(update={"casos_similares": [*out.casos_similares, ref]})
+    return b, out, {**detalle, "aceptado": True}
 
 
 def _merge_guias(b: RetrievalBundle, guias) -> RetrievalBundle:
@@ -244,6 +290,12 @@ class SafeFishPipeline:
             retries = out.meta.reintentos_parseo
             pre = out
 
+            margen = self.cfg.postprocess.soporte_dirigido_margen
+            if v is not None and margen is not None:
+                with tracker.stage("verify"):
+                    b, out, det = soporte_dirigido(self.retriever, m, b, out, margen)
+                if det is not None:
+                    eventos.append({"regla": "R2", "accion": "soporte_dirigido", "detalle": det})
             if staged:
                 with tracker.stage("verify"):
                     out, ev = v.check_analysis(m, b, out)

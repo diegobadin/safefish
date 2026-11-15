@@ -39,4 +39,5 @@ class TextExtractor:
             entidades=extract_entities(texto),
             ocr_words=None,
             origen="texto",
+            contexto=normalize_unicode(raw.contexto) if raw.contexto else None,
         )
