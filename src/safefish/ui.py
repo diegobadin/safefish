@@ -95,11 +95,16 @@ def render_resultado(res, imagen_anotada: str | None) -> str:
     return "".join(partes)
 
 
-def make_handler(pipeline, version: str):
+def make_handler(pipeline, version: str, port: int = 8501):
     from safefish.postprocess.annotate import annotate
     from safefish.schemas import RawInput
 
     lock = threading.Lock()  # una consulta por vez: es una demo
+    # Solo se aceptan pedidos dirigidos a este servidor local. Sin esto, cualquier página
+    # abierta en el navegador podría mandar un POST (CSRF) y gastar la API, o leer resultados
+    # con un DNS rebinding.
+    hosts = {f"127.0.0.1:{port}", f"localhost:{port}"}
+    origins = {f"http://{h}" for h in hosts}
 
     class Handler(BaseHTTPRequestHandler):
         def _send(self, body: str, code: int = 200):
@@ -110,10 +115,18 @@ def make_handler(pipeline, version: str):
             self.end_headers()
             self.wfile.write(data)
 
+        def _host_ok(self) -> bool:
+            return (self.headers.get("Host") or "").lower() in hosts
+
         def do_GET(self):
+            if not self._host_ok():
+                return self._send("Host no permitido", 403)
             self._send(PAGINA.format(version=html.escape(version), texto="", resultado=""))
 
         def do_POST(self):
+            origin = (self.headers.get("Origin") or "").lower()
+            if not self._host_ok() or (origin and origin not in origins):
+                return self._send("Origen no permitido", 403)
             n = int(self.headers.get("Content-Length") or 0)
             if n > MAX_UPLOAD:
                 return self._send("Archivo demasiado grande", 413)
@@ -170,7 +183,9 @@ def main(argv: list[str] | None = None) -> int:
 
     cfg = load_config(args.config)
     pipeline = SafeFishPipeline.from_config(cfg)
-    srv = ThreadingHTTPServer(("127.0.0.1", args.port), make_handler(pipeline, cfg.version))
+    srv = ThreadingHTTPServer(
+        ("127.0.0.1", args.port), make_handler(pipeline, cfg.version, args.port)
+    )
     print(f"SafeFish {cfg.version} en http://127.0.0.1:{args.port} (Ctrl+C para cortar)")
     with contextlib.suppress(KeyboardInterrupt):
         srv.serve_forever()
