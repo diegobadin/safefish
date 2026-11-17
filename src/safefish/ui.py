@@ -71,12 +71,15 @@ SEVERIDAD = {"critica": "Crítica", "alta": "Alta", "media": "Media", "baja": "B
 
 
 def respuesta(res, situacion: str, contexto: str | None, segundos: float, version: str,
-              aviso: str | None = None) -> dict:  # fmt: skip
+              aviso: str | None = None, pasos: list[dict] | None = None) -> dict:  # fmt: skip
     """Lo que necesita el front, ya traducido a lenguaje de usuario."""
     from safefish.taxonomia import load_taxonomia
 
     if res.error or res.output is None:
-        return {"error": res.error or "El análisis no devolvió resultado."}
+        return {
+            "error": res.error or "El análisis no devolvió resultado.",
+            "debug": {"pasos": pasos or []},
+        }
     tax, o = load_taxonomia(), res.output
     titulo, nivel, frase = VEREDICTOS.get(o.veredicto.value, (o.veredicto.value, "medio", ""))
     mod = o.modalidad.value
@@ -115,11 +118,13 @@ def respuesta(res, situacion: str, contexto: str | None, segundos: float, versio
             "costo": (res.usage or {}).get("costo_usd"),
         },  # fmt: skip
         "json": json.loads(o.model_dump_json()),
+        "debug": {"pasos": pasos or []},
     }
 
 
 def make_handler(pipeline, version: str, port: int = 8501):
     from safefish.schemas import RawInput
+    from safefish.trace import trazando
 
     lock = threading.Lock()  # una consulta por vez: es una demo
     # Solo se aceptan pedidos dirigidos a este servidor local. Sin esto, cualquier página
@@ -142,7 +147,11 @@ def make_handler(pipeline, version: str, port: int = 8501):
             self.wfile.write(data)
 
         def _json(self, obj: dict, code: int = 200):
-            self._send(json.dumps(obj, ensure_ascii=False), code, "application/json; charset=utf-8")
+            self._send(
+                json.dumps(obj, ensure_ascii=False, default=str),
+                code,
+                "application/json; charset=utf-8",
+            )
 
         def _host_ok(self) -> bool:
             return (self.headers.get("Host") or "").lower() in hosts
@@ -199,9 +208,10 @@ def make_handler(pipeline, version: str, port: int = 8501):
                     situacion=situacion, contexto=contexto or None,
                 )  # fmt: skip
                 t0 = time.perf_counter()
-                res = pipeline.run(raw)
+                with trazando() as tr:
+                    res = pipeline.run(raw)
                 segundos = time.perf_counter() - t0
-            r = respuesta(res, situacion, contexto or None, segundos, version, aviso)
+            r = respuesta(res, situacion, contexto or None, segundos, version, aviso, tr.pasos)
             self._json(r, 200 if "error" not in r else 502)
 
         def log_message(self, fmt, *args):  # sin logs con contenido de mensajes

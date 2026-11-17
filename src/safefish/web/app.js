@@ -158,6 +158,125 @@ function Captura({ file, senales }) {
     ${estado && html`<p class="hint">${estado}</p>`}</div>`;
 }
 
+// --- depuración: el paso a paso del análisis ---------------------------------------------------
+const num = (x, d = 3) => (x === null || x === undefined ? "—" : Number(x).toFixed(d).replace(".", ","));
+const seg = (ms) => `${(ms / 1000).toFixed(1).replace(".", ",")} s`;
+const NOMBRE_COL = { casos: "casos", mensajes: "mensajes", senales: "señales", guias: "guías" };
+
+function Doc({ d, extracto = true }) {
+  const tags = [d.modalidad, d.label, d.situacion, d.via].filter(Boolean);
+  return html`<div class="doc"><code>${d.doc}</code>${tags.map((x) => html`<span class="tag">${x}</span>`)}
+    ${extracto && d.texto && html`<div class="ext">${d.texto}</div>`}</div>`;
+}
+
+function Tabla({ cols, filas, marcar }) {
+  return html`<div class="tw"><table class="dt"><thead><tr>${cols.map((c) => html`<th class=${c.n ? "n" : ""}>${c.t}</th>`)}</tr></thead>
+    <tbody>${filas.map((f, i) => html`<tr class=${marcar && marcar(f, i) ? "keep" : ""}>${cols.map((c) => html`<td class=${c.n ? "n" : ""}>${c.v(f, i)}</td>`)}</tr>`)}</tbody></table></div>`;
+}
+
+function Def({ filas }) {
+  const f = filas.filter(([, v]) => v !== null && v !== undefined && v !== "");
+  return html`<dl class="kv">${f.map(([k, v]) => html`<dt>${k}</dt><dd>${v}</dd>`)}</dl>`;
+}
+
+function Salida({ s }) {
+  return html`<${Def} filas=${[["Veredicto", s.veredicto], ["Modalidad", s.modalidad]]}/>
+    ${s.senales.length > 0 && html`<${Tabla} cols=${[{ t: "Señal", v: (x) => html`<code>${x.id}</code>` }, { t: "Cita", v: (x) => html`<q>${x.cita}</q>` }]} filas=${s.senales}/>`}
+    ${s.casos.length > 0 && html`<${Tabla} cols=${[{ t: "Caso citado", v: (x) => html`<code>${x.id}</code>` }, { t: "Por qué", v: (x) => x.por_que }]} filas=${s.casos}/>`}`;
+}
+
+function Busqueda({ p }) {
+  const rank = { t: "#", n: 1, v: (d) => d.rank };
+  const doc = (ext) => ({ t: "Documento", v: (d) => html`<${Doc} d=${d} extracto=${ext}/>` });
+  const hayBm25 = p.por_query.some((q) => q.bm25);
+  return html`<div class="stack-s">
+    <p class="hint">Por cada query: búsqueda densa (similitud coseno)${hayBm25 ? " y BM25" : ""}, ${p.candidatos} candidatos por lista. Quedan ${p.top_n}.</p>
+    ${p.por_query.map((q, i) => html`<details class="sub"><summary>Query ${i + 1}${i === 0 ? " (mensaje original)" : ""}: <q>${q.query}</q></summary>
+      <div class="pair">
+        <div><h5>Densa</h5><${Tabla} cols=${[rank, doc(false), { t: "Sim.", n: 1, v: (d) => num(d.denso) }]} filas=${q.denso}/></div>
+        ${q.bm25 && html`<div><h5>BM25</h5><${Tabla} cols=${[rank, doc(false), { t: "Score", n: 1, v: (d) => num(d.bm25, 2) }]} filas=${q.bm25}/></div>`}
+      </div></details>`)}
+    ${p.fusion && html`<details class="sub"><summary>Fusión RRF (k = ${p.rrf_k}; pesos: densa ${p.pesos.dense}, BM25 ${p.pesos.bm25}) · ${p.fusion.length} candidatos</summary>
+      <${Tabla} cols=${[rank, doc(true), { t: "Sim. densa", n: 1, v: (d) => num(d.denso) }, { t: "BM25", n: 1, v: (d) => num(d.bm25, 2) }, { t: "RRF", n: 1, v: (d) => num(d.rrf, 4) }]}
+        filas=${p.fusion} marcar=${(d, i) => !p.rerank && i < p.top_n}/></details>`}
+    ${p.rerank && html`<details class="sub" open><summary>Reranking con LLM (${p.reranker || "LLM"}, puntaje 0–3) · quedan los ${p.top_n} primeros</summary>
+      <${Tabla} cols=${[rank, { t: "Antes", n: 1, v: (d) => d.rank_previo }, doc(true), { t: "Puntaje", n: 1, v: (d) => (d.rerank < 0 ? "—" : d.rerank) }]}
+        filas=${p.rerank} marcar=${(d, i) => i < p.top_n}/></details>`}
+    ${!p.rerank && !p.fusion && html`<${Tabla} cols=${[rank, doc(true), { t: "Sim.", n: 1, v: (d) => num(d.denso) }]} filas=${p.final}/>`}
+  </div>`;
+}
+
+const PASOS = {
+  extraccion: (p) => ({
+    titulo: p.origen === "captura" ? "Lectura de la captura (visión)" : "Texto de entrada",
+    meta: [p.canal && `canal ${p.canal}`, p.modelo].filter(Boolean).join(" · "),
+    cuerpo: html`<${Def} filas=${[["Origen", p.origen], ["Canal", p.canal], ["Modelo", p.modelo], ["Palabras OCR", p.ocr_palabras], ["Contexto del usuario", p.contexto]]}/>
+      ${p.segmentos.length > 0
+        ? html`<${Tabla} cols=${[{ t: "Emisor", v: (s) => s.emisor }, { t: "Texto transcripto", v: (s) => s.texto }]} filas=${p.segmentos}/>`
+        : html`<pre class="raw">${p.texto}</pre>`}`,
+  }),
+  query_rewrite: (p) => ({
+    titulo: "Reescritura de la consulta (multi-query)",
+    meta: `${p.queries.length} queries${p.modelo ? " · " + p.modelo : ""}`,
+    cuerpo: html`${p.facetas && html`<${Def} filas=${[["Resumen", p.facetas.resumen], ["Pedido", p.facetas.pedido], ["Entidad", p.facetas.entidad], ["Frases clave", (p.facetas.frases_clave || []).join(" · ")]]}/>`}
+      <ol class="qs">${p.queries.map((q, i) => html`<li><q>${q}</q>${i === 0 ? html` <span class="tag">mensaje original</span>` : ""}</li>`)}</ol>`,
+  }),
+  busqueda: (p) => ({
+    titulo: `Búsqueda en ${NOMBRE_COL[p.coleccion] || p.coleccion}${p.filtro ? ` · filtro ${Object.entries(p.filtro).map(([k, v]) => `${k} = ${v}`).join(", ")}` : ""}`,
+    meta: `top ${p.top_n}${p.rerank ? " · con reranking" : p.fusion ? " · con RRF" : ""}`,
+    cuerpo: html`<${Busqueda} p=${p}/>`,
+  }),
+  contexto: (p) => ({
+    titulo: "Contexto que recibe el razonador",
+    meta: Object.entries(p.colecciones).map(([k, v]) => `${v.length} ${NOMBRE_COL[k] || k}`).join(" · ") || "sin contexto (V0)",
+    cuerpo: html`${Object.entries(p.colecciones).map(([k, v]) => html`<h5>${NOMBRE_COL[k] || k}</h5>
+      <${Tabla} cols=${[{ t: "#", n: 1, v: (d) => d.rank }, { t: "Documento", v: (d) => html`<${Doc} d=${d}/>` }]} filas=${v}/>`)}
+      ${Object.keys(p.tiempos_ms || {}).length > 0 && html`<p class="hint">Tiempos de recuperación: ${Object.entries(p.tiempos_ms).map(([k, v]) => `${k} ${Math.round(v)} ms`).join(" · ")}</p>`}`,
+  }),
+  generacion: (p) => ({
+    titulo: "Generación (razonador, salida estructurada)",
+    meta: [p.modelo, p.reintentos ? `${p.reintentos} reintento(s)` : ""].filter(Boolean).join(" · "),
+    cuerpo: html`<p class="hint">Salida del modelo antes de las reglas del verificador.</p><${Salida} s=${p.salida}/>`,
+  }),
+  verificacion: (p) => ({
+    titulo: `Verificador · ${p.fase}`,
+    meta: p.eventos.length ? `${p.eventos.length} cambio(s)` : "sin cambios",
+    cuerpo: html`${p.eventos.length
+      ? html`<${Tabla} cols=${[{ t: "Regla", v: (e) => html`<b>${e.regla}</b>` }, { t: "Acción", v: (e) => e.accion }, { t: "Detalle", v: (e) => html`<code class="wrap">${JSON.stringify(e.detalle)}</code>` }]} filas=${p.eventos}/>`
+      : html`<p class="hint">Ninguna regla modificó la salida.</p>`}
+      <h5>Salida después de esta verificación</h5><${Salida} s=${p.salida}/>`,
+  }),
+  plan: (p) => ({
+    titulo: "Plan desde guías oficiales",
+    meta: [`${p.guias.length} guías`, `${p.pasos.length} pasos`, p.modelo].filter(Boolean).join(" · "),
+    cuerpo: html`<${Def} filas=${[["Situación", p.info.situacion + (p.info.situacion_asumida ? " (asumida)" : "")], ["Modo", p.info.modo], ["Prompt", p.prompt],
+        ["Entidades del mensaje", (p.info.entidades_mensaje || []).join(", ") || "ninguna"], ["Pasos descartados", p.info.pasos_descartados],
+        ["Plan extractivo de respaldo", p.info.fallback_extractivo ? "sí" : "no"]]}/>
+      <h5>Guías seleccionadas</h5><${Tabla} cols=${[{ t: "#", n: 1, v: (d) => d.rank }, { t: "Guía", v: (d) => html`<${Doc} d=${d}/>` }]} filas=${p.guias}/>
+      <h5>Pasos generados</h5><${Tabla} cols=${[{ t: "#", n: 1, v: (x, i) => i + 1 }, { t: "Paso", v: (x) => x.paso }, { t: "Guía", v: (x) => html`<code>${x.guia}</code>` }]} filas=${p.pasos}/>
+      ${(p.info.adaptaciones || []).length > 0 && html`<h5>Adaptaciones a la entidad</h5><pre class="raw">${JSON.stringify(p.info.adaptaciones, null, 2)}</pre>`}`,
+  }),
+  uso: (p) => ({
+    titulo: "Llamadas al LLM, costo y tiempos",
+    meta: `${p.llamadas.length} llamadas · USD ${num(p.costo_usd, 4)}`,
+    cuerpo: html`<${Tabla} cols=${[{ t: "Etapa", v: (c) => c.etapa }, { t: "Modelo", v: (c) => c.modelo }, { t: "Tokens in", n: 1, v: (c) => c.in }, { t: "out", n: 1, v: (c) => c.out },
+        { t: "Caché", v: (c) => (c.cache ? "sí" : "no") }, { t: "ms", n: 1, v: (c) => c.ms }, { t: "USD", n: 1, v: (c) => num(c.usd, 4) }]} filas=${p.llamadas}/>
+      <p class="hint">Tiempo por etapa: ${Object.entries(p.latencias_ms).map(([k, v]) => `${k} ${seg(v)}`).join(" · ")}${Object.keys(p.embeddings || {}).length ? ` · tokens de embeddings: ${Object.values(p.embeddings).reduce((a, b) => a + b, 0)}` : ""}</p>
+      ${p.error && html`<p class="error">${p.error}</p>`}`,
+  }),
+};
+
+function Depuracion({ pasos }) {
+  if (!pasos || !pasos.length) return null;
+  return html`<section class="panel debug"><details>
+    <summary><b>Paso a paso del análisis</b> <span class="hint">· ${pasos.length} pasos, desde la entrada hasta la respuesta</span></summary>
+    <ol class="steps">${pasos.map((p, i) => {
+      const r = (PASOS[p.etapa] || ((x) => ({ titulo: x.etapa, meta: "", cuerpo: html`<pre class="raw">${JSON.stringify(x, null, 2)}</pre>` })))(p);
+      return html`<li><details><summary><span class="sn">${i + 1}</span><b>${r.titulo}</b><span class="sm">${r.meta}</span><span class="st">${seg(p.t_ms)}</span></summary>
+        <div class="sb">${r.cuerpo}</div></details></li>`;
+    })}</ol></details></section>`;
+}
+
 // --- vistas -----------------------------------------------------------------------------------
 function Elegir({ onElegir }) {
   return html`<section class="panel narrow">
@@ -242,6 +361,7 @@ function Resultado({ r, file }) {
       <details><summary>Respuesta completa (JSON)</summary><pre>${JSON.stringify(r.json, null, 2)}</pre></details>
       <p class="meta">SafeFish ${r.meta.version} · ${Math.round(r.meta.segundos)} s${r.meta.costo ? ` · USD ${r.meta.costo.toFixed(3)}` : ""}</p>
     </section>
+    <${Depuracion} pasos=${r.debug && r.debug.pasos}/>
   </div>`;
 }
 
@@ -251,7 +371,8 @@ function App() {
   const [error, setError] = useState("");
   const [res, setRes] = useState(null);
   const [file, setFile] = useState(null);
-  const reiniciar = () => { setModo(null); setRes(null); setError(""); setFile(null); };
+  const [debugError, setDebugError] = useState(null);
+  const reiniciar = () => { setModo(null); setRes(null); setError(""); setFile(null); setDebugError(null); };
   async function enviar({ texto, file, contexto, situacion }) {
     setCargando(true); setError("");
     const fd = new FormData();
@@ -260,7 +381,8 @@ function App() {
     try {
       const r = await fetch("/api/analizar", { method: "POST", body: fd });
       const j = await r.json().catch(() => ({ error: "El servidor respondió algo que no se pudo leer." }));
-      if (!r.ok || j.error) throw new Error(j.error || `Error ${r.status}`);
+      if (!r.ok || j.error) { setDebugError(j.debug ? j.debug.pasos : null); throw new Error(j.error || `Error ${r.status}`); }
+      setDebugError(null);
       setFile(modo === "captura" ? file : null); setRes(j); window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e) {
       setError(`No se pudo analizar: ${e.message}. Revisá que el servidor siga corriendo y probá de nuevo.`);
@@ -272,6 +394,7 @@ function App() {
     ${res ? html`<${Resultado} r=${res} file=${file}/>`
       : modo ? html`<${Formulario} modo=${modo} onCambiar=${() => setModo(modo === "captura" ? "texto" : "captura")} onEnviar=${enviar} cargando=${cargando} error=${error}/>`
       : html`<${Elegir} onElegir=${setModo}/>`}
+    ${!res && debugError && html`<${Depuracion} pasos=${debugError}/>`}
   </main>`;
 }
 

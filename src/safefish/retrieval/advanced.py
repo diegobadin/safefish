@@ -34,6 +34,7 @@ from safefish.prompting import load_prompt_file
 from safefish.retrieval.multi import CAMPOS, to_item
 from safefish.schemas import EvidenceItem, ExtractedMessage, RetrievalBundle
 from safefish.textutils import normalize_for_match
+from safefish.trace import activa, item, traza
 
 PROMPTS_DIR = Path(__file__).with_name("prompts")
 CAMPO_DE_TIPO = {"caso": "casos", "mensaje": "mensajes", "senal": "senales", "guia": "guias"}
@@ -244,6 +245,7 @@ class QueryRewriter:
         entrada = f"{texto}\n\n(Contexto de quien lo recibió: {contexto})" if contexto else texto
         f = self.facets(entrada)
         out = [texto]
+        facetas = f.model_dump() if f is not None else None
         if f is not None:
             ent = f"{f.entidad}: " if f.entidad else ""
             pedido = "" if f.pedido.strip().lower() in {"", "nada"} else f.pedido
@@ -252,7 +254,10 @@ class QueryRewriter:
                 q = q.strip()
                 if q and q not in out:
                     out.append(q)
-        return out[: self.max_queries]
+        out = out[: self.max_queries]
+        traza("query_rewrite", modelo=getattr(self.llm, "model", None), facetas=facetas,
+              queries=out, con_contexto=bool(contexto))  # fmt: skip
+        return out
 
 
 # ---------------------------------------------------------------------------
@@ -379,21 +384,46 @@ class AdvancedRetriever:
         sufijo = "" if not filtro else "_" + "_".join(str(v) for v in filtro.values())
         t0 = time.perf_counter()
         listas: list[tuple[float, list[EvidenceItem]]] = []
+        detalle: list[dict] = []
         for q, vec in zip(queries, vecs, strict=True):
             kw = {"filter": filtro} if filtro else {}
             with CHROMA_LOCK:
                 hits = store.similarity_search_by_vector_with_relevance_scores(vec, k=k_cand, **kw)
-            listas.append((self.weights.get("dense", 1.0), [to_item(d, s, name) for d, s in hits]))
+            densos = [to_item(d, s, name) for d, s in hits]
+            listas.append((self.weights.get("dense", 1.0), densos))
+            lexicos: list[EvidenceItem] = []
             if (idx := self.bm25.get(campo)) is not None and self.weights.get("bm25", 0) > 0:
                 res = idx.search(q, k_cand * (10 if filtro else 1))
                 if filtro:
                     res = [(r, sc) for r, sc in res
                            if all(r["metadata"].get(k) == v for k, v in filtro.items())][:k_cand]  # fmt: skip
-                listas.append((self.weights["bm25"], [bm25_item(r, sc, name) for r, sc in res]))
+                lexicos = [bm25_item(r, sc, name) for r, sc in res]
+                listas.append((self.weights["bm25"], lexicos))
+            if activa():
+                detalle.append({
+                    "query": q,
+                    "denso": [item(x, i) for i, x in enumerate(densos, 1)],
+                    "bm25": [item(x, i) for i, x in enumerate(lexicos, 1)] if lexicos else None,
+                })  # fmt: skip
         fused = rrf(listas, self.rrf_k)
+        fusion = fused
         timings[f"fusion_{campo}{sufijo}"] = round((time.perf_counter() - t0) * 1000, 1)
+        reordenado = None
         if self.reranker is not None and len(fused) > n:
             t0 = time.perf_counter()
             fused = self.reranker.rerank(texto, fused[: self.top_in], campo)
             timings[f"rerank_{campo}{sufijo}"] = round((time.perf_counter() - t0) * 1000, 1)
+            reordenado = fused
+        if activa():
+            previo = {x.id: i for i, x in enumerate(fusion, 1)}
+            traza(
+                "busqueda", coleccion=campo, filtro=filtro, top_n=n, candidatos=k_cand,
+                pesos=dict(self.weights), rrf_k=self.rrf_k, por_query=detalle,
+                fusion=[item(x, i) for i, x in enumerate(fusion[: self.top_in], 1)],
+                rerank=None if reordenado is None else [
+                    {**item(x, i), "rank_previo": previo.get(x.id)} for i, x in enumerate(reordenado, 1)
+                ],
+                final=[item(x, i) for i, x in enumerate(fused[:n], 1)],
+                reranker=getattr(getattr(self.reranker, "llm", None), "model", None),
+            )  # fmt: skip
         return fused[:n]

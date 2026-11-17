@@ -23,7 +23,8 @@ from eval.plan_judge import judge_rows
 
 
 def rejuzgar(run_dir: Path, judge, golden_dir: str = "golden", workers: int = 4) -> dict:
-    rows = [json.loads(ln) for ln in open(run_dir / "predictions.jsonl", encoding="utf-8")]
+    with open(run_dir / "predictions.jsonl", encoding="utf-8") as f:
+        rows = [json.loads(ln) for ln in f]
     for r in rows:
         r.pop("cobertura_plan", None)
     split = rows[0]["split"]

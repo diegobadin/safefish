@@ -111,6 +111,11 @@ acepta texto o captura, un contexto opcional ("es de un amigo, me pide plata") y
 usuario, que define qué guías arma el plan. El front ([`src/safefish/web/`](src/safefish/web/)) es
 Preact + htm sin paso de build; marca las citas sobre la captura en el navegador con Tesseract.js
 (necesita conexión para cargarlo desde el CDN; sin conexión, las citas se marcan solo en el texto).
+Debajo del resultado, "Paso a paso del análisis" muestra cada etapa: la transcripción, las queries
+del multi-query, el top de cada búsqueda densa y BM25 por query y colección, la fusión RRF, el
+reranking con sus puntajes, el contexto que recibe el razonador, su salida, los cambios del
+verificador, las guías y pasos del plan, y las llamadas al LLM con tokens, costo y tiempos. Lo arma
+`safefish.trace`, que solo se activa en la UI: la evaluación no cambia.
 
 En el pipeline de evaluación, el OCR con cajas usa el binario de Tesseract con el idioma `spa`
 (Windows: `winget install UB-Mannheim.TesseractOCR`, con Spanish en "Additional language data";

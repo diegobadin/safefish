@@ -14,6 +14,7 @@ from langchain_core.embeddings import Embeddings
 
 from safefish.concurrency import CHROMA_LOCK
 from safefish.schemas import EvidenceItem, ExtractedMessage, RetrievalBundle
+from safefish.trace import item, traza
 
 CAMPOS = ("casos", "mensajes", "senales", "guias")
 
@@ -56,6 +57,11 @@ class MultiCollectionRetriever:
             with CHROMA_LOCK:
                 hits = store.similarity_search_by_vector_with_relevance_scores(vec, k=n)
             timings[f"dense_{campo}"] = round((time.perf_counter() - t0) * 1000, 1)
-            getattr(bundle, campo).extend(to_item(d, dist, self.names[campo]) for d, dist in hits)
+            items = [to_item(d, dist, self.names[campo]) for d, dist in hits]
+            getattr(bundle, campo).extend(items)
+            finales = [item(x, i) for i, x in enumerate(items, 1)]
+            traza("busqueda", coleccion=campo, top_n=n, candidatos=n,
+                  por_query=[{"query": query, "denso": finales, "bm25": None}],
+                  fusion=None, rerank=None, final=finales)  # fmt: skip
         bundle.timings_ms = timings
         return bundle

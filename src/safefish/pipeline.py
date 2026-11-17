@@ -35,6 +35,7 @@ from safefish.schemas import (
     SafeFishOutput,
     Verifier,
 )
+from safefish.trace import activa, item, recorte, traza
 
 
 @dataclass
@@ -117,6 +118,35 @@ def soporte_dirigido(
     b = b.model_copy(update={"casos": [*b.casos, item]})
     out = out.model_copy(update={"casos_similares": [*out.casos_similares, ref]})
     return b, out, {**detalle, "aceptado": True}
+
+
+def _salida(o: SafeFishOutput) -> dict:
+    """Resumen legible de una salida para la traza."""
+    return {
+        "veredicto": o.veredicto.value,
+        "modalidad": o.modalidad.value,
+        "senales": [{"id": s.signal_id.value, "cita": s.cita} for s in o.senales],
+        "casos": [{"id": c.case_id, "por_que": c.por_que} for c in o.casos_similares],
+        "plan": [{"paso": x.paso, "guia": x.guide_id} for x in o.plan],
+    }
+
+
+def _traza_extraccion(m: ExtractedMessage, extractor) -> None:
+    vision = getattr(getattr(extractor, "vision", None), "llm", None)
+    traza(
+        "extraccion", origen=m.origen, canal=m.canal.value if m.canal else None,
+        modelo=getattr(vision, "model", None) if m.origen == "captura" else None,
+        segmentos=[{"emisor": s.emisor, "texto": s.texto} for s in m.segmentos],
+        texto=m.texto, contexto=m.contexto,
+        ocr_palabras=len(m.ocr_words) if m.ocr_words is not None else None,
+    )  # fmt: skip
+
+
+def _traza_contexto(b: RetrievalBundle) -> None:
+    traza("contexto", queries=b.queries, colecciones={
+        campo: [item(x, i) for i, x in enumerate(getattr(b, campo), 1)]
+        for campo in ("casos", "mensajes", "senales", "guias") if getattr(b, campo)
+    }, tiempos_ms=b.timings_ms)  # fmt: skip
 
 
 def _merge_guias(b: RetrievalBundle, guias) -> RetrievalBundle:
@@ -278,8 +308,12 @@ class SafeFishPipeline:
         try:
             with tracker.stage("extract"):
                 m = self.extractor.extract(raw)
+            if activa():
+                _traza_extraccion(m, self.extractor)
             with tracker.stage("retrieve"):
                 b = self.retriever.retrieve(m)
+            if activa():
+                _traza_contexto(b)
             meta = RunMeta(
                 run_id=uuid.uuid4().hex[:12],
                 config_hash=self.cfg.config_hash(),
@@ -289,6 +323,9 @@ class SafeFishPipeline:
                 out = self.reasoner.reason(m, b, raw.situacion, meta)
             retries = out.meta.reintentos_parseo
             pre = out
+            traza("generacion", modelo=out.meta.modelos.get("reasoner"), reintentos=retries,
+                  situacion=raw.situacion.value if raw.situacion else None,
+                  salida=_salida(out))  # fmt: skip
 
             margen = self.cfg.postprocess.soporte_dirigido_margen
             if v is not None and margen is not None:
@@ -300,11 +337,17 @@ class SafeFishPipeline:
                 with tracker.stage("verify"):
                     out, ev = v.check_analysis(m, b, out)
                 eventos += [e.to_dict() for e in ev]
+                traza("verificacion", fase="análisis (R1–R4)", eventos=list(eventos),
+                      salida=_salida(out))  # fmt: skip
             if self.planner is not None:
                 with tracker.stage("plan"):
                     pr = self.planner.plan(out, raw.situacion, m)
                 b = _merge_guias(b, pr.guias)
                 plan_info = pr.info
+                traza("plan", modelo=getattr(self.planner.llm, "model", None),
+                      prompt=self.planner.prompt, info=pr.info,
+                      guias=[item(g, i) for i, g in enumerate(pr.guias, 1)],
+                      pasos=[{"paso": x.paso, "guia": x.guide_id} for x in pr.plan])  # fmt: skip
                 out = out.model_copy(update={"plan": pr.plan})
                 pre = pre.model_copy(update={"plan": pr.plan})
                 if self.planner.llm is not None:
@@ -314,6 +357,8 @@ class SafeFishPipeline:
                 with tracker.stage("verify"):
                     out, ev = v.check_plan(b, out, m)
                 eventos += [e.to_dict() for e in ev]
+                traza("verificacion", fase="plan (R5)", eventos=[e.to_dict() for e in ev],
+                      salida=_salida(out))  # fmt: skip
             elif v is not None:
                 with tracker.stage("verify"):
                     out = v.verify(m, b, out)
@@ -327,6 +372,13 @@ class SafeFishPipeline:
             reset_tracker(token)
 
         usage = tracker.summary()
+        if activa():
+            traza("uso", llamadas=[
+                {"etapa": c.stage, "modelo": c.model, "in": c.input_tokens, "out": c.output_tokens,
+                 "cache": c.cache_hit, "ms": round(c.ms), "usd": round(c.cost(), 5)}
+                for c in tracker.llm_calls
+            ], embeddings=dict(tracker.embed_tokens), latencias_ms=usage["latencias_ms"],
+               costo_usd=usage["costo_usd"], error=recorte(error, 500) if error else None)  # fmt: skip
         if out is not None:
             out = out.model_copy(
                 update={
