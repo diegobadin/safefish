@@ -1,14 +1,9 @@
 id,origen_id,fuente,captura,dudas_preetiquetado
-D-0001,spaphish-1af89e1b357e2eef,dataset,,
 D-0002,R-L-010+captura,recolectado,legitimo/9.jpeg,
 D-0003,spaphish-df7e638f1593b2e9,dataset,,"Menciona premios ('Pronto podrías ganar uno de los 1,000 premios') pero como promoción futura, no como premio ganado: no lo marqué como premio_inesperado. Revisar si corresponde."
 D-0004,spaphish-432f1867752c54bb,dataset,,No nombra ninguna empresa de logística.
-D-0005,R-L-019,recolectado,legitimo/18.jpeg,Está muy truncado y no se ve si después habla de rentabilidad. ¿Alcanza para el golden?
 D-0006,R-E-022,recolectado,estafa/21.png,Todavía no pide dinero ni dice que cambió de número. ¿falso_familiar_cambio_numero o no_determinada?
 D-0007,spaphish-a92f72ae57c13137,dataset,,El asunto menciona 'Voces Curanderas' y el cuerpo 'Raíces Narrativas'/'Mariana Solís': probablemente es por la anonimización.
-D-0008,R-L-010,recolectado,legitimo/9.jpeg,
-D-0009,spaphish-c0a3982a5b1bf29a,dataset,,Estafa romántica/adelanto de honorarios: no hay modalidad del enum que calce; todavía no pide nada salvo responder.
-D-0010,R-E-038+captura,recolectado,estafa/37.png,Hay una sola señal citable (crítica). La guía pide 2 o más para estafa_confirmada: ¿lo dejo como canónico o pongo muy_sospechoso? Es de México (MX).
 D-0011,spaphish-ba36c2aed0ad72e0,dataset,,Se parece mucho a spam publicitario; no suplanta a un banco concreto ni pide credenciales en el texto. Es de México (MSI).
 D-0012,spaphish-d98266380d6489bd,dataset,,'ciclo <TEL>' parece un año escolar redactado como teléfono por error.
 D-0013,spaphish-4bcf6f62ec03e272,dataset,,
@@ -19,9 +14,6 @@ D-0017,R-E-040+captura,recolectado,estafa/39.png,Es de Costa Rica (CR).
 D-0018,spaphish-4f6409e44931884c,dataset,,
 D-0019,spaphish-1137d3d4f1036dd9+adv,dataset,,Muy difícil: el link parece del dominio de la institución (posible artefacto de anonimización) y no pide datos en el texto.
 D-0020,R-L-007,recolectado,legitimo/7.jpeg,
-D-0021,spaphish-1137d3d4f1036dd9,dataset,,Muy difícil: el link parece del dominio de la institución (posible artefacto de anonimización) y no pide datos en el texto.
-D-0022,spaphish-0e679b82f3e0eda6,dataset,,
-D-0023,R-E-038,recolectado,estafa/37.png,Hay una sola señal citable (crítica). La guía pide 2 o más para estafa_confirmada: ¿lo dejo como canónico o pongo muy_sospechoso? Es de México (MX).
 D-0024,spaphish-9a3516ec00f4b615,dataset,,
 D-0025,spaphish-0e679b82f3e0eda6+adv,dataset,,
 D-0026,spaphish-a462598d3fbbec49,dataset,,
@@ -29,26 +21,18 @@ D-0027,R-L-019+captura,recolectado,legitimo/18.jpeg,Está muy truncado y no se v
 D-0028,spaphish-c0a3982a5b1bf29a+adv,dataset,,Estafa romántica/adelanto de honorarios: no hay modalidad del enum que calce; todavía no pide nada salvo responder.
 D-0029,R-E-038+adv,recolectado,estafa/37.png,Hay una sola señal citable (crítica). La guía pide 2 o más para estafa_confirmada: ¿lo dejo como canónico o pongo muy_sospechoso? Es de México (MX).
 D-0030,spaphish-1af89e1b357e2eef+adv,dataset,,
-D-0031,R-E-040,recolectado,estafa/39.png,Es de Costa Rica (CR).
-D-0032,R-E-005,recolectado,estafa/5.png,"Pedir la foto del DNI (robo de identidad) no tiene señal en el enum, así que no la etiqueté. ¿encomienda_retenida o deuda_multa_falsa?"
 D-0033,R-L-026+captura,recolectado,legitimo/25.jpeg,spoti.fi es el acortador oficial de Spotify: ¿cuenta igual como link_acortado_o_dominio_no_oficial?
-D-0034,R-L-026,recolectado,legitimo/25.jpeg,spoti.fi es el acortador oficial de Spotify: ¿cuenta igual como link_acortado_o_dominio_no_oficial?
 D-0035,R-E-005+adv,recolectado,estafa/5.png,"Pedir la foto del DNI (robo de identidad) no tiene señal en el enum, así que no la etiqueté. ¿encomienda_retenida o deuda_multa_falsa?"
 T-0001,spaphish-c7729c228fe4398c,dataset,,"Es de España (Correos, euros), no de Argentina."
-T-0002,spaphish-3c51c932faeed8bb,dataset,,No pide pago ni datos explícitamente en el texto; la acción riesgosa queda en los botones (no visibles).
-T-0003,R-L-020,recolectado,legitimo/19.jpeg,
 T-0004,spaphish-12a2c95a3b87c413,dataset,,"El asunto dice 'Genovevo' y el cuerpo 'Santiago': probablemente es un artefacto de la anonimización, no una inconsistencia del original."
 T-0005,R-L-004,recolectado,legitimo/4.jpeg,"Escribe desde un WhatsApp 'laboral' personal, que es un rasgo típico de estafa. ¿Marcar remitente_no_oficial ('WhatsApp laboral: <TEL>') y poner levemente_sospechoso como canónico?"
 T-0006,spaphish-d6feee004ca8dab8,dataset,,
 T-0007,spaphish-abdfe72571bbf7db,dataset,,Fechas inconsistentes (correo de 2021 que pide constancias 'durante el 2025'): parece artefacto de anonimización.
-T-0008,spaphish-a2041ba123abcda9,dataset,,"Modalidad phishing_bancario por cercanía: suplanta un servicio de streaming, no una entidad financiera (pide datos de pago)."
 T-0009,spaphish-6752d9dbc9abfa3a,dataset,,
 T-0010,R-L-011+captura,recolectado,legitimo/10.jpeg,"La entidad (Mercado Pago) no aparece en el texto, así que puse null."
 T-0011,R-E-033+adv,recolectado,estafa/32.png,Es de Honduras (montos en HNL).
 T-0012,spaphish-826fefd7a2162362,dataset,,
 T-0013,spaphish-e299f3bd44abc9bc,dataset,,Mensaje muy corto y sin firma: le falta contexto para juzgar quién lo manda.
-T-0014,spaphish-f1fcedf466fbfac5,dataset,,"Mensaje muy corto (cuerpo = asunto repetido), parece truncado; no se ve entidad ni pedido concreto. Misma plantilla que spaphish-23aa6ddcd21236d9 pero con otro campaign_id."
-T-0015,R-E-042,recolectado,estafa/41.png,"No hay señales citables: lo único que lo delata es el número, que está redactado. Es casi idéntico a una alerta real. ¿phishing_bancario o falso_soporte_acceso_remoto (vishing)? ¿Pasa a slice sin_evidencia? Es de México (MX)."
 T-0016,spaphish-f1fcedf466fbfac5+adv,dataset,,"Mensaje muy corto (cuerpo = asunto repetido), parece truncado; no se ve entidad ni pedido concreto. Misma plantilla que spaphish-23aa6ddcd21236d9 pero con otro campaign_id."
 T-0017,spaphish-8cbf468542c17da1,dataset,,"El link acortado puede ser un artefacto de la redacción de PII; si el original era un dominio oficial, sacar la señal."
 T-0018,R-L-001,recolectado,legitimo/1.png,El texto está truncado. La legitimidad depende del número remitente que se ve en la captura. ¿amenaza_bloqueo o urgencia_temporal para 'derivado a una instancia superior'?
@@ -56,11 +40,8 @@ T-0019,spaphish-ef7d699f70bcd93c,dataset,,
 T-0020,spaphish-86d8078b50c429f5,dataset,,"Salvo el asunto, el cuerpo está en inglés (plantilla de Teams)."
 T-0021,spaphish-23aa6ddcd21236d9,dataset,,"Mensaje muy corto, parece truncado. Misma plantilla que spaphish-f1fcedf466fbfac5: deberían compartir campaign_id para no filtrar entre splits."
 T-0022,spaphish-8954d597b95cc85b,dataset,,"El asunto dice BBVA y el cuerpo, anonimizado, 'Seguros del Fénix'."
-T-0023,R-L-011,recolectado,legitimo/10.jpeg,"La entidad (Mercado Pago) no aparece en el texto, así que puse null."
 T-0024,spaphish-830b25b731ee542b,dataset,,
 T-0025,spaphish-271d9fd235c79dff,dataset,,Entrega de malware con excusa de factura/impuesto: no calza bien en el enum (¿deuda_multa_falsa?). Es de México.
-T-0026,spaphish-be76f0bf91be5a50,dataset,,Es intimidación/sextorsión con falsa causa judicial; deuda_multa_falsa es lo más cercano (amenaza de acción legal) pero no menciona un pago.
-T-0027,R-E-033,recolectado,estafa/32.png,Es de Honduras (montos en HNL).
 T-0028,spaphish-a87e993c4a57f1e6,dataset,,"Modalidad phishing_bancario por cercanía: suplanta a Apple/iCloud, no a una entidad financiera (pide datos de pago)."
 T-0029,spaphish-3e392dd4d280a628,dataset,,Fraude de adelanto de honorarios (419); no hay modalidad exacta en el enum (¿inversion_falsa?).
 T-0030,R-L-031,recolectado,legitimo/27.jpeg,Es casi un duplicado de R-L-030 (misma captura y plantilla). ¿Descartar uno?
@@ -88,25 +69,18 @@ T-0051,spaphish-e7d05bc2a900c811,dataset,,No hay señales del enum citables lite
 T-0052,spaphish-f9a3736386cfea43,dataset,,Es de México.
 T-0053,spaphish-7b1f43d0ae7bf03b,dataset,,
 T-0054,spaphish-93fe1cee3dd9563d,dataset,,"El link de descarga de 'ZOOOM' va a meet.net (dominio anonimizado que no es de Zoom); revisar si marcar link_acortado_o_dominio_no_oficial. Las fechas (evaluación 2019, julio de 2025) son inconsistentes por la anonimización."
-T-0055,spaphish-72a089d7dda770ed,dataset,,"Modalidad phishing_bancario por cercanía: apunta a credenciales de Google, no financieras, y el texto no las pide explícitamente. Copia casi literal de un aviso real de Google (2021)."
 T-0056,spaphish-557b9e64fcceaf89,dataset,,'+<DNI>.0000' parece un teléfono redactado mal como DNI.
 T-0057,spaphish-6f524dede31e318a,dataset,,El mensaje pide 'completar tus datos' en un botón; no se ve el dominio del link.
 T-0058,spaphish-72a089d7dda770ed+adv,dataset,,"Modalidad phishing_bancario por cercanía: apunta a credenciales de Google, no financieras, y el texto no las pide explícitamente. Copia casi literal de un aviso real de Google (2021)."
 T-0059,spaphish-59c5f46139fe5b64,dataset,,"El link va a go.secure-intel.net, que no coincide con Flashpoint; probablemente es por la anonimización."
 T-0060,spaphish-f52d4e5cb976f758,dataset,,
-T-0061,R-L-030,recolectado,legitimo/27.jpeg,Es casi un duplicado de R-L-031 (misma captura y plantilla). ¿Descartar uno?
-T-0062,R-E-029,recolectado,estafa/28.png,Devolver el artículo no es un bloqueo literal: ¿cuenta como amenaza_bloqueo? Es de Uruguay (UY).
 T-0063,spaphish-3d15ff819dfbd2ef,dataset,,El asunto dice 'Anrod School' y el cuerpo 'Oakwood Academy': probablemente es por la anonimización.
 T-0064,spaphish-d0f16f0a9b32f92b,dataset,,El asunto dice UDLAP y el cuerpo UTP: probablemente es por la anonimización.
-T-0065,R-E-002,recolectado,estafa/2.png,"El 'Tribunal Regional del Trabajo' es un organismo de Brasil, no de Argentina (plantilla traducida). Amenaza con multas/consecuencias procesales, no con un bloqueo literal: ¿alcanza para amenaza_bloqueo?"
-T-0066,R-E-013,recolectado,estafa/15.png,
 T-0067,spaphish-3c51c932faeed8bb+adv,dataset,,No pide pago ni datos explícitamente en el texto; la acción riesgosa queda en los botones (no visibles).
 T-0068,R-E-042+captura,recolectado,estafa/41.png,"No hay señales citables: lo único que lo delata es el número, que está redactado. Es casi idéntico a una alerta real. ¿phishing_bancario o falso_soporte_acceso_remoto (vishing)? ¿Pasa a slice sin_evidencia? Es de México (MX)."
-T-0069,R-L-005,recolectado,legitimo/4.jpeg,Está truncado y usa la misma captura que R-L-004 (legitimo/4.jpeg). ¿Es un duplicado a descartar?
 T-0070,R-E-026+captura,recolectado,estafa/25.png,"Pide plata, pero no menciona una cuenta de un tercero, así que no puse transferencia_a_tercero. ¿Agregarla citando 'puedes apoyarme con un préstamo'? Además es de Perú (PE)."
 T-0071,R-E-009+captura,recolectado,estafa/11.png,El canal viene en null; por el formato parece WhatsApp.
 T-0072,R-L-029,recolectado,legitimo/27.jpeg,Usa la misma captura (legitimo/27.jpeg) que R-L-030 y R-L-031.
-T-0073,R-E-009,recolectado,estafa/11.png,El canal viene en null; por el formato parece WhatsApp.
 T-0074,R-E-006,recolectado,estafa/8.png,
 T-0075,R-E-001+adv,recolectado,estafa/1.png,"La sugerida era phishing_bancario, pero Personal es una telco, no un banco ni una billetera; elegí premio_sorteo_falso (canje de puntos). Confirmar la modalidad."
 T-0076,R-L-020+captura,recolectado,legitimo/19.jpeg,
@@ -115,12 +89,6 @@ T-0078,R-L-023+captura,recolectado,legitimo/21.jpeg,¿Corresponde remitente_no_o
 T-0079,R-L-025+captura,recolectado,legitimo/24.jpeg,Confirmar que mipersonalflow.go.link es un dominio que Personal usa oficialmente (deep link de Branch). Sirve de contraste con R-E-001 (estafa con Personal).
 T-0080,R-L-014,recolectado,legitimo/13.jpeg,"El texto está truncado. La entidad (Despegar) no aparece en el texto, así que puse null."
 T-0081,R-E-002+adv,recolectado,estafa/2.png,"El 'Tribunal Regional del Trabajo' es un organismo de Brasil, no de Argentina (plantilla traducida). Amenaza con multas/consecuencias procesales, no con un bloqueo literal: ¿alcanza para amenaza_bloqueo?"
-T-0082,R-E-026,recolectado,estafa/25.png,"Pide plata, pero no menciona una cuenta de un tercero, así que no puse transferencia_a_tercero. ¿Agregarla citando 'puedes apoyarme con un préstamo'? Además es de Perú (PE)."
-T-0083,R-E-001,recolectado,estafa/1.png,"La sugerida era phishing_bancario, pero Personal es una telco, no un banco ni una billetera; elegí premio_sorteo_falso (canje de puntos). Confirmar la modalidad."
 T-0084,R-E-020,recolectado,estafa/19.png,Este fragmento solo no muestra premio ni pedido. Usé no_determinada (la sugerida era premio_sorteo_falso por la campaña). ¿Pasa a slice sin_evidencia o se une a R-E-021?
 T-0085,R-E-013+captura,recolectado,estafa/15.png,
 T-0086,R-E-004,recolectado,estafa/4.png,El texto está truncado y tiene muy poca evidencia. ¿Pasa a slice sin_evidencia o se descarta? Es la misma campaña que R-E-002.
-T-0087,R-L-023,recolectado,legitimo/21.jpeg,¿Corresponde remitente_no_oficial? Es un tercerizado que escribe por WhatsApp.
-T-0088,R-E-021,recolectado,estafa/20.png,
-T-0089,R-E-010,recolectado,estafa/12.png,El texto es casi idéntico a un mail real de Mercado Libre; lo que lo delata (remitente o link) seguramente está solo en la captura y no se puede citar. ¿Pasa a slice sin_evidencia?
-T-0090,R-L-025,recolectado,legitimo/24.jpeg,Confirmar que mipersonalflow.go.link es un dominio que Personal usa oficialmente (deep link de Branch). Sirve de contraste con R-E-001 (estafa con Personal).

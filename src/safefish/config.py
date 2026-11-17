@@ -138,6 +138,9 @@ class GenerationCfg(_Cfg):
     temperature: float = 0.0
     seed: int | None = 7
     prompt: str = "reasoner_v1"
+    # V10: cómo se le presenta al razonador el contexto del usuario. v1 = solo para interpretar;
+    # v2 = sus hechos concretos (quién lo mandó, suplantación, pedidos por otro canal) pesan.
+    contexto_prompt: Literal["v1", "v2"] = "v1"
     max_retries: int = 1  # reintentos ante JSON inválido (§2.2)
     planner: bool = False  # V2+: plan desde Guías (M-GEN.2)
     planner_mode: Literal["llm", "extractivo"] = "llm"  # extractivo = pasos literales, sin LLM

@@ -39,6 +39,20 @@ class TranscripcionLLM(_LLM):
     legible: bool = Field(description="false si la imagen no tiene texto legible")
 
 
+class TranscripcionConMetadatosLLM(TranscripcionLLM):
+    """vision_v3 (V10): además del texto, lo que se ve en la captura."""
+
+    insignia_verificada: bool | None = Field(
+        description="true si se ve la insignia de cuenta verificada junto al nombre, false si no, null si no se sabe"
+    )  # fmt: skip
+    descripcion: str = Field(
+        description="2–3 oraciones factuales sobre lo que se ve además del texto: logo o marca, tipo de cuenta, bot con menú, adjuntos, avisos de la app"
+    )  # fmt: skip
+
+
+PROMPTS_SIN_METADATOS = ("vision_v1", "vision_v2")
+
+
 def image_data_url(path: str | Path) -> str:
     mime = mimetypes.guess_type(str(path))[0] or "image/png"
     data = base64.b64encode(Path(path).read_bytes()).decode()
@@ -52,6 +66,12 @@ class VisionTranscriber:
     @property
     def prompt_hash(self) -> str:
         return load_prompt_file(PROMPTS_DIR / f"{self.prompt}.md")[1]
+
+    @property
+    def schema(self) -> type[TranscripcionLLM]:
+        if self.prompt in PROMPTS_SIN_METADATOS:
+            return TranscripcionLLM
+        return TranscripcionConMetadatosLLM
 
     def messages(self, image_path: str):
         template, _ = load_prompt_file(PROMPTS_DIR / f"{self.prompt}.md")
@@ -70,7 +90,7 @@ class VisionTranscriber:
         ]
 
     def transcribe(self, image_path: str) -> TranscripcionLLM:
-        r = self.llm.invoke(self.messages(image_path), TranscripcionLLM, stage="extract_vision")
+        r = self.llm.invoke(self.messages(image_path), self.schema, stage="extract_vision")
         if r.parsed is None:
             raise ValueError(f"Transcripción inválida: {(r.error or '')[:300]}")
         return r.parsed

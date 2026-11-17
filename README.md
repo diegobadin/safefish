@@ -44,8 +44,8 @@ Con Poetry: `make eval RUN="poetry run"`.
 | Datos | ✅ Fuentes públicas: `make data` las baja (manifiesto `data/descargas.yaml`) y `data/sources.yaml` ya las carga: 12 fuentes de casos, 9 de guías y 4.260 emails etiquetados (SpaPhish + SpearPhishMX). Qué se usa en cada fase y cómo dejar los mensajes propios: [`docs/datos.md`](docs/datos.md) |
 | Golden v1 | ✅ 125 casos (35 dev · 90 test): 35 SMS/WhatsApp/email recolectados, 60 emails de SpaPhish, 15 adversariales y 15 capturas; split por `campaign_id`, sin leakage contra la KB. Pre-etiquetado con LLM y revisado (`golden/decisiones_revision.csv`) ([`docs/datos.md`](docs/datos.md#golden-v1)) |
 | Fase 3 · V4–V6 | ✅ Multi-query + RRF (V4), híbrido denso + BM25 (V5) y reranking listwise (V6, **Versión 1**). Resultados y análisis: [`docs/ablation.md`](docs/ablation.md) |
-| Ej. 4 · V7–V9 | ✅ Análisis de errores de la Versión 1 y un cambio por modo de falla: mensajes de contraste (V7), respaldo dirigido para R2 (V8) y plan adaptado a la entidad del mensaje (V9, **Versión 2**) ([`docs/ablation.md` §3](docs/ablation.md)) |
-| Reporte y UI | ✅ `make report` (tabla de la ablación) y UI local: `python -m safefish.ui` (usa `configs/v9.yaml`) |
+| Ej. 4 · V7–V9 | ✅ Análisis de errores de la Versión 1 y un cambio por modo de falla: mensajes de contraste (V7), respaldo dirigido para R2 (V8) y plan adaptado a la entidad del mensaje (V9, **Versión 2**) ([`docs/ablation.md` §3](docs/ablation.md)). Después, V10 suma lo que ve visión en la captura (remitente, insignia, descripción) y da peso a los hechos del contexto del usuario |
+| Reporte y UI | ✅ `make report` (tabla de la ablación) y UI local: `python -m safefish.ui` (usa `configs/v10.yaml`) |
 
 ### Modelos
 
@@ -101,12 +101,13 @@ make eval CONFIG=configs/v6.yaml SPLIT=test JUDGE=1   # + reranking listwise →
 make eval CONFIG=configs/v7.yaml SPLIT=test JUDGE=1   # + mensajes de contraste (análisis de errores)
 make eval CONFIG=configs/v8.yaml SPLIT=test JUDGE=1   # + respaldo dirigido para R2
 make eval CONFIG=configs/v9.yaml SPLIT=test JUDGE=1   # + plan adaptado a la entidad → Versión 2
+make eval CONFIG=configs/v10.yaml SPLIT=test JUDGE=1  # + metadatos de la captura y contexto con peso (UI)
 make report SPLIT=test                                 # → docs/ablation_tabla_test.md
 make compare A=results/<run_v6> B=results/<run_v9>     # IC bootstrap + McNemar
 ```
 
 Análisis, decisiones y fichas de V7–V9: [`docs/ablation.md`](docs/ablation.md). Demo:
-`python -m safefish.ui` → http://127.0.0.1:8501. Por defecto usa `configs/v9.yaml`, la Versión 2;
+`python -m safefish.ui` → http://127.0.0.1:8501. Por defecto usa `configs/v10.yaml` (la Versión 2 más lo que ve visión en la captura y el contexto con peso);
 acepta texto o captura, un contexto opcional ("es de un amigo, me pide plata") y la situación del
 usuario, que define qué guías arma el plan. El front ([`src/safefish/web/`](src/safefish/web/)) es
 Preact + htm sin paso de build; marca las citas sobre la captura en el navegador con Tesseract.js

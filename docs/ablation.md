@@ -126,6 +126,15 @@ Se probó un cambio por modo de falla, de a uno.
 **Versión 1 → Versión 2 (test):** F1 0.920 → 0.929, FPR 0.12 → 0.08, F1 señales igual, cobertura
 del plan 0.47 → 0.85, acc. modalidad 0.863 → 0.824 (−2 casos, no significativo).
 
+### Ficha V10 · lo que ve visión y el contexto del usuario (después de la Versión 2)
+
+| | |
+|---|---|
+| **Problema** | En la demo, una captura de WhatsApp cuyo encabezado decía "LA ANONIMA" y el mensaje "Carrefour", con un contexto del usuario que lo contaba, salió "levemente sospechoso". Visión solo pasaba el texto de los globos (el encabezado se perdía) y el contexto entraba "solo para interpretar" |
+| **Cambio** | Dos cambios sobre la entrada, sin tocar recuperación ni plan. `extraction.vision_prompt: vision_v3`: visión devuelve también el remitente del encabezado, si tiene insignia de cuenta verificada y una descripción factual de la captura; el razonador la recibe en un bloque aparte, como dato que no se cita. `generation.contexto_prompt: v2`: los hechos concretos del contexto (suplantación, pedidos por otro canal) pesan en el veredicto; las opiniones no |
+| **Resultado** | El golden no tiene casos con contexto, así que solo cambian las 15 capturas. Transcripción: CER 0.111 → 0.074 y WER 0.098 → 0.061 en test. Clasificación en test: F1 0.929 → 0.909, FPR en legítimos parecidos 0.08 → 0.12 (McNemar p = 0.5, 2 casos; no significativo); dev sin cambios. Caso por caso: dos cuentas verificadas (Mercado Pago, Argentina) pasan correctamente a "parece legítimo"; un phishing con el logo de Mercado Libre baja a "levemente sospechoso" (el logo le dio confianza al razonador) y un mensaje legítimo de HP desde un número no guardado sube a "muy sospechoso" |
+| **Decisión** | No reemplaza a la Versión 2 (V9) en la evaluación: con 10 capturas en test el efecto no es medible y los dos errores nuevos muestran un riesgo real (un logo se copia fácil). Se usa en la UI porque cubre el caso que la motivó. Trabajo futuro: decirle al razonador que un logo o una marca en la imagen no prueban nada y que solo la insignia de verificación y la coincidencia del remitente cuentan, y medirlo con más capturas |
+
 ## 4. Problemas encontrados y cómo se resolvieron
 
 | Problema | Diagnóstico | Arreglo |

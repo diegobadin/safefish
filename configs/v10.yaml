@@ -1,0 +1,58 @@
+# V10 — Iteración sobre la entrada del usuario (después de la Versión 2). Problema observado en
+# la demo: una captura de WhatsApp cuyo encabezado decía "LA ANONIMA" mientras el mensaje decía
+# "Carrefour", y el contexto del usuario lo contaba; el razonador no veía el encabezado (visión
+# solo pasaba el texto de los globos) y tomaba el contexto solo para interpretar. Dos cambios,
+# ambos sobre la entrada y sin tocar recuperación ni plan:
+#   - vision_v3: visión devuelve también el remitente del encabezado, si tiene insignia de cuenta
+#     verificada y una descripción factual de la captura; el razonador la recibe aparte, como dato.
+#   - contexto_prompt v2: los hechos concretos del contexto (suplantación, pedidos por otro canal)
+#     pesan en el veredicto; las opiniones no.
+# El golden no tiene casos con contexto: en la evaluación solo cambian las 15 capturas.
+version: v10
+descripcion: V9 + descripción de la captura (vision_v3) y contexto del usuario con peso (contexto v2).
+kb_snapshot: kb-v2
+ingest:
+  sources: data/sources.yaml
+  languages: [es]
+  dedupe: {exact: true, near_threshold: 0.95, near_method: tfidf}
+  normalize: {mode: auto, model: gpt-4.1-mini-2025-04-14, prompt: normalizer_v1, review_fraction: 0.1}
+  min_casos_por_modalidad: 5
+chunking:
+  strategy: per_case
+index:
+  layout: per_tipo
+embeddings:
+  model: text-embedding-3-small
+retrieval:
+  enabled: true
+  query: {strategy: multi_query, model: claude-haiku-5-5, prompt: query_rewrite_v1, max_queries: 4}
+  hybrid: {enabled: true, weights: {dense: 1.0, bm25: 1.0}}
+  rerank: {enabled: true, model: claude-haiku-5-5, prompt: rerank_v1, top_in: 20, max_chars: 600}
+  filter_canal: "off"
+  mensajes_contrastivo: true
+  k_eval: 4  # mismo k para comparar casos entre V1, V2a y V2 (§2.0)
+  top_n: {casos: 4, mensajes: 6, senales: 6, guias: 0}
+generation:
+  reasoner: claude-sonnet-5-5
+  temperature: 0
+  seed: 7
+  prompt: reasoner_v1
+  contexto_prompt: v2
+  max_retries: 1
+  planner: true
+  planner_mode: llm
+  planner_model: claude-haiku-5-5
+  planner_prompt: planner_v2
+  planner_top_guias: 2
+  planner_max_pasos: 5
+postprocess:
+  verifier: true
+  rules: [R1, R2, R3, R4, R5]
+  cita_threshold: 0.9
+  bbox_threshold: 0.8
+  soporte_dirigido_margen: 0.06
+extraction:
+  vision_model: claude-sonnet-5-5
+  vision_prompt: vision_v3
+  ocr: tesseract
+  ocr_lang: spa

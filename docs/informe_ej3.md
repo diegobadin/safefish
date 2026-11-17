@@ -38,8 +38,8 @@ menos dos señales verificadas (R3). Si la evidencia no alcanza, el sistema info
 como no determinada en lugar de forzar una respuesta (*negative rejection*).
 
 **Robustez frente a inyección.** El mensaje se delimita como dato y el prompt indica ignorar
-cualquier orden contenida en él. El planner recibe solo campos estructurados, nunca el texto del
-mensaje. El conjunto de evaluación incluye variantes adversariales y se reporta la tasa de éxito
+cualquier orden contenida en él. El planner recibe el mensaje solo como dato delimitado, y todo
+teléfono, URL u organismo del plan se verifica contra la guía de origen (R5). El conjunto de evaluación incluye variantes adversariales y se reporta la tasa de éxito
 del ataque (ASR).
 
 **Integridad de la base de conocimiento.** Las fuentes se descargan solo por HTTPS desde una lista
@@ -77,6 +77,12 @@ fuentes y licencias, y cada iteración del sistema parte de un análisis de erro
 - Ingesta como proceso programado (semanal o ante nuevas alertas oficiales), independiente del
   servicio de inferencia.
 
+![Arquitectura de SafeFish en producción](img/arquitectura_produccion.png)
+
+*Figura 1. Arquitectura en producción. Ingesta offline (descarga, limpieza, normalización y
+embeddings hacia la base vectorial), consulta online (extracción, recuperación híbrida, reranking,
+generación, verificador y plan) y evaluación y monitoreo (golden, métricas y despliegue condicionado).*
+
 ### 2.2 Actualización de la base de conocimiento
 
 Cada versión de la base se construye fuera de línea, se valida (cobertura por modalidad, auditoría
@@ -87,13 +93,11 @@ versión (identificador exacto del modelo y hash del prompt), lo que mantiene la
 
 ### 2.3 Monitoreo
 
-- **Operación:** latencia por etapa (p50 y p95), tasa de errores y de reintentos de parseo, tokens
-  y costo por análisis, ya instrumentados por etapa, con trazas en LangSmith u OpenTelemetry.
-- **Calidad:** distribución de veredictos y modalidades, proporción de modalidad no determinada (un
-  aumento sostenido indica modalidades nuevas sin cobertura), intervenciones del verificador y
-  valoración explícita del usuario. Una muestra de casos se revisa manualmente y se incorpora al
-  golden.
-- **Alertas** ante desvíos respecto de la línea base de cada métrica.
+- **Operación:** latencia por etapa (p50 y p95), errores, tokens y costo por análisis, ya
+  instrumentados por etapa, con trazas en LangSmith u OpenTelemetry.
+- **Calidad:** distribución de veredictos, proporción de modalidad no determinada (si crece, hay
+  modalidades nuevas sin cobertura), intervenciones del verificador y valoración del usuario; una
+  muestra se revisa a mano y se suma al golden. Alertas ante desvíos de la línea base.
 
 ### 2.4 Costo y escalabilidad
 
@@ -105,8 +109,7 @@ evaluaría con la misma metodología de ablación.
 
 ### 2.5 Seguridad operativa
 
-Secretos en un gestor dedicado y fuera del repositorio, autenticación y límite de solicitudes por
-usuario, validación de tipo y tamaño de las imágenes, registros sin datos personales y una
-respuesta conservadora de contingencia (verificar por el canal oficial) ante una falla del
-proveedor del LLM. Una capa de abstracción sobre el cliente del modelo permite cambiar de
-proveedor sin modificar el pipeline.
+Secretos en un gestor dedicado, autenticación y límite de solicitudes por usuario, validación de
+las imágenes, registros sin datos personales y, ante una falla del proveedor del LLM, una respuesta
+conservadora (verificar por el canal oficial). El cliente del modelo está abstraído, lo que permite
+cambiar de proveedor sin modificar el pipeline.

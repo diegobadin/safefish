@@ -18,7 +18,7 @@ from pathlib import Path
 from eval.compare import HEADLINE
 from safefish.config import REPO_ROOT
 
-ORDEN = ["v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9"]
+ORDEN = ["v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"]
 COLUMNAS = [
     ("task", "f1_binario", "F1"), ("task", "recall_estafas", "Recall"),
     ("task", "fpr_hard_negative", "FPR neg. dif."), ("task", "veredicto_aceptable", "Veredicto ok"),

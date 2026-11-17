@@ -92,3 +92,35 @@ T-0086,R-E-004,El texto está truncado y tiene muy poca evidencia. ¿Pasa a slic
 T-0087,R-L-023,¿Corresponde remitente_no_oficial? Es un tercerizado que escribe por WhatsApp.,Sí corresponde remitente_no_oficial: un tercerizado que escribe por WhatsApp 'de parte de HP' no es un canal oficial de la marca. Se mantiene.,
 T-0089,R-E-010,El texto es casi idéntico a un mail real de Mercado Libre; lo que lo delata (remitente o link) seguramente está solo en la captura y no se puede citar. ¿Pasa a slice sin_evidencia?,"Criterio 6: el texto es casi igual a un mail real de Mercado Libre y lo que lo delata no es citable. Se mantiene phishing_bancario (Mercado Pago es billetera; pide completar datos con excusa de actualización) sin pasar a sin_evidencia, y se acepta también levemente_sospechoso.",veredicto_esperado: + levemente_sospechoso
 T-0090,R-L-025,Confirmar que mipersonalflow.go.link es un dominio que Personal usa oficialmente (deep link de Branch). Sirve de contraste con R-E-001 (estafa con Personal).,"Criterio 5 por analogía: mipersonalflow.go.link es el deep link (Branch) de la app Mi Personal Flow, un acortador oficial de la marca usado en un SMS real de Personal; no cuenta como link_acortado_o_dominio_no_oficial. No se visitó el link.",senales/citas: - link_acortado_o_dominio_no_oficial
+D-0001,spaphish-1af89e1b357e2eef,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que D-0030 (spaphish-1af89e1b357e2eef); queda la versión con inyección.,descartado del golden
+D-0005,R-L-019,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que D-0027 (R-L-019); queda la captura.,descartado del golden
+D-0008,R-L-010,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que D-0002 (R-L-010); queda la captura.,descartado del golden
+D-0009,spaphish-c0a3982a5b1bf29a,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que D-0028 (spaphish-c0a3982a5b1bf29a); queda la versión con inyección.,descartado del golden
+D-0010,R-E-038+captura,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que D-0029 (R-E-038); queda la versión con inyección.,descartado del golden
+D-0021,spaphish-1137d3d4f1036dd9,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que D-0019 (spaphish-1137d3d4f1036dd9); queda la versión con inyección.,descartado del golden
+D-0022,spaphish-0e679b82f3e0eda6,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que D-0025 (spaphish-0e679b82f3e0eda6); queda la versión con inyección.,descartado del golden
+D-0023,R-E-038,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que D-0029 (R-E-038); queda la versión con inyección.,descartado del golden
+D-0031,R-E-040,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que D-0017 (R-E-040); queda la captura.,descartado del golden
+D-0032,R-E-005,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que D-0035 (R-E-005); queda la versión con inyección.,descartado del golden
+D-0034,R-L-026,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que D-0033 (R-L-026); queda la captura.,descartado del golden
+T-0002,spaphish-3c51c932faeed8bb,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0067 (spaphish-3c51c932faeed8bb); queda la versión con inyección.,descartado del golden
+T-0003,R-L-020,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0076 (R-L-020); queda la captura.,descartado del golden
+T-0008,spaphish-a2041ba123abcda9,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0047 (spaphish-a2041ba123abcda9); queda la versión con inyección.,descartado del golden
+T-0014,spaphish-f1fcedf466fbfac5,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0016 (spaphish-f1fcedf466fbfac5); queda la versión con inyección.,descartado del golden
+T-0015,R-E-042,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0068 (R-E-042); queda la captura.,descartado del golden
+T-0023,R-L-011,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0010 (R-L-011); queda la captura.,descartado del golden
+T-0026,spaphish-be76f0bf91be5a50,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0040 (spaphish-be76f0bf91be5a50); queda la versión con inyección.,descartado del golden
+T-0027,R-E-033,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0011 (R-E-033); queda la versión con inyección.,descartado del golden
+T-0055,spaphish-72a089d7dda770ed,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0058 (spaphish-72a089d7dda770ed); queda la versión con inyección.,descartado del golden
+T-0061,R-L-030,Golden v2: cada mensaje aparece una sola vez.,"Repite el mensaje de T-0030 (mismo SMS de Google, captura legitimo/27.jpeg).",descartado del golden
+T-0062,R-E-029,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0034 (R-E-029); queda la captura.,descartado del golden
+T-0065,R-E-002,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0081 (R-E-002); queda la versión con inyección.,descartado del golden
+T-0066,R-E-013,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0085 (R-E-013); queda la captura.,descartado del golden
+T-0069,R-L-005,Golden v2: cada mensaje aparece una sola vez.,Repite el mensaje de T-0005 (misma captura legitimo/4.jpeg).,descartado del golden
+T-0073,R-E-009,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0071 (R-E-009); queda la captura.,descartado del golden
+T-0082,R-E-026,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0070 (R-E-026); queda la captura.,descartado del golden
+T-0083,R-E-001,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0075 (R-E-001); queda la versión con inyección.,descartado del golden
+T-0087,R-L-023,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0078 (R-L-023); queda la captura.,descartado del golden
+T-0088,R-E-021,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0033 (R-E-021); queda la versión con inyección.,descartado del golden
+T-0089,R-E-010,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0037 (R-E-010); queda la captura.,descartado del golden
+T-0090,R-L-025,Golden v2: cada mensaje aparece una sola vez.,Mismo mensaje que T-0079 (R-L-025); queda la captura.,descartado del golden

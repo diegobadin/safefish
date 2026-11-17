@@ -1,0 +1,258 @@
+{
+  "meta": {
+    "run_id": "v2-test-20261117-132613",
+    "version": "v2",
+    "config_hash": "3a381fe2c5e7",
+    "kb_snapshot": "kb-v2",
+    "kb_hash": "c8e84fef0e822791",
+    "split": "test",
+    "golden_path": "golden\\test.jsonl",
+    "golden_version": "9909db9dd3c1",
+    "n_casos": 69,
+    "git_sha": "42d4f15",
+    "git_dirty": true,
+    "fecha": "2026-11-17T13:26:15+00:00",
+    "modelos": {
+      "reasoner": "claude-sonnet-5-5",
+      "embeddings": "text-embedding-3-small",
+      "planner": "claude-haiku-5-5",
+      "normalizer": "gpt-4.1-mini-2025-04-14:normalizer_v1_caso:2a8c86521610,gpt-4.1-mini-2025-04-14:normalizer_v1_guia:9fa231a263ed,template",
+      "plan_judge": "claude-sonnet-5-5"
+    },
+    "prompt": {
+      "name": "reasoner_v1",
+      "hash": "aaa9eaacdc0a"
+    },
+    "planner": {
+      "mode": "llm",
+      "prompt": "planner_v1",
+      "hash": "363d78a58d7f"
+    },
+    "verifier": null
+  },
+  "modo": "completo",
+  "task": {
+    "n": 69,
+    "tp": 30,
+    "fp": 2,
+    "fn": 6,
+    "tn": 31,
+    "precision": 0.9375,
+    "recall_estafas": 0.8333,
+    "f1_binario": 0.8824,
+    "accuracy_binaria": 0.8841,
+    "fpr": 0.0606,
+    "fpr_hard_negative": 0.1053,
+    "n_hard_negative": 19,
+    "veredicto_aceptable": 0.971,
+    "kappa_ponderado": 0.795,
+    "distribucion_veredictos": {
+      "estafa_confirmada": 6,
+      "levemente_sospechoso": 18,
+      "muy_sospechoso": 26,
+      "parece_legitimo": 19
+    },
+    "n_modalidad": 36,
+    "acc_modalidad": 0.8333,
+    "macro_f1_modalidad": 0.7528,
+    "f1_senales": 0.6701,
+    "precision_senales": 0.528,
+    "recall_senales": 0.9167,
+    "n_citas": 128,
+    "grounding_citas": 1.0,
+    "soporte_modalidad": 0.9231,
+    "contactos_no_respaldados": 0,
+    "n_adversarial": 9,
+    "n_sin_evidencia": 1,
+    "asr_inyeccion": 0.0,
+    "negative_rejection": 1.0,
+    "pasos_plan_promedio": 3.88,
+    "pasos_con_guide_id": 1.0,
+    "planner_fallback_extractivo": 0.0,
+    "planner_sin_guias": 0,
+    "planner_via_guias": {
+      "exacta": 2,
+      "general_situacion": 48,
+      "modalidad": 45
+    },
+    "cobertura_plan": 0.4203,
+    "n_cobertura_plan": 46,
+    "n_errores": 0,
+    "json_valido_sin_reintento": 1.0
+  },
+  "extraccion": {
+    "n_capturas": 10,
+    "cer": 0.1105,
+    "wer": 0.0983,
+    "f1_entidades": 0.2,
+    "localizacion_iou50": null,
+    "n_citas_bbox_gold": 0,
+    "senales_con_bbox": null
+  },
+  "retrieval": {
+    "k": 4,
+    "n_eval_casos": 31,
+    "n_sin_cobertura_kb": 0,
+    "hit_modalidad@k": 0.8387,
+    "mrr_casos": 0.7742,
+    "recall@k_casos": 0.5484,
+    "ndcg@k_casos": 0.591,
+    "pureza_knn_mensajes": 0.7271,
+    "recall@k_senales": 0.6574,
+    "items_promedio_por_tipo": {
+      "casos": 4.0,
+      "mensajes": 6.0,
+      "senales": 6.0,
+      "guias": 1.38
+    }
+  },
+  "ops": {
+    "latencia_ms": {
+      "extract": {
+        "p50": 0.8,
+        "p95": 23.9
+      },
+      "plan": {
+        "p50": 6.2,
+        "p95": 18.7
+      },
+      "reason": {
+        "p50": 4.8,
+        "p95": 19.4
+      },
+      "retrieve": {
+        "p50": 68.2,
+        "p95": 325.9
+      },
+      "total": {
+        "p50": 84.5,
+        "p95": 565.2
+      }
+    },
+    "tokens_in_promedio": 12279.8,
+    "tokens_out_promedio": 885.1,
+    "costo_usd_por_analisis": 0.019312,
+    "costo_usd_total": 1.332525,
+    "costo_usd_pagado_total": 0.0,
+    "llm_calls": 148,
+    "llm_cache_hits": 148,
+    "nota": "latencias con caché no representan la API; medir p95 con SAFEFISH_NO_CACHE=1"
+  },
+  "juez_plan": {
+    "version": "plan_judge_v1",
+    "modelo": "claude-sonnet-5-5",
+    "n_juzgados": 46,
+    "n_fallidos": 0,
+    "fallidos": [],
+    "tokens": {
+      "in": 43900,
+      "out": 8405,
+      "embed": 0
+    },
+    "costo_usd": 0.112418
+  },
+  "por_slice": {
+    "canal=email": {
+      "n": 47,
+      "f1_binario": 0.875,
+      "recall_estafas": 0.84,
+      "fpr": 0.0909
+    },
+    "canal=sms": {
+      "n": 7,
+      "f1_binario": 0.8571,
+      "recall_estafas": 0.75,
+      "fpr": 0.0
+    },
+    "canal=whatsapp": {
+      "n": 15,
+      "f1_binario": 0.9231,
+      "recall_estafas": 0.8571,
+      "fpr": 0.0
+    },
+    "modalidad=deuda_multa_falsa": {
+      "n": 3,
+      "f1_binario": 0.8,
+      "recall_estafas": 0.6667,
+      "fpr": null
+    },
+    "modalidad=encomienda_retenida": {
+      "n": 10,
+      "f1_binario": 1.0,
+      "recall_estafas": 1.0,
+      "fpr": null
+    },
+    "modalidad=falso_empleo_tareas": {
+      "n": 4,
+      "f1_binario": 1.0,
+      "recall_estafas": 1.0,
+      "fpr": null
+    },
+    "modalidad=falso_familiar_cambio_numero": {
+      "n": 1,
+      "f1_binario": 1.0,
+      "recall_estafas": 1.0,
+      "fpr": null
+    },
+    "modalidad=falso_soporte_acceso_remoto": {
+      "n": 1,
+      "f1_binario": 0.0,
+      "recall_estafas": 0.0,
+      "fpr": null
+    },
+    "modalidad=no_determinada": {
+      "n": 5,
+      "f1_binario": 0.75,
+      "recall_estafas": 0.6,
+      "fpr": null
+    },
+    "modalidad=phishing_bancario": {
+      "n": 7,
+      "f1_binario": 0.8333,
+      "recall_estafas": 0.7143,
+      "fpr": null
+    },
+    "modalidad=premio_sorteo_falso": {
+      "n": 5,
+      "f1_binario": 1.0,
+      "recall_estafas": 1.0,
+      "fpr": null
+    },
+    "origen=captura": {
+      "n": 10,
+      "f1_binario": 0.8,
+      "recall_estafas": 0.6667,
+      "fpr": 0.0
+    },
+    "origen=texto": {
+      "n": 59,
+      "f1_binario": 0.8966,
+      "recall_estafas": 0.8667,
+      "fpr": 0.069
+    },
+    "slice=adversarial": {
+      "n": 9,
+      "f1_binario": 1.0,
+      "recall_estafas": 1.0,
+      "fpr": null
+    },
+    "slice=capturas": {
+      "n": 10,
+      "f1_binario": 0.8,
+      "recall_estafas": 0.6667,
+      "fpr": 0.0
+    },
+    "slice=hard_negative": {
+      "n": 19,
+      "f1_binario": 0.0,
+      "recall_estafas": null,
+      "fpr": 0.1053
+    },
+    "slice=sin_evidencia": {
+      "n": 1,
+      "f1_binario": 0.0,
+      "recall_estafas": 0.0,
+      "fpr": null
+    }
+  }
+}

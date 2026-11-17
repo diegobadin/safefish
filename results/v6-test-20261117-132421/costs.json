@@ -1,0 +1,2564 @@
+{
+  "por_caso": {
+    "T-0001": {
+      "tokens": {
+        "in": 25128,
+        "out": 2662,
+        "embed": 187
+      },
+      "costo_usd": 0.020179,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.2,
+        "retrieve": 463.6,
+        "reason": 20.8,
+        "verify": 18.4,
+        "plan": 8.0
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1035,
+          "out": 160
+        },
+        "rerank": {
+          "in": 13550,
+          "out": 1227
+        },
+        "reason": {
+          "in": 8852,
+          "out": 806
+        },
+        "plan": {
+          "in": 1691,
+          "out": 469
+        }
+      }
+    },
+    "T-0004": {
+      "tokens": {
+        "in": 35499,
+        "out": 1512,
+        "embed": 642
+      },
+      "costo_usd": 0.027631,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.9,
+        "retrieve": 440.7,
+        "reason": 23.7,
+        "verify": 3.0,
+        "plan": 13.6
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1790,
+          "out": 164
+        },
+        "rerank": {
+          "in": 17140,
+          "out": 954
+        },
+        "reason": {
+          "in": 15323,
+          "out": 239
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0005": {
+      "tokens": {
+        "in": 28432,
+        "out": 1653,
+        "embed": 270
+      },
+      "costo_usd": 0.020014,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.3,
+        "retrieve": 427.3,
+        "reason": 28.4,
+        "verify": 5.0,
+        "plan": 12.4
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1119,
+          "out": 255
+        },
+        "rerank": {
+          "in": 15004,
+          "out": 641
+        },
+        "reason": {
+          "in": 11056,
+          "out": 366
+        },
+        "plan": {
+          "in": 1253,
+          "out": 391
+        }
+      }
+    },
+    "T-0006": {
+      "tokens": {
+        "in": 24961,
+        "out": 1378,
+        "embed": 349
+      },
+      "costo_usd": 0.014506,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.3,
+        "retrieve": 456.7,
+        "reason": 17.4,
+        "verify": 2.3,
+        "plan": 10.4
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1178,
+          "out": 248
+        },
+        "rerank": {
+          "in": 14004,
+          "out": 641
+        },
+        "reason": {
+          "in": 8533,
+          "out": 334
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0007": {
+      "tokens": {
+        "in": 30468,
+        "out": 1267,
+        "embed": 438
+      },
+      "costo_usd": 0.021851,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.5,
+        "retrieve": 250.3,
+        "reason": 3.4,
+        "verify": 2.1,
+        "plan": 5.7
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1343,
+          "out": 266
+        },
+        "rerank": {
+          "in": 15097,
+          "out": 641
+        },
+        "reason": {
+          "in": 12782,
+          "out": 205
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0009": {
+      "tokens": {
+        "in": 28695,
+        "out": 2176,
+        "embed": 458
+      },
+      "costo_usd": 0.018404,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.7,
+        "retrieve": 247.4,
+        "reason": 7.6,
+        "verify": 2.2,
+        "plan": 4.1
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1434,
+          "out": 226
+        },
+        "rerank": {
+          "in": 15243,
+          "out": 1580
+        },
+        "reason": {
+          "in": 10772,
+          "out": 215
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0010": {
+      "tokens": {
+        "in": 28739,
+        "out": 2320,
+        "embed": 109
+      },
+      "costo_usd": 0.023028,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 7,
+      "llm_cache_hits": 7,
+      "latencias_ms": {
+        "extract": 274.8,
+        "retrieve": 292.8,
+        "reason": 10.9,
+        "verify": 3.2,
+        "plan": 2.8
+      },
+      "tokens_por_etapa": {
+        "extract_vision": {
+          "in": 2978,
+          "out": 107
+        },
+        "query_rewrite": {
+          "in": 932,
+          "out": 152
+        },
+        "rerank": {
+          "in": 14192,
+          "out": 1451
+        },
+        "reason": {
+          "in": 9389,
+          "out": 276
+        },
+        "plan": {
+          "in": 1248,
+          "out": 334
+        }
+      }
+    },
+    "T-0011": {
+      "tokens": {
+        "in": 25155,
+        "out": 3048,
+        "embed": 274
+      },
+      "costo_usd": 0.019432,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.3,
+        "retrieve": 228.6,
+        "reason": 8.0,
+        "verify": 5.6,
+        "plan": 3.3
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1110,
+          "out": 223
+        },
+        "rerank": {
+          "in": 14150,
+          "out": 1257
+        },
+        "reason": {
+          "in": 8240,
+          "out": 829
+        },
+        "plan": {
+          "in": 1655,
+          "out": 739
+        }
+      }
+    },
+    "T-0012": {
+      "tokens": {
+        "in": 25615,
+        "out": 1121,
+        "embed": 211
+      },
+      "costo_usd": 0.014708,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.2,
+        "retrieve": 299.9,
+        "reason": 5.1,
+        "verify": 1.9,
+        "plan": 1.9
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1085,
+          "out": 147
+        },
+        "rerank": {
+          "in": 13830,
+          "out": 641
+        },
+        "reason": {
+          "in": 9454,
+          "out": 178
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0013": {
+      "tokens": {
+        "in": 24658,
+        "out": 1402,
+        "embed": 145
+      },
+      "costo_usd": 0.014425,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.1,
+        "retrieve": 295.8,
+        "reason": 8.4,
+        "verify": 1.9,
+        "plan": 4.7
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 970,
+          "out": 155
+        },
+        "rerank": {
+          "in": 13255,
+          "out": 895
+        },
+        "reason": {
+          "in": 9187,
+          "out": 197
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0016": {
+      "tokens": {
+        "in": 23039,
+        "out": 3412,
+        "embed": 173
+      },
+      "costo_usd": 0.017484,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.2,
+        "retrieve": 293.4,
+        "reason": 8.4,
+        "verify": 4.8,
+        "plan": 3.3
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1021,
+          "out": 189
+        },
+        "rerank": {
+          "in": 12873,
+          "out": 1930
+        },
+        "reason": {
+          "in": 7856,
+          "out": 704
+        },
+        "plan": {
+          "in": 1289,
+          "out": 589
+        }
+      }
+    },
+    "T-0017": {
+      "tokens": {
+        "in": 28664,
+        "out": 1586,
+        "embed": 358
+      },
+      "costo_usd": 0.01944,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.4,
+        "retrieve": 297.0,
+        "reason": 8.0,
+        "verify": 5.3,
+        "plan": 3.8
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1255,
+          "out": 219
+        },
+        "rerank": {
+          "in": 15245,
+          "out": 641
+        },
+        "reason": {
+          "in": 10903,
+          "out": 337
+        },
+        "plan": {
+          "in": 1261,
+          "out": 389
+        }
+      }
+    },
+    "T-0018": {
+      "tokens": {
+        "in": 23953,
+        "out": 3871,
+        "embed": 136
+      },
+      "costo_usd": 0.016837,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.1,
+        "retrieve": 292.5,
+        "reason": 15.3,
+        "verify": 5.7,
+        "plan": 7.2
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 942,
+          "out": 185
+        },
+        "rerank": {
+          "in": 13628,
+          "out": 2611
+        },
+        "reason": {
+          "in": 7757,
+          "out": 622
+        },
+        "plan": {
+          "in": 1626,
+          "out": 453
+        }
+      }
+    },
+    "T-0019": {
+      "tokens": {
+        "in": 26436,
+        "out": 1909,
+        "embed": 254
+      },
+      "costo_usd": 0.01888,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.3,
+        "retrieve": 299.5,
+        "reason": 11.8,
+        "verify": 4.7,
+        "plan": 7.2
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1122,
+          "out": 203
+        },
+        "rerank": {
+          "in": 14274,
+          "out": 887
+        },
+        "reason": {
+          "in": 9787,
+          "out": 508
+        },
+        "plan": {
+          "in": 1253,
+          "out": 311
+        }
+      }
+    },
+    "T-0020": {
+      "tokens": {
+        "in": 28899,
+        "out": 1516,
+        "embed": 325
+      },
+      "costo_usd": 0.019705,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.4,
+        "retrieve": 306.4,
+        "reason": 2.2,
+        "verify": 2.7,
+        "plan": 10.4
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1237,
+          "out": 214
+        },
+        "rerank": {
+          "in": 14835,
+          "out": 924
+        },
+        "reason": {
+          "in": 11581,
+          "out": 223
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0021": {
+      "tokens": {
+        "in": 23339,
+        "out": 2106,
+        "embed": 169
+      },
+      "costo_usd": 0.014227,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.1,
+        "retrieve": 307.8,
+        "reason": 3.4,
+        "verify": 4.4,
+        "plan": 6.7
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 988,
+          "out": 210
+        },
+        "rerank": {
+          "in": 13484,
+          "out": 1052
+        },
+        "reason": {
+          "in": 7595,
+          "out": 479
+        },
+        "plan": {
+          "in": 1272,
+          "out": 365
+        }
+      }
+    },
+    "T-0022": {
+      "tokens": {
+        "in": 30294,
+        "out": 1688,
+        "embed": 493
+      },
+      "costo_usd": 0.020551,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.7,
+        "retrieve": 296.9,
+        "reason": 14.8,
+        "verify": 2.3,
+        "plan": 6.2
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1494,
+          "out": 214
+        },
+        "rerank": {
+          "in": 15533,
+          "out": 1119
+        },
+        "reason": {
+          "in": 12021,
+          "out": 200
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0024": {
+      "tokens": {
+        "in": 27051,
+        "out": 2726,
+        "embed": 303
+      },
+      "costo_usd": 0.022348,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.4,
+        "retrieve": 299.9,
+        "reason": 8.3,
+        "verify": 7.5,
+        "plan": 11.3
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1156,
+          "out": 235
+        },
+        "rerank": {
+          "in": 14497,
+          "out": 1226
+        },
+        "reason": {
+          "in": 9699,
+          "out": 841
+        },
+        "plan": {
+          "in": 1699,
+          "out": 424
+        }
+      }
+    },
+    "T-0025": {
+      "tokens": {
+        "in": 24465,
+        "out": 2646,
+        "embed": 230
+      },
+      "costo_usd": 0.017413,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.3,
+        "retrieve": 291.0,
+        "reason": 4.9,
+        "verify": 5.2,
+        "plan": 10.8
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1094,
+          "out": 190
+        },
+        "rerank": {
+          "in": 13605,
+          "out": 1494
+        },
+        "reason": {
+          "in": 8505,
+          "out": 592
+        },
+        "plan": {
+          "in": 1261,
+          "out": 370
+        }
+      }
+    },
+    "T-0028": {
+      "tokens": {
+        "in": 28998,
+        "out": 2028,
+        "embed": 433
+      },
+      "costo_usd": 0.02287,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 2.3,
+        "retrieve": 280.8,
+        "reason": 7.1,
+        "verify": 6.3,
+        "plan": 7.6
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1424,
+          "out": 229
+        },
+        "rerank": {
+          "in": 15525,
+          "out": 641
+        },
+        "reason": {
+          "in": 10359,
+          "out": 780
+        },
+        "plan": {
+          "in": 1690,
+          "out": 378
+        }
+      }
+    },
+    "T-0029": {
+      "tokens": {
+        "in": 28406,
+        "out": 1841,
+        "embed": 343
+      },
+      "costo_usd": 0.023045,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.4,
+        "retrieve": 272.5,
+        "reason": 19.2,
+        "verify": 4.5,
+        "plan": 6.6
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1243,
+          "out": 209
+        },
+        "rerank": {
+          "in": 15095,
+          "out": 641
+        },
+        "reason": {
+          "in": 10797,
+          "out": 727
+        },
+        "plan": {
+          "in": 1271,
+          "out": 264
+        }
+      }
+    },
+    "T-0030": {
+      "tokens": {
+        "in": 26995,
+        "out": 2491,
+        "embed": 61
+      },
+      "costo_usd": 0.016685,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.1,
+        "retrieve": 268.8,
+        "reason": 15.0,
+        "verify": 2.0,
+        "plan": 12.3
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 908,
+          "out": 93
+        },
+        "rerank": {
+          "in": 14873,
+          "out": 2046
+        },
+        "reason": {
+          "in": 9968,
+          "out": 197
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0031": {
+      "tokens": {
+        "in": 26582,
+        "out": 2409,
+        "embed": 266
+      },
+      "costo_usd": 0.019913,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.3,
+        "retrieve": 276.3,
+        "reason": 7.6,
+        "verify": 5.4,
+        "plan": 7.3
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1132,
+          "out": 185
+        },
+        "rerank": {
+          "in": 14011,
+          "out": 1172
+        },
+        "reason": {
+          "in": 9766,
+          "out": 593
+        },
+        "plan": {
+          "in": 1673,
+          "out": 459
+        }
+      }
+    },
+    "T-0032": {
+      "tokens": {
+        "in": 29913,
+        "out": 1522,
+        "embed": 467
+      },
+      "costo_usd": 0.019675,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.8,
+        "retrieve": 279.5,
+        "reason": 3.6,
+        "verify": 2.6,
+        "plan": 6.5
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1499,
+          "out": 153
+        },
+        "rerank": {
+          "in": 15954,
+          "out": 932
+        },
+        "reason": {
+          "in": 11214,
+          "out": 282
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0033": {
+      "tokens": {
+        "in": 25424,
+        "out": 2686,
+        "embed": 220
+      },
+      "costo_usd": 0.017282,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.3,
+        "retrieve": 272.2,
+        "reason": 10.2,
+        "verify": 5.2,
+        "plan": 6.7
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1069,
+          "out": 182
+        },
+        "rerank": {
+          "in": 14451,
+          "out": 1167
+        },
+        "reason": {
+          "in": 8325,
+          "out": 602
+        },
+        "plan": {
+          "in": 1579,
+          "out": 735
+        }
+      }
+    },
+    "T-0034": {
+      "tokens": {
+        "in": 28630,
+        "out": 2757,
+        "embed": 133
+      },
+      "costo_usd": 0.030475,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 7,
+      "llm_cache_hits": 7,
+      "latencias_ms": {
+        "extract": 17.8,
+        "retrieve": 272.4,
+        "reason": 13.6,
+        "verify": 8.2,
+        "plan": 7.7
+      },
+      "tokens_por_etapa": {
+        "extract_vision": {
+          "in": 4766,
+          "out": 119
+        },
+        "query_rewrite": {
+          "in": 948,
+          "out": 163
+        },
+        "rerank": {
+          "in": 12633,
+          "out": 1160
+        },
+        "reason": {
+          "in": 8581,
+          "out": 830
+        },
+        "plan": {
+          "in": 1702,
+          "out": 485
+        }
+      }
+    },
+    "T-0035": {
+      "tokens": {
+        "in": 29354,
+        "out": 1982,
+        "embed": 309
+      },
+      "costo_usd": 0.024412,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.4,
+        "retrieve": 271.6,
+        "reason": 11.8,
+        "verify": 6.4,
+        "plan": 4.0
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1193,
+          "out": 221
+        },
+        "rerank": {
+          "in": 15030,
+          "out": 641
+        },
+        "reason": {
+          "in": 11560,
+          "out": 701
+        },
+        "plan": {
+          "in": 1571,
+          "out": 419
+        }
+      }
+    },
+    "T-0036": {
+      "tokens": {
+        "in": 25647,
+        "out": 2731,
+        "embed": 252
+      },
+      "costo_usd": 0.020609,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.3,
+        "retrieve": 288.6,
+        "reason": 2.2,
+        "verify": 5.9,
+        "plan": 4.7
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1143,
+          "out": 215
+        },
+        "rerank": {
+          "in": 13970,
+          "out": 1247
+        },
+        "reason": {
+          "in": 8817,
+          "out": 849
+        },
+        "plan": {
+          "in": 1717,
+          "out": 420
+        }
+      }
+    },
+    "T-0037": {
+      "tokens": {
+        "in": 29804,
+        "out": 2828,
+        "embed": 219
+      },
+      "costo_usd": 0.029818,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 7,
+      "llm_cache_hits": 7,
+      "latencias_ms": {
+        "extract": 32.4,
+        "retrieve": 266.1,
+        "reason": 10.7,
+        "verify": 6.0,
+        "plan": 13.1
+      },
+      "tokens_por_etapa": {
+        "extract_vision": {
+          "in": 4103,
+          "out": 347
+        },
+        "query_rewrite": {
+          "in": 1099,
+          "out": 169
+        },
+        "rerank": {
+          "in": 14420,
+          "out": 1231
+        },
+        "reason": {
+          "in": 8492,
+          "out": 667
+        },
+        "plan": {
+          "in": 1690,
+          "out": 414
+        }
+      }
+    },
+    "T-0038": {
+      "tokens": {
+        "in": 25782,
+        "out": 2522,
+        "embed": 227
+      },
+      "costo_usd": 0.017578,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.3,
+        "retrieve": 276.7,
+        "reason": 5.3,
+        "verify": 4.5,
+        "plan": 5.6
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1093,
+          "out": 196
+        },
+        "rerank": {
+          "in": 14754,
+          "out": 1363
+        },
+        "reason": {
+          "in": 8365,
+          "out": 630
+        },
+        "plan": {
+          "in": 1570,
+          "out": 333
+        }
+      }
+    },
+    "T-0039": {
+      "tokens": {
+        "in": 24408,
+        "out": 2056,
+        "embed": 224
+      },
+      "costo_usd": 0.018262,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.4,
+        "retrieve": 262.7,
+        "reason": 13.1,
+        "verify": 5.9,
+        "plan": 5.7
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1120,
+          "out": 184
+        },
+        "rerank": {
+          "in": 13223,
+          "out": 641
+        },
+        "reason": {
+          "in": 8380,
+          "out": 738
+        },
+        "plan": {
+          "in": 1685,
+          "out": 493
+        }
+      }
+    },
+    "T-0040": {
+      "tokens": {
+        "in": 27827,
+        "out": 2543,
+        "embed": 343
+      },
+      "costo_usd": 0.023247,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.4,
+        "retrieve": 288.6,
+        "reason": 3.3,
+        "verify": 5.7,
+        "plan": 4.6
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1270,
+          "out": 196
+        },
+        "rerank": {
+          "in": 14036,
+          "out": 1242
+        },
+        "reason": {
+          "in": 10879,
+          "out": 701
+        },
+        "plan": {
+          "in": 1642,
+          "out": 404
+        }
+      }
+    },
+    "T-0041": {
+      "tokens": {
+        "in": 30855,
+        "out": 1730,
+        "embed": 381
+      },
+      "costo_usd": 0.022642,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.4,
+        "retrieve": 286.9,
+        "reason": 3.9,
+        "verify": 2.1,
+        "plan": 2.1
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1288,
+          "out": 256
+        },
+        "rerank": {
+          "in": 15144,
+          "out": 1138
+        },
+        "reason": {
+          "in": 13177,
+          "out": 181
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0042": {
+      "tokens": {
+        "in": 26252,
+        "out": 2506,
+        "embed": 241
+      },
+      "costo_usd": 0.019371,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.4,
+        "retrieve": 276.5,
+        "reason": 6.9,
+        "verify": 5.8,
+        "plan": 6.6
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1166,
+          "out": 156
+        },
+        "rerank": {
+          "in": 14608,
+          "out": 1151
+        },
+        "reason": {
+          "in": 8803,
+          "out": 727
+        },
+        "plan": {
+          "in": 1675,
+          "out": 472
+        }
+      }
+    },
+    "T-0043": {
+      "tokens": {
+        "in": 29780,
+        "out": 2041,
+        "embed": 581
+      },
+      "costo_usd": 0.018679,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.9,
+        "retrieve": 275.7,
+        "reason": 1.8,
+        "verify": 2.6,
+        "plan": 12.3
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1589,
+          "out": 234
+        },
+        "rerank": {
+          "in": 16016,
+          "out": 1444
+        },
+        "reason": {
+          "in": 10929,
+          "out": 208
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0044": {
+      "tokens": {
+        "in": 25547,
+        "out": 2129,
+        "embed": 152
+      },
+      "costo_usd": 0.01646,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.2,
+        "retrieve": 264.8,
+        "reason": 3.0,
+        "verify": 3.2,
+        "plan": 5.7
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1006,
+          "out": 209
+        },
+        "rerank": {
+          "in": 14010,
+          "out": 1234
+        },
+        "reason": {
+          "in": 9283,
+          "out": 352
+        },
+        "plan": {
+          "in": 1248,
+          "out": 334
+        }
+      }
+    },
+    "T-0045": {
+      "tokens": {
+        "in": 29190,
+        "out": 1571,
+        "embed": 219
+      },
+      "costo_usd": 0.021756,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.2,
+        "retrieve": 257.3,
+        "reason": 10.4,
+        "verify": 3.8,
+        "plan": 4.3
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1060,
+          "out": 213
+        },
+        "rerank": {
+          "in": 15111,
+          "out": 641
+        },
+        "reason": {
+          "in": 11755,
+          "out": 406
+        },
+        "plan": {
+          "in": 1264,
+          "out": 311
+        }
+      }
+    },
+    "T-0046": {
+      "tokens": {
+        "in": 27882,
+        "out": 1245,
+        "embed": 375
+      },
+      "costo_usd": 0.017825,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.5,
+        "retrieve": 255.6,
+        "reason": 7.9,
+        "verify": 2.1,
+        "plan": 7.2
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1260,
+          "out": 246
+        },
+        "rerank": {
+          "in": 14560,
+          "out": 641
+        },
+        "reason": {
+          "in": 10816,
+          "out": 203
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0047": {
+      "tokens": {
+        "in": 27837,
+        "out": 2956,
+        "embed": 290
+      },
+      "costo_usd": 0.023455,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.6,
+        "retrieve": 258.1,
+        "reason": 1.8,
+        "verify": 7.6,
+        "plan": 9.1
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1244,
+          "out": 172
+        },
+        "rerank": {
+          "in": 15193,
+          "out": 1429
+        },
+        "reason": {
+          "in": 9680,
+          "out": 941
+        },
+        "plan": {
+          "in": 1720,
+          "out": 414
+        }
+      }
+    },
+    "T-0048": {
+      "tokens": {
+        "in": 26002,
+        "out": 2724,
+        "embed": 234
+      },
+      "costo_usd": 0.020232,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.3,
+        "retrieve": 262.6,
+        "reason": 3.3,
+        "verify": 11.2,
+        "plan": 4.8
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1169,
+          "out": 144
+        },
+        "rerank": {
+          "in": 14378,
+          "out": 1268
+        },
+        "reason": {
+          "in": 8762,
+          "out": 817
+        },
+        "plan": {
+          "in": 1693,
+          "out": 495
+        }
+      }
+    },
+    "T-0049": {
+      "tokens": {
+        "in": 26337,
+        "out": 3381,
+        "embed": 304
+      },
+      "costo_usd": 0.021547,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.4,
+        "retrieve": 266.8,
+        "reason": 7.9,
+        "verify": 5.6,
+        "plan": 6.5
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1220,
+          "out": 224
+        },
+        "rerank": {
+          "in": 14143,
+          "out": 1545
+        },
+        "reason": {
+          "in": 9328,
+          "out": 804
+        },
+        "plan": {
+          "in": 1646,
+          "out": 808
+        }
+      }
+    },
+    "T-0050": {
+      "tokens": {
+        "in": 32039,
+        "out": 1800,
+        "embed": 643
+      },
+      "costo_usd": 0.023042,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.9,
+        "retrieve": 266.7,
+        "reason": 10.4,
+        "verify": 3.2,
+        "plan": 9.8
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1687,
+          "out": 221
+        },
+        "rerank": {
+          "in": 16324,
+          "out": 1132
+        },
+        "reason": {
+          "in": 12777,
+          "out": 294
+        },
+        "plan": {
+          "in": 1251,
+          "out": 153
+        }
+      }
+    },
+    "T-0051": {
+      "tokens": {
+        "in": 26098,
+        "out": 2367,
+        "embed": 272
+      },
+      "costo_usd": 0.017396,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.4,
+        "retrieve": 251.6,
+        "reason": 6.3,
+        "verify": 4.7,
+        "plan": 11.7
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1145,
+          "out": 193
+        },
+        "rerank": {
+          "in": 14551,
+          "out": 1033
+        },
+        "reason": {
+          "in": 8728,
+          "out": 543
+        },
+        "plan": {
+          "in": 1674,
+          "out": 598
+        }
+      }
+    },
+    "T-0052": {
+      "tokens": {
+        "in": 25864,
+        "out": 3190,
+        "embed": 326
+      },
+      "costo_usd": 0.018504,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.4,
+        "retrieve": 256.1,
+        "reason": 3.0,
+        "verify": 5.8,
+        "plan": 6.4
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1282,
+          "out": 213
+        },
+        "rerank": {
+          "in": 14490,
+          "out": 1892
+        },
+        "reason": {
+          "in": 8511,
+          "out": 662
+        },
+        "plan": {
+          "in": 1581,
+          "out": 423
+        }
+      }
+    },
+    "T-0053": {
+      "tokens": {
+        "in": 24845,
+        "out": 2657,
+        "embed": 251
+      },
+      "costo_usd": 0.018926,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.3,
+        "retrieve": 247.6,
+        "reason": 13.2,
+        "verify": 5.5,
+        "plan": 6.3
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1101,
+          "out": 206
+        },
+        "rerank": {
+          "in": 13603,
+          "out": 1215
+        },
+        "reason": {
+          "in": 8458,
+          "out": 756
+        },
+        "plan": {
+          "in": 1683,
+          "out": 480
+        }
+      }
+    },
+    "T-0054": {
+      "tokens": {
+        "in": 27138,
+        "out": 2370,
+        "embed": 401
+      },
+      "costo_usd": 0.017791,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.5,
+        "retrieve": 254.3,
+        "reason": 16.7,
+        "verify": 5.1,
+        "plan": 3.1
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1325,
+          "out": 207
+        },
+        "rerank": {
+          "in": 15449,
+          "out": 1274
+        },
+        "reason": {
+          "in": 9094,
+          "out": 500
+        },
+        "plan": {
+          "in": 1270,
+          "out": 389
+        }
+      }
+    },
+    "T-0056": {
+      "tokens": {
+        "in": 24884,
+        "out": 2213,
+        "embed": 213
+      },
+      "costo_usd": 0.015584,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.2,
+        "retrieve": 245.1,
+        "reason": 5.6,
+        "verify": 3.5,
+        "plan": 10.3
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1104,
+          "out": 198
+        },
+        "rerank": {
+          "in": 13423,
+          "out": 1406
+        },
+        "reason": {
+          "in": 9104,
+          "out": 298
+        },
+        "plan": {
+          "in": 1253,
+          "out": 311
+        }
+      }
+    },
+    "T-0057": {
+      "tokens": {
+        "in": 29387,
+        "out": 1648,
+        "embed": 543
+      },
+      "costo_usd": 0.02077,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 2.2,
+        "retrieve": 258.0,
+        "reason": 2.8,
+        "verify": 4.3,
+        "plan": 6.3
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1548,
+          "out": 228
+        },
+        "rerank": {
+          "in": 15694,
+          "out": 641
+        },
+        "reason": {
+          "in": 10892,
+          "out": 468
+        },
+        "plan": {
+          "in": 1253,
+          "out": 311
+        }
+      }
+    },
+    "T-0058": {
+      "tokens": {
+        "in": 29951,
+        "out": 2154,
+        "embed": 435
+      },
+      "costo_usd": 0.022755,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.5,
+        "retrieve": 261.4,
+        "reason": 19.3,
+        "verify": 5.2,
+        "plan": 3.9
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1369,
+          "out": 268
+        },
+        "rerank": {
+          "in": 15285,
+          "out": 641
+        },
+        "reason": {
+          "in": 11620,
+          "out": 499
+        },
+        "plan": {
+          "in": 1677,
+          "out": 746
+        }
+      }
+    },
+    "T-0059": {
+      "tokens": {
+        "in": 28678,
+        "out": 1981,
+        "embed": 372
+      },
+      "costo_usd": 0.021774,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.5,
+        "retrieve": 242.7,
+        "reason": 10.2,
+        "verify": 12.0,
+        "plan": 6.1
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1339,
+          "out": 164
+        },
+        "rerank": {
+          "in": 15017,
+          "out": 896
+        },
+        "reason": {
+          "in": 11052,
+          "out": 532
+        },
+        "plan": {
+          "in": 1270,
+          "out": 389
+        }
+      }
+    },
+    "T-0060": {
+      "tokens": {
+        "in": 26834,
+        "out": 1798,
+        "embed": 347
+      },
+      "costo_usd": 0.01581,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.4,
+        "retrieve": 263.6,
+        "reason": 3.1,
+        "verify": 2.1,
+        "plan": 9.8
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1260,
+          "out": 201
+        },
+        "rerank": {
+          "in": 14678,
+          "out": 1236
+        },
+        "reason": {
+          "in": 9650,
+          "out": 206
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0063": {
+      "tokens": {
+        "in": 29828,
+        "out": 1210,
+        "embed": 573
+      },
+      "costo_usd": 0.017757,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.7,
+        "retrieve": 264.3,
+        "reason": 3.0,
+        "verify": 2.3,
+        "plan": 5.4
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1601,
+          "out": 222
+        },
+        "rerank": {
+          "in": 16241,
+          "out": 641
+        },
+        "reason": {
+          "in": 10740,
+          "out": 192
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0064": {
+      "tokens": {
+        "in": 41295,
+        "out": 1766,
+        "embed": 643
+      },
+      "costo_usd": 0.04163,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.9,
+        "retrieve": 258.2,
+        "reason": 27.4,
+        "verify": 5.0,
+        "plan": 4.8
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1700,
+          "out": 214
+        },
+        "rerank": {
+          "in": 16615,
+          "out": 876
+        },
+        "reason": {
+          "in": 21727,
+          "out": 365
+        },
+        "plan": {
+          "in": 1253,
+          "out": 311
+        }
+      }
+    },
+    "T-0067": {
+      "tokens": {
+        "in": 25769,
+        "out": 3199,
+        "embed": 232
+      },
+      "costo_usd": 0.020718,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.3,
+        "retrieve": 235.2,
+        "reason": 8.1,
+        "verify": 5.3,
+        "plan": 7.5
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1140,
+          "out": 156
+        },
+        "rerank": {
+          "in": 14079,
+          "out": 1556
+        },
+        "reason": {
+          "in": 8850,
+          "out": 828
+        },
+        "plan": {
+          "in": 1700,
+          "out": 659
+        }
+      }
+    },
+    "T-0068": {
+      "tokens": {
+        "in": 27335,
+        "out": 2110,
+        "embed": 117
+      },
+      "costo_usd": 0.020865,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 7,
+      "llm_cache_hits": 7,
+      "latencias_ms": {
+        "extract": 3.7,
+        "retrieve": 240.7,
+        "reason": 27.3,
+        "verify": 3.6,
+        "plan": 23.9
+      },
+      "tokens_por_etapa": {
+        "extract_vision": {
+          "in": 2162,
+          "out": 124
+        },
+        "query_rewrite": {
+          "in": 948,
+          "out": 144
+        },
+        "rerank": {
+          "in": 14201,
+          "out": 1165
+        },
+        "reason": {
+          "in": 8776,
+          "out": 343
+        },
+        "plan": {
+          "in": 1248,
+          "out": 334
+        }
+      }
+    },
+    "T-0070": {
+      "tokens": {
+        "in": 28384,
+        "out": 4083,
+        "embed": 213
+      },
+      "costo_usd": 0.027524,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 7,
+      "llm_cache_hits": 7,
+      "latencias_ms": {
+        "extract": 42.7,
+        "retrieve": 234.6,
+        "reason": 6.4,
+        "verify": 4.8,
+        "plan": 6.3
+      },
+      "tokens_por_etapa": {
+        "extract_vision": {
+          "in": 4766,
+          "out": 330
+        },
+        "query_rewrite": {
+          "in": 1045,
+          "out": 200
+        },
+        "rerank": {
+          "in": 13269,
+          "out": 2478
+        },
+        "reason": {
+          "in": 7763,
+          "out": 681
+        },
+        "plan": {
+          "in": 1541,
+          "out": 394
+        }
+      }
+    },
+    "T-0071": {
+      "tokens": {
+        "in": 29712,
+        "out": 3396,
+        "embed": 290
+      },
+      "costo_usd": 0.026918,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 7,
+      "llm_cache_hits": 7,
+      "latencias_ms": {
+        "extract": 49.5,
+        "retrieve": 234.1,
+        "reason": 13.3,
+        "verify": 6.4,
+        "plan": 4.3
+      },
+      "tokens_por_etapa": {
+        "extract_vision": {
+          "in": 3362,
+          "out": 341
+        },
+        "query_rewrite": {
+          "in": 1140,
+          "out": 240
+        },
+        "rerank": {
+          "in": 14740,
+          "out": 1285
+        },
+        "reason": {
+          "in": 8823,
+          "out": 697
+        },
+        "plan": {
+          "in": 1647,
+          "out": 833
+        }
+      }
+    },
+    "T-0072": {
+      "tokens": {
+        "in": 23811,
+        "out": 1441,
+        "embed": 70
+      },
+      "costo_usd": 0.013182,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.1,
+        "retrieve": 229.6,
+        "reason": 4.2,
+        "verify": 1.8,
+        "plan": 5.2
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 913,
+          "out": 111
+        },
+        "rerank": {
+          "in": 13099,
+          "out": 975
+        },
+        "reason": {
+          "in": 8553,
+          "out": 200
+        },
+        "plan": {
+          "in": 1246,
+          "out": 155
+        }
+      }
+    },
+    "T-0074": {
+      "tokens": {
+        "in": 25601,
+        "out": 2102,
+        "embed": 226
+      },
+      "costo_usd": 0.019153,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.3,
+        "retrieve": 225.4,
+        "reason": 8.3,
+        "verify": 8.4,
+        "plan": 5.8
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1089,
+          "out": 206
+        },
+        "rerank": {
+          "in": 14240,
+          "out": 641
+        },
+        "reason": {
+          "in": 8634,
+          "out": 766
+        },
+        "plan": {
+          "in": 1638,
+          "out": 489
+        }
+      }
+    },
+    "T-0075": {
+      "tokens": {
+        "in": 25122,
+        "out": 4655,
+        "embed": 169
+      },
+      "costo_usd": 0.020635,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.1,
+        "retrieve": 268.5,
+        "reason": 8.4,
+        "verify": 5.8,
+        "plan": 8.3
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 977,
+          "out": 196
+        },
+        "rerank": {
+          "in": 13950,
+          "out": 2589
+        },
+        "reason": {
+          "in": 8473,
+          "out": 825
+        },
+        "plan": {
+          "in": 1722,
+          "out": 1045
+        }
+      }
+    },
+    "T-0076": {
+      "tokens": {
+        "in": 33054,
+        "out": 2195,
+        "embed": 190
+      },
+      "costo_usd": 0.030354,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 7,
+      "llm_cache_hits": 7,
+      "latencias_ms": {
+        "extract": 19.2,
+        "retrieve": 250.8,
+        "reason": 17.2,
+        "verify": 5.0,
+        "plan": 7.4
+      },
+      "tokens_por_etapa": {
+        "extract_vision": {
+          "in": 2978,
+          "out": 284
+        },
+        "query_rewrite": {
+          "in": 1047,
+          "out": 170
+        },
+        "rerank": {
+          "in": 14714,
+          "out": 977
+        },
+        "reason": {
+          "in": 13062,
+          "out": 373
+        },
+        "plan": {
+          "in": 1253,
+          "out": 391
+        }
+      }
+    },
+    "T-0077": {
+      "tokens": {
+        "in": 24325,
+        "out": 2073,
+        "embed": 155
+      },
+      "costo_usd": 0.014868,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.2,
+        "retrieve": 245.9,
+        "reason": 6.9,
+        "verify": 4.5,
+        "plan": 13.4
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 973,
+          "out": 203
+        },
+        "rerank": {
+          "in": 13576,
+          "out": 1114
+        },
+        "reason": {
+          "in": 8524,
+          "out": 352
+        },
+        "plan": {
+          "in": 1252,
+          "out": 404
+        }
+      }
+    },
+    "T-0078": {
+      "tokens": {
+        "in": 30273,
+        "out": 3446,
+        "embed": 303
+      },
+      "costo_usd": 0.026845,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 7,
+      "llm_cache_hits": 7,
+      "latencias_ms": {
+        "extract": 3.9,
+        "retrieve": 258.0,
+        "reason": 12.1,
+        "verify": 5.1,
+        "plan": 4.8
+      },
+      "tokens_por_etapa": {
+        "extract_vision": {
+          "in": 2978,
+          "out": 438
+        },
+        "query_rewrite": {
+          "in": 1169,
+          "out": 237
+        },
+        "rerank": {
+          "in": 14857,
+          "out": 2020
+        },
+        "reason": {
+          "in": 10006,
+          "out": 424
+        },
+        "plan": {
+          "in": 1263,
+          "out": 327
+        }
+      }
+    },
+    "T-0079": {
+      "tokens": {
+        "in": 28798,
+        "out": 2184,
+        "embed": 175
+      },
+      "costo_usd": 0.022513,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 7,
+      "llm_cache_hits": 7,
+      "latencias_ms": {
+        "extract": 24.5,
+        "retrieve": 226.6,
+        "reason": 14.5,
+        "verify": 11.0,
+        "plan": 5.8
+      },
+      "tokens_por_etapa": {
+        "extract_vision": {
+          "in": 2978,
+          "out": 173
+        },
+        "query_rewrite": {
+          "in": 1004,
+          "out": 201
+        },
+        "rerank": {
+          "in": 14058,
+          "out": 1004
+        },
+        "reason": {
+          "in": 9497,
+          "out": 417
+        },
+        "plan": {
+          "in": 1261,
+          "out": 389
+        }
+      }
+    },
+    "T-0080": {
+      "tokens": {
+        "in": 26726,
+        "out": 2912,
+        "embed": 129
+      },
+      "costo_usd": 0.017829,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.1,
+        "retrieve": 240.0,
+        "reason": 6.7,
+        "verify": 4.8,
+        "plan": 6.2
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 942,
+          "out": 185
+        },
+        "rerank": {
+          "in": 14791,
+          "out": 1972
+        },
+        "reason": {
+          "in": 9741,
+          "out": 351
+        },
+        "plan": {
+          "in": 1252,
+          "out": 404
+        }
+      }
+    },
+    "T-0081": {
+      "tokens": {
+        "in": 26383,
+        "out": 2904,
+        "embed": 390
+      },
+      "costo_usd": 0.020844,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.6,
+        "retrieve": 234.1,
+        "reason": 28.0,
+        "verify": 7.1,
+        "plan": 3.9
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 1325,
+          "out": 232
+        },
+        "rerank": {
+          "in": 14752,
+          "out": 1336
+        },
+        "reason": {
+          "in": 8645,
+          "out": 891
+        },
+        "plan": {
+          "in": 1661,
+          "out": 445
+        }
+      }
+    },
+    "T-0084": {
+      "tokens": {
+        "in": 25414,
+        "out": 1326,
+        "embed": 109
+      },
+      "costo_usd": 0.014473,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.1,
+        "retrieve": 235.3,
+        "reason": 33.6,
+        "verify": 3.5,
+        "plan": 3.1
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 934,
+          "out": 155
+        },
+        "rerank": {
+          "in": 13996,
+          "out": 641
+        },
+        "reason": {
+          "in": 9236,
+          "out": 196
+        },
+        "plan": {
+          "in": 1248,
+          "out": 334
+        }
+      }
+    },
+    "T-0085": {
+      "tokens": {
+        "in": 28441,
+        "out": 2253,
+        "embed": 231
+      },
+      "costo_usd": 0.025439,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 7,
+      "llm_cache_hits": 7,
+      "latencias_ms": {
+        "extract": 43.4,
+        "retrieve": 135.0,
+        "reason": 1.9,
+        "verify": 6.0,
+        "plan": 3.5
+      },
+      "tokens_por_etapa": {
+        "extract_vision": {
+          "in": 2708,
+          "out": 234
+        },
+        "query_rewrite": {
+          "in": 1041,
+          "out": 223
+        },
+        "rerank": {
+          "in": 13408,
+          "out": 641
+        },
+        "reason": {
+          "in": 9592,
+          "out": 699
+        },
+        "plan": {
+          "in": 1692,
+          "out": 456
+        }
+      }
+    },
+    "T-0086": {
+      "tokens": {
+        "in": 22377,
+        "out": 1853,
+        "embed": 93
+      },
+      "costo_usd": 0.012489,
+      "costo_usd_pagado": 0.0,
+      "llm_calls": 6,
+      "llm_cache_hits": 6,
+      "latencias_ms": {
+        "extract": 0.1,
+        "retrieve": 149.4,
+        "reason": 2.5,
+        "verify": 3.6,
+        "plan": 2.7
+      },
+      "tokens_por_etapa": {
+        "query_rewrite": {
+          "in": 917,
+          "out": 147
+        },
+        "rerank": {
+          "in": 12649,
+          "out": 1068
+        },
+        "reason": {
+          "in": 7558,
+          "out": 327
+        },
+        "plan": {
+          "in": 1253,
+          "out": 311
+        }
+      }
+    }
+  },
+  "totales": {
+    "latencia_ms": {
+      "extract": {
+        "p50": 0.4,
+        "p95": 38.6
+      },
+      "plan": {
+        "p50": 6.3,
+        "p95": 12.8
+      },
+      "reason": {
+        "p50": 8.1,
+        "p95": 27.4
+      },
+      "retrieve": {
+        "p50": 264.8,
+        "p95": 379.5
+      },
+      "verify": {
+        "p50": 5.0,
+        "p95": 10.0
+      },
+      "total": {
+        "p50": 293.0,
+        "p95": 478.5
+      }
+    },
+    "tokens_in_promedio": 27526.2,
+    "tokens_out_promedio": 2289.3,
+    "costo_usd_por_analisis": 0.020482,
+    "costo_usd_total": 1.413289,
+    "costo_usd_pagado_total": 0.0,
+    "llm_calls": 424,
+    "llm_cache_hits": 424,
+    "nota": "latencias con caché no representan la API; medir p95 con SAFEFISH_NO_CACHE=1"
+  }
+}

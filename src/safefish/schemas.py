@@ -132,6 +132,15 @@ class RawInput(_Strict):
         return self
 
 
+class MetadatosCaptura(_Strict):
+    """V10: lo que el modelo de visión ve en la captura además del texto. No es texto del
+    mensaje: no se cita (R1 verifica contra `ExtractedMessage.texto`)."""
+
+    remitente: str | None = None  # nombre o número que muestra la app en el encabezado
+    insignia_verificada: bool | None = None
+    descripcion: str | None = None
+
+
 class Segmento(_Strict):
     emisor: Literal["remitente", "usuario"]
     texto: str
@@ -160,6 +169,7 @@ class ExtractedMessage(_Strict):
     ocr_words: list[OcrWord] | None = None
     origen: Literal["texto", "captura"] = "texto"
     contexto: str | None = None  # de RawInput.contexto; no es fuente de citas
+    captura: MetadatosCaptura | None = None  # V10 (vision_v3); None en texto y en vision_v1/v2
 
 
 # ---------------------------------------------------------------------------

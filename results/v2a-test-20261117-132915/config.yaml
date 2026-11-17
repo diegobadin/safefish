@@ -1,0 +1,97 @@
+version: v2a
+descripcion: Normalización + 1 caso = 1 chunk, 1 colección, denso top-6, query = texto
+  crudo.
+kb_snapshot: kb-v2a
+ingest:
+  sources: data/sources.yaml
+  languages:
+  - es
+  min_chars_lang_detect: 60
+  dedupe:
+    exact: true
+    near_threshold: 0.95
+    near_method: tfidf
+  pii_por_tipo:
+    caso: true
+    mensaje: true
+    senal: false
+    guia: false
+  normalize:
+    mode: auto
+    model: gpt-4.1-mini-2025-04-14
+    prompt: normalizer_v1
+    min_frase_score: 0.85
+    review_fraction: 0.1
+    review_seed: 7
+    timeout_s: 90.0
+  min_casos_por_modalidad: 5
+chunking:
+  strategy: per_case
+  chunk_size: 800
+  chunk_overlap: 120
+  separators:
+  - '
+
+
+    '
+  - '
+
+    '
+  - .
+  - ' '
+index:
+  layout: single
+embeddings:
+  model: text-embedding-3-small
+retrieval:
+  enabled: true
+  query:
+    strategy: raw
+    facets: []
+    model: claude-haiku-5-5
+    prompt: query_rewrite_v1
+    max_queries: 4
+  filter_canal: 'off'
+  hybrid:
+    enabled: false
+    weights:
+      dense: 1.0
+      bm25: 0.0
+  rerank:
+    enabled: false
+    model: null
+    prompt: rerank_v1
+    top_in: 20
+    max_chars: 600
+  mensajes_contrastivo: false
+  top_k: 6
+  top_n: {}
+  k_eval: 4
+generation:
+  reasoner: claude-sonnet-5-5
+  temperature: 0.0
+  seed: 7
+  prompt: reasoner_v1
+  contexto_prompt: v1
+  max_retries: 1
+  planner: false
+  planner_mode: llm
+  planner_model: claude-haiku-5-5
+  planner_prompt: planner_v1
+  planner_top_guias: 2
+  planner_max_pasos: 5
+  timeout_s: 60.0
+postprocess:
+  verifier: false
+  rules: []
+  cita_threshold: 0.9
+  bbox_threshold: 0.8
+  soporte_dirigido_margen: null
+extraction:
+  vision_model: claude-sonnet-5-5
+  vision_prompt: vision_v2
+  ocr: tesseract
+  ocr_lang: spa
+  ocr_min_conf: 30.0
+  preprocess: true
+  timeout_s: 90.0

@@ -210,7 +210,9 @@ const PASOS = {
   extraccion: (p) => ({
     titulo: p.origen === "captura" ? "Lectura de la captura (visión)" : "Texto de entrada",
     meta: [p.canal && `canal ${p.canal}`, p.modelo].filter(Boolean).join(" · "),
-    cuerpo: html`<${Def} filas=${[["Origen", p.origen], ["Canal", p.canal], ["Modelo", p.modelo], ["Palabras OCR", p.ocr_palabras], ["Contexto del usuario", p.contexto]]}/>
+    cuerpo: html`<${Def} filas=${[["Origen", p.origen], ["Canal", p.canal], ["Modelo", p.modelo], ["Palabras OCR", p.ocr_palabras], ["Contexto del usuario", p.contexto],
+        ["Remitente que muestra la app", p.captura && p.captura.remitente && p.captura.remitente + (p.captura.insignia_verificada === true ? " (verificado)" : p.captura.insignia_verificada === false ? " (sin insignia)" : "")],
+        ["Lo que se ve en la captura", p.captura && p.captura.descripcion]]}/>
       ${p.segmentos.length > 0
         ? html`<${Tabla} cols=${[{ t: "Emisor", v: (s) => s.emisor }, { t: "Texto transcripto", v: (s) => s.texto }]} filas=${p.segmentos}/>`
         : html`<pre class="raw">${p.texto}</pre>`}`,

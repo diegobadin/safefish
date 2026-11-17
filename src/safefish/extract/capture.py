@@ -16,7 +16,7 @@ from safefish.config import resolve_path
 from safefish.extract.ocr import OCRUnavailable, TesseractOCR
 from safefish.extract.text import TextExtractor, extract_entities
 from safefish.extract.vision import VisionTranscriber
-from safefish.schemas import Canal, ExtractedMessage, RawInput, Segmento
+from safefish.schemas import Canal, ExtractedMessage, MetadatosCaptura, RawInput, Segmento
 from safefish.textutils import normalize_unicode
 
 log = logging.getLogger(__name__)
@@ -66,6 +66,14 @@ class MultimodalExtractor:
                 self.ocr_disponible = False
                 log.warning("OCR deshabilitado: %s (las señales irán sin recuadro)", e)
 
+        captura = None
+        if hasattr(t, "descripcion"):  # vision_v3 (V10)
+            captura = MetadatosCaptura(
+                remitente=normalize_unicode(t.remitente) if t.remitente else None,
+                insignia_verificada=t.insignia_verificada,
+                descripcion=normalize_unicode(t.descripcion) if t.descripcion else None,
+            )
+
         return ExtractedMessage(
             texto=texto,
             canal=canal,
@@ -74,4 +82,5 @@ class MultimodalExtractor:
             ocr_words=ocr_words,
             origen="captura",
             contexto=normalize_unicode(raw.contexto) if raw.contexto else None,
+            captura=captura,
         )

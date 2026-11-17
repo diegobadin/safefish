@@ -138,6 +138,7 @@ def _traza_extraccion(m: ExtractedMessage, extractor) -> None:
         modelo=getattr(vision, "model", None) if m.origen == "captura" else None,
         segmentos=[{"emisor": s.emisor, "texto": s.texto} for s in m.segmentos],
         texto=m.texto, contexto=m.contexto,
+        captura=m.captura.model_dump() if m.captura is not None else None,
         ocr_palabras=len(m.ocr_words) if m.ocr_words is not None else None,
     )  # fmt: skip
 
@@ -276,7 +277,9 @@ class SafeFishPipeline:
         )
 
         llm = llm or StructuredLLM.from_cfg(g.reasoner, g.temperature, g.seed, g.timeout_s)
-        reasoner = LLMReasoner(llm, prompt=g.prompt, max_retries=g.max_retries)
+        reasoner = LLMReasoner(
+            llm, prompt=g.prompt, max_retries=g.max_retries, contexto_prompt=g.contexto_prompt
+        )
         return cls(cfg, extractor, retriever, reasoner, verifier, manifest, planner)
 
     def retrieve_only(self, raw: RawInput) -> PipelineResult:
