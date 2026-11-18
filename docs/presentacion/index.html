@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SafeFish · TP3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* === ESCENARIO FIJO 16:9 (viewport-base.css) === */
+/* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   Include this ENTIRE file in every presentation.
+   Slides are authored at 1920×1080 and scaled as a whole.
+   =========================================== */
+
+/* 1. Lock the browser viewport */
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 2. Full-window deck viewport */
+.deck-viewport {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 3. Fixed 16:9 design canvas.
+   JavaScript sets transform: translate(...) scale(...). */
+.deck-stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    transform-origin: 0 0;
+    background: var(--slide-bg, #fff);
+}
+
+/* 4. Slides stack inside the fixed stage.
+   Content must be laid out at 1920×1080, not reflowed per device. */
+.slide {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    background: var(--slide-bg, #fff);
+}
+
+.slide.active,
+.slide.visible {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
+}
+
+/* 5. Keep media inside authored slide bounds */
+img,
+video,
+canvas,
+svg {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* 6. Presentation chrome stays outside the slide design system */
+.deck-controls {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+/* 7. Print one fixed-size slide per page */
+@media print {
+    html,
+    body {
+        width: 1920px;
+        height: auto;
+        overflow: visible;
+        background: #fff;
+    }
+
+    .deck-viewport {
+        position: static;
+        overflow: visible;
+        background: #fff;
+    }
+
+    .deck-stage {
+        position: static;
+        width: auto;
+        height: auto;
+        transform: none !important;
+        background: none;
+    }
+
+    .slide {
+        position: relative;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        width: 1920px;
+        height: 1080px;
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .slide:last-child {
+        break-after: auto;
+        page-break-after: auto;
+    }
+
+    .deck-controls {
+        display: none !important;
+    }
+}
+
+/* 8. Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+}
+
+
+/* === SISTEMA VISUAL: papel cálido, resaltado de citas, naranja para la versión final === */
+:root {
+  --stage-bg: #1b1a17; --slide-bg: #f4f1ea;
+  --paper: #f4f1ea; --card: #ffffff; --ink: #1d1c1a; --muted: #5f5b53; --line: #d6d0c3;
+  --mark: #ffd84d; --signal: #c2410c; --signal-soft: #fbe6da;
+  --s1: #a39c8e; --s2: #4f4a42; --s3: #c2410c;
+  --head: 'Instrument Serif', Georgia, serif; --text: 'IBM Plex Sans', Arial, sans-serif; --mono: 'IBM Plex Mono', 'Courier New', monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+.slide { background: var(--paper); color: var(--ink); font-family: var(--text); padding: 88px 128px 104px; display: flex; flex-direction: column; }
+h1, h2, h3 { font-family: var(--head); font-weight: 400; letter-spacing: -0.01em; }
+h2.t { font-size: 76px; line-height: 1.02; flex: none; }
+p { font-size: 32px; line-height: 1.45; }
+b { font-weight: 600; }
+.body { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 48px; padding-top: 24px; }
+.row { display: flex; gap: 72px; }
+.row.center { flex-direction: row; align-items: center; justify-content: flex-start; }
+.col { flex: 1; display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+.lead { font-size: 36px; }
+.callout { border-left: 6px solid var(--signal); padding-left: 28px; }
+.small, .nota { font: 400 24px/1.5 var(--mono); color: var(--muted); }
+mark { background: linear-gradient(transparent 52%, var(--mark) 52%); color: inherit; padding: 0 2px; }
+sup.c { font: 600 0.55em var(--mono); color: var(--signal); margin-left: 3px; }
+.tag { font: 500 22px var(--mono); letter-spacing: 1px; text-transform: uppercase; color: var(--signal); }
+.lane { font: 500 24px var(--mono); letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+
+/* Portada y separadores */
+.portada { justify-content: center; gap: 40px; }
+.portada h1 { font-size: 230px; line-height: 0.92; letter-spacing: -0.02em; }
+.portada .sub { font-family: var(--head); font-size: 54px; line-height: 1.3; max-width: 1060px; }
+.portada .meta { position: absolute; left: 128px; bottom: 96px; font: 400 26px var(--mono); color: var(--muted); }
+.bubble.tilt { position: absolute; right: 140px; top: 300px; width: 600px; transform: rotate(2deg); }
+.separador { justify-content: center; }
+.separador h1 { font-size: 260px; line-height: 0.92; letter-spacing: -0.02em; }
+.separador::after { content: ""; position: absolute; left: 128px; bottom: 120px; width: 240px; height: 8px; background: var(--signal); }
+
+/* Burbuja de mensaje */
+.bubble { background: var(--card); border-radius: 30px 30px 30px 8px; padding: 36px 42px; box-shadow: 0 24px 50px -24px rgb(29 28 26 / 35%); font: 400 32px/1.45 var(--text); }
+.bubble.grande { font-size: 42px; padding: 48px 52px; }
+.bubble small { display: block; margin-top: 20px; font: 500 22px var(--mono); letter-spacing: 1px; color: var(--signal); }
+
+/* Listas */
+ul.pts { padding-left: 40px; display: flex; flex-direction: column; gap: 22px; font-size: 32px; line-height: 1.45; }
+ul.pts.big { font-size: 36px; gap: 28px; }
+ul.pts li::marker { color: var(--signal); }
+ol.concl { padding-left: 64px; display: flex; flex-direction: column; gap: 40px; font-size: 40px; line-height: 1.4; }
+ol.concl li { padding-left: 12px; }
+ol.concl li::marker { font: 600 32px var(--mono); color: var(--signal); }
+
+/* Tablas */
+table.tb { width: 100%; border-collapse: collapse; font-size: 30px; font-variant-numeric: tabular-nums; }
+table.tb.grande { font-size: 32px; }
+table.tb th { text-align: left; font: 500 21px var(--mono); letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); padding: 14px 22px; border-bottom: 2px solid var(--ink); white-space: nowrap; }
+table.tb td { padding: 22px 22px; border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.4; }
+table.tb.def td:first-child { font-weight: 600; white-space: nowrap; width: 1%; padding-right: 48px; }
+tr.hl td { background: var(--signal-soft); }
+
+/* Datos: número del golden */
+.golden { display: flex; align-items: center; gap: 48px; border-top: 3px solid var(--signal); padding-top: 28px; }
+.golden .num { font: 400 150px/0.9 var(--head); color: var(--signal); }
+.golden .lead { font-size: 32px; }
+
+/* Tarjetas */
+.cards { display: flex; gap: 64px; }
+.card { flex: 1; display: flex; flex-direction: column; gap: 20px; border-top: 4px solid var(--ink); padding-top: 32px; }
+.card.cool { border-top-color: var(--signal); }
+.card .num { font: 400 150px/0.9 var(--head); color: var(--signal); }
+.card h3 { font-size: 54px; line-height: 1.1; }
+.card p { font-size: 32px; color: var(--muted); line-height: 1.45; }
+.card .tag { color: var(--signal); }
+
+/* Diagrama */
+.lane-wrap { display: flex; flex-direction: column; gap: 18px; }
+.flow { display: flex; align-items: stretch; }
+.box { background: var(--card); border-radius: 16px; padding: 26px 24px; display: flex; flex-direction: column; gap: 10px; width: 200px; min-height: 250px; box-shadow: 0 10px 24px -18px rgb(29 28 26 / 40%); }
+.flow .box { flex: 1; }
+.box h3 { font: 600 29px/1.2 var(--text); }
+.box p { font: 400 25px/1.35 var(--text); color: var(--muted); }
+.box.db { background: var(--ink); color: var(--paper); }
+.box.db p { color: #cfc9bd; }
+.box.key { outline: 3px solid var(--signal); }
+.arrow { width: 36px; flex: none; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 30px; }
+
+/* UMAP */
+.umap { height: 760px; width: auto; max-width: none; border-radius: 16px; border: 2px solid var(--line); flex: none; }
+.dicho { font: 400 52px/1.25 var(--head); }
+
+/* Mapa de versiones */
+.vmap { display: grid; grid-template-columns: repeat(3, 1fr); position: relative; }
+.vmap::before { content: ""; position: absolute; left: 0; right: 0; top: 15px; height: 3px; background: var(--ink); }
+.vmap .v { padding-right: 56px; display: flex; flex-direction: column; gap: 22px; }
+.vmap .dot { width: 32px; height: 32px; border-radius: 50%; background: var(--ink); position: relative; z-index: 1; }
+.vmap .v.fin .dot { background: var(--signal); }
+.vmap h3 { font-size: 72px; margin-top: 12px; }
+.vmap .v.fin h3 { color: var(--signal); }
+.vmap .add { font-size: 34px; }
+.vmap .ent { font: 500 24px var(--mono); letter-spacing: 1px; text-transform: uppercase; color: var(--signal); }
+
+/* Barras */
+.legend { display: flex; gap: 44px; font: 400 26px var(--mono); color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 22px; height: 22px; border-radius: 4px; margin-right: 12px; vertical-align: -3px; }
+.legend .s1::before { background: var(--s1); } .legend .s2::before { background: var(--s2); } .legend .s3::before { background: var(--s3); }
+.bars-chart { display: flex; border-bottom: 2px solid var(--ink); }
+.g { flex: 1; display: flex; justify-content: center; }
+.g .bars { height: 540px; display: flex; align-items: flex-end; gap: 6px; }
+.b { width: 100px; border-radius: 4px 4px 0 0; position: relative; }
+.b span { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 10px; font: 600 28px var(--mono); white-space: nowrap; }
+.b.s1 { background: var(--s1); } .b.s2 { background: var(--s2); } .b.s3 { background: var(--s3); }
+.xlab { display: flex; }
+.xlab p { flex: 1; text-align: center; font: 400 26px/1.3 var(--mono); color: var(--muted); padding-top: 16px; }
+
+/* Modalidades */
+.modgrid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 80px; row-gap: 0; }
+.mod { display: flex; align-items: baseline; gap: 28px; padding: 34px 0; border-bottom: 1px solid var(--line); }
+.mod .n { font: 500 28px/1.5 var(--mono); color: var(--signal); flex: none; }
+.mod h3 { font: 400 50px/1.15 var(--head); }
+.mod p { font-size: 27px; line-height: 1.4; color: var(--muted); }
+/* Reglas */
+table.reglas td { padding: 16px 22px; font-size: 28px; }
+table.reglas td.rid { font: 400 50px/1 var(--head); color: var(--signal); width: 1%; padding-right: 36px; }
+table.reglas td:nth-child(2) { white-space: nowrap; }
+table.reglas td:last-child { color: var(--muted); }
+/* Matriz: una columna por versión */
+table.mx { width: 100%; border-collapse: collapse; table-layout: fixed; font-variant-numeric: tabular-nums; }
+table.mx th:first-child { width: 34%; }
+table.mx th { font: 400 52px var(--head); text-align: right; padding: 0 28px 22px; border-bottom: 3px solid var(--ink); }
+table.mx th.s3 { color: var(--signal); border-bottom-color: var(--signal); }
+table.mx td { padding: 26px 28px; border-bottom: 1px solid var(--line); vertical-align: baseline; }
+table.mx td.lbl { font-size: 34px; color: var(--ink); padding-left: 0; }
+table.mx td.v { font: 400 76px/1 var(--head); text-align: right; white-space: nowrap; }
+.alto table.mx td { padding-top: 56px; padding-bottom: 56px; }
+.alto table.mx td.v { font-size: 100px; }
+table.mx td.v.s3 { color: var(--signal); background: var(--signal-soft); }
+/* Tres columnas de números por versión */
+.stat3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 64px; }
+.vcol { border-top: 4px solid var(--ink); padding-top: 28px; display: flex; flex-direction: column; gap: 36px; }
+.vcol.fin { border-top-color: var(--signal); }
+.vcol h3 { font-size: 52px; }
+.vcol.fin h3, .vcol.fin .big { color: var(--signal); }
+.st .big { font: 400 84px/1 var(--head); }
+.st .lbl { font: 400 24px/1.4 var(--mono); color: var(--muted); margin-top: 8px; }
+
+/* === CONTROLES FUERA DEL ESCENARIO === */
+.deck-controls { display: flex; gap: 14px; align-items: center; font: 500 13px 'IBM Plex Mono', monospace; color: #cfc9bd; background: rgb(27 26 23 / 70%); padding: 6px 14px; border-radius: 999px; opacity: 0; transition: opacity .3s; }
+body:hover .deck-controls { opacity: 1; }
+.deck-controls button { all: unset; cursor: pointer; padding: 2px 6px; }
+.progress { position: fixed; left: 0; bottom: 0; height: 3px; background: #c2410c; z-index: 1001; transition: width .3s; }
+/* === ENTRADA DE CADA SLIDE === */
+.slide.visible > *, .slide.visible .body > * { animation: sube .6s cubic-bezier(.16,1,.3,1) both; }
+.slide.visible .body > *:nth-child(2) { animation-delay: .1s; } .slide.visible .body > *:nth-child(3) { animation-delay: .2s; }
+.slide.visible .bubble.tilt { animation: none; }
+@keyframes sube { from { opacity: 0; transform: translateY(18px); } }
+.slide.visible mark { background-size: 100% 100%; background-repeat: no-repeat; animation: marca .9s .5s cubic-bezier(.16,1,.3,1) both; }
+@keyframes marca { from { background-size: 0% 100%; } }
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+<section id="cover" class="slide portada active">
+<h1>SafeFish</h1>
+<p class="sub">Detección de estafas en mensajes con RAG sobre casos documentados y guías oficiales</p>
+<div class="bubble tilt">“Hola ma, se me rompió el celu, este es mi número nuevo. ¿Me podés transferir 85.000?”<small>FALSO FAMILIAR · MUY SOSPECHOSO</small></div>
+<p class="meta">TP3 · 73.69 Large Language Models · ITBA 2026 — Diego Badin · Diego Rabinovich</p>
+
+<!-- Notas: SafeFish recibe un mensaje sospechoso, como texto o captura, y devuelve si es una estafa, qué modalidad es, qué casos documentados la respaldan y qué hacer. Orden: problema, arquitectura, datos e indexación, decisiones de implementación, métricas, ejemplos, limitaciones y conclusiones. -->
+</section>
+<section id="problema" class="slide ">
+<h2 class="t">El problema</h2>
+<div class="body row center">
+  <div class="col" style="gap:56px">
+    <ul class="pts big">
+      <li>Las estafas llegan por WhatsApp, SMS y mail, u otros medios e imitan a bancos, familiares, correos y organismos.</li>
+      <li>Las variantes cambian con frecuencia y los filtros por reglas no siempre son suficiente.</li>
+      <li>La víctima no siempre reconoce el patrón</li>
+    </ul>
+    <p class="lead callout"><b>Por qué RAG:</b> permite citar casos reales y guías oficiales, y la base se actualiza con modalidades nuevas sin reentrenar.</p>
+  </div>
+  <div class="col" style="flex:0 0 700px">
+    <div class="bubble grande">“Estimado cliente, <mark>cuenta con 9986 puntos próximos a vencer</mark><sup class="c">1</sup>. Canjeá ahora por regalos ingresando a <mark>claro-ard.top/ar</mark><sup class="c">2</sup>”<small>SMS · 2 SEÑALES</small></div>
+  </div>
+</div>
+
+<!-- Notas: Estafas por mensajería que cambian rápido. Elegimos RAG y no fine-tuning porque las modalidades cambian: se actualiza la base sin reentrenar, y cada veredicto puede citar casos y guías reales, lo que reduce alucinaciones. No es un sistema de preguntas y respuestas: la entrada es un mensaje a clasificar. -->
+</section>
+<section id="salida" class="slide ">
+<h2 class="t">Qué entra y qué sale</h2>
+<div class="body">
+  <p class="lead" style="max-width:none">Entra el texto o la captura del mensaje, un contexto opcional (“es de un amigo”) y lo que la persona ya hizo (no respondí, pagué, pasé un código…).</p>
+  <table class="tb def grande">
+    <thead><tr><th>Salida</th><th>Contenido</th></tr></thead>
+    <tbody>
+      <tr><td>Veredicto</td><td>Estafa, muy sospechoso, levemente sospechoso o parece legítimo</td></tr>
+      <tr><td>Modalidad</td><td>Una de las 10 modalidades de la taxonomía, o “no determinada”</td></tr>
+      <tr><td>Señales</td><td>Cita literal del mensaje y su recuadro sobre la captura</td></tr>
+      <tr><td>Casos</td><td>Casos recuperados que respaldan la modalidad, con su fuente</td></tr>
+      <tr><td>Plan</td><td>Pasos tomados de guías oficiales según la situación</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Notas: La salida es estructurada y se valida contra un esquema. La situación cambia el plan: si la persona solo respondió, el plan es de prevención; si pagó, de reclamo y denuncia. -->
+</section>
+<section id="modalidades" class="slide ">
+<h2 class="t">Diez modalidades</h2>
+<div class="body">
+  <div class="modgrid"><div class="mod"><p class="n">01</p><h3>Falso familiar / cambio de número</h3></div><div class="mod"><p class="n">02</p><h3>Phishing bancario</h3></div><div class="mod"><p class="n">03</p><h3>Robo de cuenta de WhatsApp</h3></div><div class="mod"><p class="n">04</p><h3>Falso comprador o vendedor</h3></div><div class="mod"><p class="n">05</p><h3>Falso soporte / acceso remoto</h3></div><div class="mod"><p class="n">06</p><h3>Premio o sorteo falso</h3></div><div class="mod"><p class="n">07</p><h3>Inversión falsa</h3></div><div class="mod"><p class="n">08</p><h3>Falso empleo / tareas pagas</h3></div><div class="mod"><p class="n">09</p><h3>Encomienda retenida</h3></div><div class="mod"><p class="n">10</p><h3>Deuda o multa falsa</h3></div></div>
+  <p class="small">Si ningún caso recuperado respalda una modalidad, la salida es <b>no determinada</b>.</p>
+</div>
+
+<!-- Notas: La taxonomía de modalidades sale de las guías del BCRA, bancos y organismos. Es un conjunto cerrado: el modelo elige una de las diez o no determinada, y así se puede medir el acierto de modalidad. -->
+</section>
+<section id="arquitectura" class="slide ">
+<h2 class="t">Arquitectura propuesta</h2>
+<div class="body" style="gap:64px">
+  <div class="lane-wrap"><p class="lane">Indexación · una vez</p><div class="flow"><div class="box "><h3>Fuentes</h3><p>36 páginas oficiales, SpaPhish, SpearPhishMX, recolectados</p></div><span class="arrow">→</span><div class="box "><h3>Limpieza</h3><p>duplicados y datos personales</p></div><span class="arrow">→</span><div class="box "><h3>Normalización</h3><p>LLM a un esquema fijo</p></div><span class="arrow">→</span><div class="box "><h3>Chunking</h3><p>1 caso por chunk</p></div><span class="arrow">→</span><div class="box "><h3>Embeddings</h3><p>text-embedding-3-small</p></div><span class="arrow">→</span><div class="box db"><h3>Chroma</h3><p>4 colecciones: casos, mensajes, señales, guías</p></div></div></div>
+  <div class="lane-wrap"><p class="lane">Consulta · por mensaje</p><div class="flow"><div class="box "><h3>Extracción</h3><p>captura → texto (visión)</p></div><span class="arrow">→</span><div class="box "><h3>Query rewriting</h3><p>4 consultas</p></div><span class="arrow">→</span><div class="box "><h3>Retrieval híbrido</h3><p>denso + BM25, RRF</p></div><span class="arrow">→</span><div class="box "><h3>Reranking</h3><p>LLM, puntaje 0–3</p></div><span class="arrow">→</span><div class="box key"><h3>Generación</h3><p>salida estructurada</p></div><span class="arrow">→</span><div class="box "><h3>Verificador</h3><p>reglas R1–R5</p></div><span class="arrow">→</span><div class="box "><h3>Plan</h3><p>desde guías</p></div></div></div>
+  <p class="small">Claude Sonnet 5.5 en extracción y generación · Claude Haiku 5.5 en rewriting, reranking y plan · embeddings de OpenAI.</p>
+</div>
+
+<!-- Notas: Dos procesos. La indexación corre una vez: carga las fuentes, limpia duplicados y datos personales, normaliza cada página a un esquema, guarda un caso por chunk y lo indexa en Chroma, separado en cuatro colecciones. La consulta corre por mensaje: si es una captura la transcribe, reescribe la consulta, busca con vectores y BM25, reordena con un LLM, genera la respuesta con salida estructurada, la verifica con reglas y arma el plan desde guías oficiales. -->
+</section>
+<section id="reglas" class="slide ">
+<h2 class="t">Verificador: reglas R1–R5</h2>
+<div class="body">
+  <table class="tb reglas">
+    <thead><tr><th></th><th>Regla</th><th>Qué controla</th><th>Si no se cumple</th></tr></thead>
+    <tbody><tr><td class="rid">R1</td><td><b>Cita literal</b></td><td>Cada señal cita un fragmento que está en el mensaje (al menos 5 caracteres, coincidencia aproximada).</td><td>Se descarta la señal</td></tr><tr><td class="rid">R2</td><td><b>Respaldo de la modalidad</b></td><td>La modalidad coincide con la de al menos un caso recuperado.</td><td>Pasa a “no determinada”</td></tr><tr><td class="rid">R3</td><td><b>Estafa confirmada</b></td><td>Requiere modalidad respaldada y al menos 2 señales verificadas distintas.</td><td>Baja a muy sospechoso</td></tr><tr><td class="rid">R4</td><td><b>Asimetría</b></td><td>“Parece legítimo” no puede tener una señal crítica verificada.</td><td>Sube a levemente sospechoso</td></tr><tr><td class="rid">R5</td><td><b>Plan sin inventos</b></td><td>Teléfonos, links y mails del plan están en la guía de la que sale el paso.</td><td>Se reemplazan; un paso con un organismo ausente se elimina</td></tr></tbody>
+  </table>
+  <p class="small">Reglas determinísticas, sin LLM. R1 a R4 corren sobre el análisis; R5, sobre el plan.</p>
+</div>
+
+<!-- Notas: El verificador es un guardrail de salida determinístico: no usa un LLM. Cada intervención queda registrada y se ve en el panel de depuración de la UI. -->
+</section>
+<section id="datos" class="slide ">
+<h2 class="t">Datos</h2>
+<div class="body">
+  <table class="tb def grande">
+    <thead><tr><th>Colección</th><th>Documentos</th><th>Origen</th></tr></thead>
+    <tbody>
+      <tr><td>Casos</td><td>59</td><td>36 páginas del BCRA, bancos, ministerios, INCIBE y prensa, normalizadas</td></tr>
+      <tr><td>Mensajes</td><td>3.412 · 2.332 estafa, 1.080 legítimos</td><td>SpaPhish, SpearPhishMX y mensajes recolectados</td></tr>
+      <tr><td>Señales</td><td>15</td><td>Taxonomía propia: urgencia, link no oficial, pedido de código…</td></tr>
+      <tr><td>Guías</td><td>42</td><td>Procedimientos oficiales por modalidad y situación</td></tr>
+    </tbody>
+  </table>
+  <div class="golden">
+    <p class="num">93</p>
+    <p class="lead"><b>Golden:</b> 93 mensajes etiquetados, 24 de dev y 69 de test, cada uno una sola vez: 51 mails de SpaPhish, 13 recolectados, 14 capturas y 15 con inyección de prompt.</p>
+  </div>
+</div>
+
+<!-- Notas: La base es lo que el RAG recupera. El golden es el examen: mensajes con la respuesta correcta anotada. Se separa por campaña, de modo que una campaña entera queda en dev o en test y ninguna está en la base (data leakage). Dev se usa para desarrollar y analizar errores; test, solo para reportar. -->
+</section>
+<section id="indexacion" class="slide ">
+<h2 class="t">Indexación: tres decisiones</h2>
+<div class="body">
+  <div class="cards tall">
+    <div class="card"><p class="num">1</p><h3>Normalizar</h3><p>Una nota de prensa y una guía del BCRA quedan con el mismo esquema: modalidad, canal, entidad, frases típicas.</p></div>
+    <div class="card"><p class="num">2</p><h3>Un caso por chunk</h3><p>Un caso es una unidad.</p></div>
+    <div class="card cool"><p class="num">3</p><h3>Cuatro colecciones</h3><p>Casos, mensajes, señales y guías por separado, cada una con su top-k.</p></div>
+  </div>
+  <p class="small">Embeddings text-embedding-3-small (1536 dimensiones, normalizados) · Chroma con índice HNSW y similitud coseno</p>
+</div>
+
+<!-- Notas: Tres decisiones de indexación. Normalizar porque las fuentes son muy distintas. Un caso por chunk porque la clase pregunta por la naturaleza del contenido: un caso corto partido pierde su modalidad. Y cuatro colecciones porque, como muestra la próxima slide, los mensajes y los casos son tipos de texto distintos. -->
+</section>
+<section id="colecciones" class="slide ">
+<h2 class="t">Proyección UMAP de los embeddings de la base</h2>
+<div class="body row center" style="gap:72px">
+  <img class="umap" src="umap_kb_slide.png" alt="Proyección UMAP de los embeddings de la base: los mensajes forman una nube grande; casos, guías y señales quedan juntos en un grupo aparte">
+  <p class="dicho">Casos, guías y señales <mark>describen</mark> la estafa. Los mensajes <mark>son</mark> la estafa.</p>
+</div>
+
+<!-- Notas: UMAP proyecta los 1536 números de cada embedding a dos dimensiones conservando vecindades. Los mensajes quedan en una nube y casos, guías y señales en otra: no es otro modelo, es otro tipo de texto, descriptivo en tercera persona contra mensajes crudos en primera persona. Por eso separamos la base en cuatro colecciones con su propio top-k: casos 4, mensajes 6, señales 6, y las guías se eligen por metadata para el plan. El mismo vector de consulta busca en todas. -->
+</section>
+<section id="mapa" class="slide ">
+<h2 class="t">Tres versiones, un cambio por vez</h2>
+<div class="body">
+  <div class="vmap">
+    <div class="v"><span class="dot"></span><h3>RAG base</h3><p class="add">Normalización, 4 colecciones, búsqueda densa, plan desde guías, verificador.</p></div>
+    <div class="v"><span class="dot"></span><h3>RAG avanzado</h3><p class="add">Query rewriting + RRF, búsqueda híbrida con BM25, reranking con LLM.</p><p class="ent">Versión 1</p></div>
+    <div class="v fin"><span class="dot"></span><h3>RAG iterado</h3><p class="add">Mensajes de contraste, plan adaptado a la entidad del mensaje.</p><p class="ent">Versión 2</p></div>
+  </div>
+  <p class="small">Mismo golden, misma base y mismos modelos</p>
+</div>
+
+<!-- Notas: Cada versión agrega una cosa sobre la anterior, así cada cambio en las métricas se puede atribuir. RAG base es el pipeline completo. RAG avanzado suma las técnicas avanzadas y es la Versión 1 del Ejercicio 2. RAG iterado sale del análisis de errores y es la Versión 2 del Ejercicio 4. -->
+</section>
+<section id="dec-iterado" class="slide ">
+<h2 class="t">RAG avanzado → RAG iterado</h2>
+<div class="body">
+  <table class="tb grande">
+    <thead><tr><th>Error de la Versión 1</th><th>Cambio</th><th>Efecto (test · dev)</th></tr></thead>
+    <tbody>
+      <tr><td>Falsos positivos en legítimos parecidos</td><td><b>Mensajes de contraste:</b> filtro por metadata, mitad estafa y mitad legítimo</td><td>FPR 0,16 → 0,11 · F1 dev 0,86 → 0,96</td></tr>
+      <tr><td>Modalidades sin caso de respaldo</td><td><b>Respaldo dirigido</b> para la regla R2</td><td>Sin efecto: no hubo casos que lo necesitaran</td></tr>
+      <tr class="hl"><td>Plan genérico y con contactos de otra entidad</td><td><b>Plan adaptado:</b> el planner ve el mensaje y usa las guías como estructura</td><td><b>Cobertura 0,50 → 0,83 · 0,41 → 0,88</b></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Notas: Para el Ejercicio 4 analizamos los errores de la Versión 1 en dev. Tres modos de falla, un cambio para cada uno, medidos aislados. El respaldo dirigido no actuó en ningún caso: es un resultado nulo y lo reportamos. El plan adaptado casi duplica la cobertura: si la guía es de otra entidad, cambia sus contactos por los canales oficiales de la entidad del mensaje. -->
+</section>
+<section id="metricas" class="slide separador"><h1>Métricas</h1>
+</section>
+<section id="m-precision" class="slide ">
+<h2 class="t">¿El contexto recuperado es correcto y está bien ordenado?</h2>
+<div class="body">
+  <div class="legend"><span class="s1">RAG base</span><span class="s2">RAG avanzado</span><span class="s3">RAG iterado</span></div>
+  <div class="chart"><div class="bars-chart"><div class="g"><div class="bars"><div class="b s1" style="height:385px;width:150px"><span>0,77</span></div><div class="b s2" style="height:450px;width:150px"><span>0,90</span></div><div class="b s3" style="height:450px;width:150px"><span>0,90</span></div></div></div><div class="g"><div class="bars"><div class="b s1" style="height:295px;width:150px"><span>0,59</span></div><div class="b s2" style="height:395px;width:150px"><span>0,79</span></div><div class="b s3" style="height:395px;width:150px"><span>0,79</span></div></div></div></div><div class="xlab"><p>MRR · posición del primer caso correcto</p><p>nDCG@k · orden de toda la lista</p></div></div>
+</div>
+
+<!-- Notas: Context precision: lo que trae el retrieval, ¿es correcto y está arriba? MRR mira la posición del primer caso de la modalidad correcta; nDCG, el orden de toda la lista. El RAG avanzado sube los dos; el RAG iterado no toca el retrieval de casos y queda igual. -->
+</section>
+<section id="m-recall" class="slide ">
+<h2 class="t">¿El contexto alcanza para responder?</h2>
+<div class="body">
+  <div class="legend"><span class="s1">RAG base</span><span class="s2">RAG avanzado</span><span class="s3">RAG iterado</span></div>
+  <div class="chart"><div class="bars-chart"><div class="g"><div class="bars"><div class="b s1" style="height:420px;width:120px"><span>0,84</span></div><div class="b s2" style="height:485px;width:120px"><span>0,97</span></div><div class="b s3" style="height:485px;width:120px"><span>0,97</span></div></div></div><div class="g"><div class="bars"><div class="b s1" style="height:275px;width:120px"><span>0,55</span></div><div class="b s2" style="height:395px;width:120px"><span>0,79</span></div><div class="b s3" style="height:395px;width:120px"><span>0,79</span></div></div></div><div class="g"><div class="bars"><div class="b s1" style="height:330px;width:120px"><span>0,66</span></div><div class="b s2" style="height:485px;width:120px"><span>0,97</span></div><div class="b s3" style="height:485px;width:120px"><span>0,97</span></div></div></div></div><div class="xlab"><p>Hit-mod@k · algún caso correcto</p><p>Recall@k · casos correctos</p><p>Recall@k · señales esperadas</p></div></div>
+</div>
+
+<!-- Notas: Context recall: ¿el contexto trae lo necesario? Hit-mod@k es si hay al menos un caso de la modalidad correcta entre los recuperados; recall@k, qué parte de los casos y de las señales esperadas aparecen. Con el RAG avanzado el caso correcto está en el 97 % de los mensajes y casi todas las señales esperadas llegan al contexto. -->
+</section>
+<section id="m-relevance" class="slide ">
+<h2 class="t">¿La respuesta responde lo que importa?</h2>
+<div class="body">
+  <div class="legend"><span class="s1">RAG base</span><span class="s2">RAG avanzado</span><span class="s3">RAG iterado</span></div>
+  <div class="chart"><div class="bars-chart"><div class="g"><div class="bars"><div class="b s1" style="height:405px;width:100px"><span>0,88</span></div><div class="b s2" style="height:414px;width:100px"><span>0,90</span></div><div class="b s3" style="height:419px;width:100px"><span>0,91</span></div></div></div><div class="g"><div class="bars"><div class="b s1" style="height:359px;width:100px"><span>0,78</span></div><div class="b s2" style="height:409px;width:100px"><span>0,89</span></div><div class="b s3" style="height:382px;width:100px"><span>0,83</span></div></div></div><div class="g"><div class="bars"><div class="b s1" style="height:308px;width:100px"><span>0,67</span></div><div class="b s2" style="height:308px;width:100px"><span>0,67</span></div><div class="b s3" style="height:317px;width:100px"><span>0,69</span></div></div></div><div class="g"><div class="bars"><div class="b s1" style="height:184px;width:100px"><span>0,40</span></div><div class="b s2" style="height:207px;width:100px"><span>0,45</span></div><div class="b s3" style="height:382px;width:100px"><span>0,83</span></div></div></div></div><div class="xlab"><p>F1 de estafa</p><p>Acierto de modalidad</p><p>F1 de señales</p><p>Cobertura del plan</p></div></div>
+</div>
+
+<!-- Notas: Answer relevance: ¿la respuesta resuelve lo que la persona necesita? Si es estafa, qué modalidad, qué señales y qué hacer. El F1 de estafa queda en torno a 0,90 en las tres versiones. El RAG avanzado mejora la modalidad. El plan desde guías copia pasos generales, y la iteración lo lleva hasta 0,83. -->
+</section>
+<section id="m-nose" class="slide ">
+<h2 class="t">¿Sabe decir “no sé”?</h2>
+<div class="body alto">
+  <table class="mx"><thead><tr><th></th><th class="s1">RAG base</th><th class="s2">RAG avanzado</th><th class="s3">RAG iterado</th></tr></thead><tbody><tr><td class="lbl">Dice “no determinada” <b>cuando corresponde</b></td><td class="v s1">5 de 5</td><td class="v s2">5 de 5</td><td class="v s3">4 de 5</td></tr><tr><td class="lbl">Dice “no determinada” <b>de más</b></td><td class="v s1">7 de 31</td><td class="v s2">3 de 31</td><td class="v s3">4 de 31</td></tr></tbody></table>
+</div>
+
+<!-- Notas: Negative rejection: no responder cuando no hay información suficiente. Golden de test: 5 estafas sin modalidad que calce y 31 con modalidad. El verificador baja a no determinada toda modalidad sin un caso recuperado que la respalde. Lo que mejora con el RAG avanzado es no rechazar de más: al recuperar mejor, encuentra el caso que respalda la modalidad. -->
+</section>
+<section id="m-costo" class="slide ">
+<h2 class="t">¿Cuánto cuesta?</h2>
+<div class="body">
+  <table class="mx"><thead><tr><th></th><th class="s1">RAG base</th><th class="s2">RAG avanzado</th><th class="s3">RAG iterado</th></tr></thead><tbody><tr><td class="lbl">USD por análisis</td><td class="v s1">0,019</td><td class="v s2">0,020</td><td class="v s3">0,022</td></tr><tr><td class="lbl">Tokens de entrada</td><td class="v s1">12,3 mil</td><td class="v s2">27,5 mil</td><td class="v s3">34,5 mil</td></tr><tr><td class="lbl">Tokens de salida</td><td class="v s1">0,9 mil</td><td class="v s2">2,3 mil</td><td class="v s3">2,8 mil</td></tr><tr><td class="lbl">Llamadas al LLM</td><td class="v s1">2</td><td class="v s2">7</td><td class="v s3">8</td></tr></tbody></table>
+</div>
+
+<!-- Notas: Promedios en el golden de test: unos dos centavos de dólar por análisis en la versión final. El reranking y el multi-query usan Haiku: suman tokens pero casi no suman costo. Un análisis tarda unos 25 s en la demo. La caché de respuestas evita pagar dos veces el mismo análisis. -->
+</section>
+<section id="ej-errores" class="slide ">
+<h2 class="t">Ejemplo: dónde se equivoca</h2>
+<div class="body">
+  <div class="cards tall">
+    <div class="card"><p class="tag">Falso positivo</p><h3>Mail de una universidad con link a “meet.net”</h3><p>Legítimo en SpaPhish; el link no coincide con la marca porque el dataset reemplazó los dominios reales. El sistema dice muy sospechoso.</p></div>
+    <div class="card"><p class="tag">Falso negativo</p><h3>“BBVA Alerta: movimiento inusual… llamanos a la Línea BBVA”</h3><p>Casi idéntico a una alerta real; lo único que la delata es el número, que está tapado en la captura. El sistema dice levemente sospechoso.</p></div>
+  </div>
+</div>
+
+<!-- Notas: Dos errores reales del test. El primero es un legítimo con un dominio que no coincide, un artefacto de la anonimización del dataset. El segundo, una estafa que copia una alerta real y cuyo único indicio no se puede citar. -->
+</section>
+<section id="demo" class="slide separador"><h1>Demo!</h1>
+</section>
+<section id="limitaciones" class="slide ">
+<h2 class="t">Limitaciones y trabajo futuro</h2>
+<div class="body"><div class="row" style="gap:96px;align-items:flex-start">
+  <div class="col">
+    <p class="lane">Limitaciones</p>
+    <ul class="pts big">
+      <li>Falsos positivos en legítimos parecidos a estafas (2 de 19).</li>
+      <li>Lo que delata una estafa a veces no está en el texto: el remitente o el link real.</li>
+      <li>69 casos de test: intervalos de confianza anchos.</li>
+    </ul>
+  </div>
+  <div class="col">
+    <p class="lane">Trabajo futuro</p>
+    <ul class="pts big">
+      <li>Repreguntar: si la evidencia no alcanza, pedirle a la persona más información (quién lo mandó, el link completo) antes de dar el veredicto.</li>
+      <li>Vincular con casilla de spam del usuario para ampliar la KB automáticamente, y personalizado.</li>
+      <li>Observabilidad con LangSmith para evaluar a menor costo.</li>
+    </ul>
+  </div>
+</div></div>
+
+<!-- Notas: La limitación principal es noise robustness. La segunda, que a veces lo que delata la estafa no está en el texto que vemos. Por eso la idea más prometedora es repreguntar: si el sistema no tiene evidencia suficiente, pedirle a la persona el dato que falta en lugar de dar un veredicto débil. -->
+</section>
+<section id="conclusiones" class="slide ">
+<h2 class="t">Conclusiones</h2>
+<div class="body">
+  <ol class="concl">
+    <li>La forma de indexar fue lo que más movió la recuperación: con una sola colección, el caso correcto aparecía en el 8 % de los mensajes; con cuatro colecciones, en el 84 %.</li>
+    <li>El RAG avanzado mejoró qué se recupera y en qué orden</li>
+    <li>Las métricas mejoran, pero no son perfectas.</li>
+    <li>El análisis de errores llevó al RAG iterado y mejoró la cobertura del plan 0,45 → 0,83.</li>
+  </ol>
+</div>
+
+<!-- Notas: Cuatro conclusiones. La indexación pesó más que cualquier técnica avanzada. El reranking ordena lo que traen el rewriting y BM25. Las métricas mejoran pero no son perfectas. Y el análisis de errores de la Versión 1 llevó a la Versión 2. -->
+</section>
+</main>
+</div>
+<div class="deck-controls"><button id="prev" aria-label="Anterior">←</button><span id="count"></span><button id="next" aria-label="Siguiente">→</button></div>
+<div class="progress" id="progress"></div>
+<script>
+/* === CONTROLADOR DE LA PRESENTACIÓN === */
+class SlidePresentation {
+  constructor() {
+    this.slides = [...document.querySelectorAll('.slide')];
+    this.stage = document.getElementById('deckStage');
+    this.i = Math.min(Math.max(parseInt(location.hash.slice(1)) - 1 || 0, 0), this.slides.length - 1);
+    this.scale(); addEventListener('resize', () => this.scale());
+    addEventListener('keydown', (e) => {
+      if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); this.go(this.i + 1); }
+      if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); this.go(this.i - 1); }
+      if (e.key === 'Home') this.go(0); if (e.key === 'End') this.go(this.slides.length - 1);
+    });
+    let x0 = null;
+    addEventListener('touchstart', (e) => x0 = e.touches[0].clientX, { passive: true });
+    addEventListener('touchend', (e) => { if (x0 === null) return; const d = e.changedTouches[0].clientX - x0; if (Math.abs(d) > 50) this.go(this.i + (d < 0 ? 1 : -1)); x0 = null; });
+    document.getElementById('prev').onclick = () => this.go(this.i - 1);
+    document.getElementById('next').onclick = () => this.go(this.i + 1);
+    this.go(this.i);
+  }
+  scale() {
+    const f = Math.min(innerWidth / 1920, innerHeight / 1080);
+    this.stage.style.transform = `translate(${(innerWidth - 1920 * f) / 2}px, ${(innerHeight - 1080 * f) / 2}px) scale(${f})`;
+  }
+  go(n) {
+    this.i = Math.max(0, Math.min(n, this.slides.length - 1));
+    this.slides.forEach((s, k) => { s.classList.toggle('active', k === this.i); s.classList.toggle('visible', k === this.i); });
+    document.getElementById('count').textContent = `${this.i + 1} / ${this.slides.length}`;
+    document.getElementById('progress').style.width = `${(this.i + 1) / this.slides.length * 100}%`;
+    history.replaceState(null, '', '#' + (this.i + 1));
+  }
+}
+new SlidePresentation();
+</script>
+</body>
+</html>
